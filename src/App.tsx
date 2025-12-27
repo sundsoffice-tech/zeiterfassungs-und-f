@@ -1,8 +1,9 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar, Brain, CalendarCheck, Article, Gauge, Lighthouse } from '@phosphor-icons/react'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
+import { Clock } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
+import { NavigationMenu } from '@/components/NavigationMenu'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
 import { Projects } from '@/components/Projects'
@@ -165,76 +166,7 @@ function App() {
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-16 lg:w-auto lg:inline-grid" role="tablist" aria-label="Hauptnavigation">
-            <TabsTrigger value="timepicker" className="gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10" aria-label="Time Picker Ansicht">
-              <Article className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Time Picker</span>
-            </TabsTrigger>
-            <TabsTrigger value="today" className="gap-2" aria-label="Heute Ansicht">
-              <Clock className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Heute</span>
-            </TabsTrigger>
-            <TabsTrigger value="week" className="gap-2" aria-label="Wochenansicht">
-              <CalendarBlank className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Woche</span>
-            </TabsTrigger>
-            <TabsTrigger value="projects" className="gap-2" aria-label="Projektübersicht">
-              <FolderOpen className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Projekte</span>
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="gap-2" aria-label="Berichte">
-              <ChartBar className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Berichte</span>
-            </TabsTrigger>
-            <TabsTrigger value="calendar" className="gap-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10" aria-label="Kalenderintegration">
-              <CalendarCheck className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Kalender</span>
-            </TabsTrigger>
-            <TabsTrigger value="trust" className="gap-2" aria-label="Vertrauensschicht">
-              <ShieldStar className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Vertrauen</span>
-            </TabsTrigger>
-            <TabsTrigger value="forecast" className="gap-2" aria-label="Prognose und Forecast">
-              <TrendUp className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Forecast</span>
-            </TabsTrigger>
-            <TabsTrigger value="automation" className="gap-2" aria-label="Automatisierung">
-              <Lightning className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Automation</span>
-            </TabsTrigger>
-            <TabsTrigger value="offline" className="gap-2" aria-label="Offline und Synchronisation">
-              <CloudArrowUp className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Offline/Sync</span>
-            </TabsTrigger>
-            <TabsTrigger value="pro" className="gap-2 bg-gradient-to-r from-accent/10 to-primary/10" aria-label="Pro Module">
-              <Rocket className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Pro</span>
-            </TabsTrigger>
-            <TabsTrigger value="performance" className="gap-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10" aria-label="Performance Monitor">
-              <Gauge className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Performance</span>
-            </TabsTrigger>
-            <TabsTrigger value="lighthouse" className="gap-2 bg-gradient-to-r from-orange-500/10 to-yellow-500/10" aria-label="Lighthouse CI">
-              <Lighthouse className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Lighthouse</span>
-            </TabsTrigger>
-            <TabsTrigger value="repair" className="gap-2" aria-label="Reparaturmodus">
-              <Wrench className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Reparatur</span>
-            </TabsTrigger>
-            <TabsTrigger value="validation" className="gap-2" aria-label="KI-Validierung">
-              <ShieldCheck className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">KI-Validierung</span>
-            </TabsTrigger>
-            <TabsTrigger value="explainable" className="gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10" aria-label="Erklärbare KI">
-              <Brain className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Erklärbare KI</span>
-            </TabsTrigger>
-            <TabsTrigger value="admin" className="gap-2" aria-label="Adminbereich">
-              <UserCircleGear className="h-4 w-4" weight="duotone" aria-hidden="true" />
-              <span className="hidden sm:inline">Admin</span>
-            </TabsTrigger>
-          </TabsList>
+          <NavigationMenu activeTab={activeTab} onNavigate={setActiveTab} />
 
           <TabsContent value="timepicker" className="mt-6">
             <TimePickerDemo />
