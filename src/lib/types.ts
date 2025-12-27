@@ -276,6 +276,59 @@ export interface CorrectionEntry {
   afterData: Record<string, any>
 }
 
+export interface Permission {
+  id: string
+  roleId: UserRole
+  canSeeRates: boolean
+  canEditAfterApproval: boolean
+  canCreateProjects: boolean
+  canApproveTimesheets: boolean
+  canViewAllEmployees: boolean
+  canEditAllTimeEntries: boolean
+  canAccessAdminPanel: boolean
+  canRunReports: boolean
+  restrictedToOwnProjects: boolean
+  restrictedToOwnData: boolean
+}
+
+export interface Warning {
+  id: string
+  type: 'implausible' | 'overtime_risk' | 'budget_risk' | 'missing_days' | 'missing_notes' | 'weekend_work' | 'overlap' | 'gap'
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  employeeId?: string
+  projectId?: string
+  entryId?: string
+  date: string
+  title: string
+  description: string
+  metadata?: Record<string, any>
+  acknowledged: boolean
+  acknowledgedBy?: string
+  acknowledgedAt?: string
+}
+
+export interface LiveStatus {
+  employeeId: string
+  projectId?: string
+  taskId?: string
+  status: 'working' | 'paused' | 'idle'
+  startTime: number
+  duration: number
+  lastActivity: number
+}
+
+export interface KPI {
+  id: string
+  name: string
+  value: number
+  change?: number
+  changeDirection?: 'up' | 'down' | 'neutral'
+  target?: number
+  unit: string
+  period: string
+  description: string
+}
+
 export type LegacyEmployee = Omit<Employee, 'tenantId' | 'role' | 'hourlyRate' | 'active' | 'audit'>
 export type LegacyProject = Omit<Project, 'tenantId' | 'clientId' | 'code' | 'startDate' | 'endDate' | 'budget' | 'active' | 'audit'>
 export type LegacyTimeEntry = Omit<TimeEntry, 'tenantId' | 'phaseId' | 'taskId' | 'duration' | 'approvalStatus' | 'approvedBy' | 'approvedAt' | 'locked' | 'rate' | 'audit' | 'changeLog'>

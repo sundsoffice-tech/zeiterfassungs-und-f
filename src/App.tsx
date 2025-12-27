@@ -177,6 +177,12 @@ function App() {
             <AdminScreen
               employees={employees || []}
               setEmployees={setEmployees}
+              projects={projects || []}
+              tasks={tasks || []}
+              timeEntries={timeEntries || []}
+              mileageEntries={mileageEntries || []}
+              activeTimer={activeTimer || null}
+              absences={absences || []}
             />
           </TabsContent>
         </Tabs>

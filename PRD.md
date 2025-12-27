@@ -1,6 +1,6 @@
 # Planning Guide
 
-A comprehensive, enterprise-grade time tracking application with intuitive UI/UX featuring a minimalist navigation (Heute/Today, Woche/Week, Projekte/Projects, Berichte/Reports, Admin), weltklasse timer interface, keyboard shortcuts, command palette (Ctrl+K), and one-click week submission for efficient time management.
+A comprehensive, enterprise-grade time tracking application with intuitive UI/UX featuring a minimalist navigation (Heute/Today, Woche/Week, Projekte/Projects, Berichte/Reports, Admin with Dashboard & User Management), weltklasse timer interface, keyboard shortcuts, command palette (Ctrl+K), powerful admin dashboard with live status tracking, KPIs, warnings, and role-based access control for efficient time management and administrative oversight.
 
 **Experience Qualities**: 
 1. **Intuitiv** - World-class interface that feels natural and requires zero training with large timer, smart project selection, and instant feedback
@@ -46,6 +46,36 @@ This application requires sophisticated features including active timer manageme
 - **Trigger**: Employee submits timesheet period for approval
 - **Progression**: Employee fills timesheet → Submits period → Manager reviews → Approves or rejects with reason → Locked if approved
 - **Success criteria**: Status tracking, email notifications (simulated), rejection reasons captured, resubmission flow
+
+### Admin Dashboard (Kontrolle ohne Micromanagement)
+- **Functionality**: Comprehensive administrative control center featuring live status tracking, KPIs, warnings, approval management, and user administration. Includes five tabs: Overview (live status + top warnings), Live-Status (all employees), KPIs (key metrics), Warnungen (all warnings by severity), and Genehmigungen (pending approvals).
+- **Purpose**: Provide administrators and project managers with at-a-glance oversight without micromanagement, enabling proactive problem detection and efficient approval workflows while maintaining team autonomy.
+- **Live Status (Heute aktiv)**: Real-time view of who is working on what with active timers, showing employee names, current project/task, status (working/paused), and elapsed time. Updates dynamically as timers start, pause, or stop.
+- **KPIs**: Five key performance indicators with targets and trend indicators:
+  - **Auslastung (Utilization)**: Billable vs non-billable hours percentage (target: 75%)
+  - **Abrechenbare Stunden (Billable Hours)**: Total billable hours this week
+  - **Aktive Projekte (Active Projects)**: Projects with activity in last 7 days
+  - **Budget-Einhaltung (Budget Compliance)**: Percentage of projects within budget (target: 100%)
+  - **Marge (Profit Margin)**: Revenue minus cost percentage (target: 30%)
+- **Warnungen (Warnings)**: Automated detection and categorization of issues with severity levels (critical/high/medium/low):
+  - **Überlange Arbeitszeit**: Daily hours >12h (critical if >16h)
+  - **Wochenendarbeit**: Entries on weekend without approval (low severity)
+  - **Fehlende Notizen**: Billable entries without description (low severity)
+  - **Verdächtige Rundung**: Perfectly rounded hours suggesting estimation (low severity)
+  - **Budget-Risiko**: Projects >80% budget consumed (critical if >100%, high if >95%)
+  - **Fehlende Tage**: Missing timesheet days for current week (high if >2 days, medium otherwise)
+  - Warnings display employee name, project, date, severity badge, description, and "Bestätigen" button
+- **Offene Genehmigungen (Pending Approvals)**: Unified view of all pending approvals for time entries and mileage with one-click approve/reject actions, showing employee, project, date, and duration/distance.
+- **User Management Tab**: Employee creation, editing, deletion with role assignment (Admin/Projektleiter/Mitarbeiter/Extern), hourly rate setting, and role permissions overview showing capabilities for each role:
+  - **Admin**: Full system access, manage users, approve all entries, create projects, view/edit rates, edit after approval
+  - **Projektleiter**: Approve team entries, manage own projects, view team data, create reports, view rates (own projects only)
+  - **Mitarbeiter**: Track own time, view own entries, submit timesheets, view projects, export own reports, no rate visibility
+  - **Extern**: Track own time only, restricted visibility, no other employees visible, assigned projects only, no rate visibility
+- **Summary Cards**: Four metric cards at top showing: Heute aktiv (active workers), Offene Genehmigungen (pending approvals), Warnungen (total warnings with critical/high count), Mitarbeiter (active users)
+- **Alert Banner**: Prominent orange alert at top when critical or high-severity warnings exist, showing counts and requiring attention
+- **Trigger**: Navigate to Admin tab, select Dashboard sub-tab (default view), system automatically calculates metrics and warnings on load
+- **Progression**: Open Admin → View Dashboard overview with live statuses and top warnings → Explore KPIs tab for metrics → Check Warnungen tab for all issues → Review Genehmigungen tab for approvals → Switch to Users tab for employee management → Return to Dashboard for ongoing monitoring
+- **Success criteria**: Live status updates in real-time as timers change, KPIs calculate correctly from time entry data, warnings detect all configured rule violations with correct severity levels, approval list shows only submitted entries, user management CRUD operations work, role permissions accurately reflect access levels, dashboard loads in <2 seconds with 100+ entries
 
 ### AI-Assisted Time Logic (Validation & Suggestions)
 - **Functionality**: Comprehensive validation system with hard rules (blocking errors) and soft rules (warnings), plus AI-powered suggestions based on historical patterns, advanced AI-powered anomaly detection that identifies unusual behavior patterns, and smart auto-categorization that suggests projects/tasks based on multiple context signals
