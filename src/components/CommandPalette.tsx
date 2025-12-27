@@ -1,0 +1,119 @@
+import { useState, useEffect } from 'react'
+import { Employee, Project, ActiveTimer } from '@/lib/types'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, Play, Stop } from '@phosphor-icons/react'
+
+interface CommandPaletteProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onNavigate: (tab: string) => void
+  employees: Employee[]
+  projects: Project[]
+  activeTimer: ActiveTimer | null
+  setActiveTimer: (value: ActiveTimer | null | ((oldValue?: ActiveTimer | null) => ActiveTimer | null)) => void
+}
+
+export function CommandPalette({
+  open,
+  onOpenChange,
+  onNavigate,
+  employees,
+  projects,
+  activeTimer,
+  setActiveTimer
+}: CommandPaletteProps) {
+  const [search, setSearch] = useState('')
+
+  const commands = [
+    {
+      group: 'Navigation',
+      items: [
+        { id: 'nav-today', label: 'Heute öffnen', icon: Clock, action: () => onNavigate('today') },
+        { id: 'nav-week', label: 'Woche öffnen', icon: CalendarBlank, action: () => onNavigate('week') },
+        { id: 'nav-projects', label: 'Projekte öffnen', icon: FolderOpen, action: () => onNavigate('projects') },
+        { id: 'nav-reports', label: 'Berichte öffnen', icon: ChartBar, action: () => onNavigate('reports') },
+        { id: 'nav-admin', label: 'Admin öffnen', icon: UserCircleGear, action: () => onNavigate('admin') }
+      ]
+    },
+    {
+      group: 'Timer',
+      items: [
+        ...(activeTimer
+          ? [{ id: 'timer-stop', label: 'Timer stoppen', icon: Stop, action: () => setActiveTimer(null) }]
+          : []
+        )
+      ]
+    }
+  ]
+
+  const filteredCommands = commands.map(group => ({
+    ...group,
+    items: group.items.filter(item =>
+      item.label.toLowerCase().includes(search.toLowerCase())
+    )
+  })).filter(group => group.items.length > 0)
+
+  const handleSelect = (action: () => void) => {
+    action()
+    onOpenChange(false)
+    setSearch('')
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="p-0 gap-0 max-w-2xl">
+        <Command className="rounded-lg border-none">
+          <CommandInput
+            placeholder="Suchen Sie nach Befehlen, Projekten..."
+            value={search}
+            onValueChange={setSearch}
+            className="border-none"
+          />
+          <CommandList>
+            <CommandEmpty>Keine Ergebnisse gefunden</CommandEmpty>
+            {filteredCommands.map(group => (
+              <CommandGroup key={group.group} heading={group.group}>
+                {group.items.map(item => {
+                  const Icon = item.icon
+                  return (
+                    <CommandItem
+                      key={item.id}
+                      onSelect={() => handleSelect(item.action)}
+                      className="flex items-center gap-2"
+                    >
+                      <Icon className="h-4 w-4" weight="duotone" />
+                      <span>{item.label}</span>
+                    </CommandItem>
+                  )
+                })}
+              </CommandGroup>
+            ))}
+            {projects.length > 0 && search && (
+              <CommandGroup heading="Projekte">
+                {projects
+                  .filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+                  .slice(0, 5)
+                  .map(project => (
+                    <CommandItem
+                      key={project.id}
+                      onSelect={() => {
+                        onNavigate('today')
+                        onOpenChange(false)
+                        setSearch('')
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <FolderOpen className="h-4 w-4" weight="duotone" />
+                      <span>{project.name}</span>
+                    </CommandItem>
+                  ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
+      </DialogContent>
+    </Dialog>
+  )
+}

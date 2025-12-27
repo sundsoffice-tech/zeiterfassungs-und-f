@@ -1,14 +1,14 @@
 # Planning Guide
 
-A comprehensive, enterprise-grade time tracking application with multi-tenancy, role-based access, approval workflows, and full audit trails for managing employee work hours, project assignments, rates, and expenses in a scalable, compliant platform.
+A comprehensive, enterprise-grade time tracking application with intuitive UI/UX featuring a minimalist navigation (Heute/Today, Woche/Week, Projekte/Projects, Berichte/Reports, Admin), weltklasse timer interface, keyboard shortcuts, command palette (Ctrl+K), and one-click week submission for efficient time management.
 
 **Experience Qualities**: 
-1. **Professional** - Clean, business-focused interface that conveys reliability and trustworthiness for workplace time management
-2. **Efficient** - Quick data entry with minimal clicks, enabling fast logging of time entries and mileage without friction
-3. **Organized** - Clear visual hierarchy and logical grouping of time entries, projects, and mileage records for easy review
+1. **Intuitiv** - World-class interface that feels natural and requires zero training with large timer, smart project selection, and instant feedback
+2. **Schnell** - Lightning-fast interactions with keyboard shortcuts, command palette (Ctrl+K), and one-click actions that never delay the user
+3. **Übersichtlich** - Crystal-clear visual hierarchy with today's overview, weekly timesheet grid, and at-a-glance summaries that prevent information overload
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This application requires enterprise-level features including multi-tenant architecture, role-based access control, hierarchical data structures (Tenant → Client → Project → Phase → Task), dynamic rate management, approval workflows, version control with audit trails, and immutable accounting logic after approval - warranting a sophisticated multi-view architecture with data model migration capabilities.
+This application requires sophisticated features including active timer management, weekly timesheet with copy/paste/drag-drop, global search with filter chips, command palette for keyboard-driven workflows, multi-tenant architecture, role-based access control, approval workflows, and comprehensive reporting - warranting a sophisticated multi-view architecture optimized for speed and usability.
 
 ## Essential Features
 

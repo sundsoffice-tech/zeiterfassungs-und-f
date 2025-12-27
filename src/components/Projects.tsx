@@ -6,22 +6,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Project, TimeEntry } from '@/lib/types'
+import { Project, TimeEntry, Task, Phase, AuditMetadata } from '@/lib/types'
 import { getTotalHoursByProject, formatDuration } from '@/lib/helpers'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import { createAuditMetadata } from '@/lib/data-model-helpers'
 
 interface ProjectsProps {
   projects: Project[]
-  setProjects: (updateFn: (prev: Project[]) => Project[]) => void
+  setProjects: (value: Project[] | ((oldValue?: Project[]) => Project[])) => void
+  tasks: Task[]
+  setTasks: (value: Task[] | ((oldValue?: Task[]) => Task[])) => void
+  phases: Phase[]
+  setPhases: (value: Phase[] | ((oldValue?: Phase[]) => Phase[])) => void
   timeEntries: TimeEntry[]
 }
 
-export function Projects({ projects, setProjects, timeEntries }: ProjectsProps) {
+export function Projects({ projects, setProjects, tasks, setTasks, phases, setPhases, timeEntries }: ProjectsProps) {
   const [open, setOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
-  const [formData, setFormData] = useState({ name: '', description: '', client: '' })
+  const [formData, setFormData] = useState({ name: '', description: '' })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,31 +37,32 @@ export function Projects({ projects, setProjects, timeEntries }: ProjectsProps) 
     }
 
     if (editingProject) {
-      setProjects((prev) => 
+      setProjects((prev = []) => 
         prev.map(proj => proj.id === editingProject.id 
           ? { 
               ...proj, 
               name: formData.name, 
-              description: formData.description, 
-              client: formData.client 
+              description: formData.description
             }
           : proj
         )
       )
       toast.success('Project updated successfully')
     } else {
+      const audit: AuditMetadata = createAuditMetadata('admin', 'Browser')
       const newProject: Project = {
         id: `proj_${Date.now()}`,
+        tenantId: 'default',
         name: formData.name,
         description: formData.description,
-        client: formData.client,
-        createdAt: new Date().toISOString()
+        active: true,
+        audit
       }
-      setProjects((prev) => [...prev, newProject])
+      setProjects((prev = []) => [...prev, newProject])
       toast.success('Project added successfully')
     }
 
-    setFormData({ name: '', description: '', client: '' })
+    setFormData({ name: '', description: '' })
     setEditingProject(null)
     setOpen(false)
   }
@@ -65,21 +71,20 @@ export function Projects({ projects, setProjects, timeEntries }: ProjectsProps) 
     setEditingProject(project)
     setFormData({ 
       name: project.name, 
-      description: project.description || '', 
-      client: project.client || '' 
+      description: project.description || ''
     })
     setOpen(true)
   }
 
   const handleDelete = (projectId: string) => {
-    setProjects((prev) => prev.filter(proj => proj.id !== projectId))
+    setProjects((prev = []) => prev.filter(proj => proj.id !== projectId))
     toast.success('Project deleted')
   }
 
   const handleClose = () => {
     setOpen(false)
     setEditingProject(null)
-    setFormData({ name: '', description: '', client: '' })
+    setFormData({ name: '', description: '' })
   }
 
   return (
@@ -110,15 +115,6 @@ export function Projects({ projects, setProjects, timeEntries }: ProjectsProps) 
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Website Redesign"
                     required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="client">Client</Label>
-                  <Input
-                    id="client"
-                    value={formData.client}
-                    onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-                    placeholder="Acme Corp"
                   />
                 </div>
                 <div className="space-y-2">
@@ -191,11 +187,6 @@ export function Projects({ projects, setProjects, timeEntries }: ProjectsProps) 
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {project.client && (
-                      <div className="mb-2">
-                        <Badge variant="secondary">{project.client}</Badge>
-                      </div>
-                    )}
                     {project.description && (
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                         {project.description}
