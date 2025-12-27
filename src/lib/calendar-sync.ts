@@ -1,0 +1,432 @@
+import { TimeEntry, ActiveTimer, Project, Task, Phase, IntegrationConfig, IntegrationProvider, TimerEvent, TimerEventType, ActivityMode, ApprovalStatus } from './types'
+
+export interface CalendarEvent {
+  id: string
+  title: string
+  description?: string
+  startTime: string
+  endTime: string
+  location?: string
+  attendees?: string[]
+  provider: IntegrationProvider
+  calendarId?: string
+  syncStatus: 'synced' | 'pending' | 'error'
+  lastSyncedAt?: string
+  errorMessage?: string
+}
+
+export interface CalendarSyncMapping {
+  id: string
+  tenantId: string
+  calendarEventId: string
+  timeEntryId?: string
+  timerEventId?: string
+  projectId?: string
+  taskId?: string
+  phaseId?: string
+  mode?: ActivityMode
+  status: 'mapped' | 'ignored' | 'suggested'
+  confidence?: number
+  mappingReason?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CalendarSyncSettings {
+  autoCreateTimeEntries: boolean
+  autoStartTimer: boolean
+  autoStopTimer: boolean
+  syncPastDays: number
+  syncFutureDays: number
+  defaultBillable: boolean
+  defaultMode?: ActivityMode
+  titlePatterns: CalendarTitlePattern[]
+  ignoredCalendars: string[]
+  workingHoursOnly: boolean
+  workingHoursStart: string
+  workingHoursEnd: string
+  minimumDurationMinutes: number
+}
+
+export interface CalendarTitlePattern {
+  id: string
+  pattern: string
+  isRegex: boolean
+  projectId?: string
+  taskId?: string
+  phaseId?: string
+  mode?: ActivityMode
+  tags?: string[]
+  action: 'map' | 'ignore' | 'suggest'
+  priority: number
+}
+
+export interface CalendarSyncLog {
+  id: string
+  tenantId: string
+  timestamp: string
+  provider: IntegrationProvider
+  action: 'import' | 'export' | 'sync'
+  eventsProcessed: number
+  eventsCreated: number
+  eventsUpdated: number
+  eventsIgnored: number
+  errors: string[]
+  duration: number
+}
+
+export function getDefaultCalendarSyncSettings(): CalendarSyncSettings {
+  return {
+    autoCreateTimeEntries: false,
+    autoStartTimer: false,
+    autoStopTimer: false,
+    syncPastDays: 7,
+    syncFutureDays: 1,
+    defaultBillable: true,
+    titlePatterns: [],
+    ignoredCalendars: [],
+    workingHoursOnly: false,
+    workingHoursStart: '08:00',
+    workingHoursEnd: '18:00',
+    minimumDurationMinutes: 5
+  }
+}
+
+export function matchCalendarEventToProject(
+  event: CalendarEvent,
+  projects: Project[],
+  tasks: Task[],
+  patterns: CalendarTitlePattern[]
+): { projectId?: string; taskId?: string; phaseId?: string; mode?: ActivityMode; confidence: number; reason: string } {
+  let bestMatch = {
+    projectId: undefined as string | undefined,
+    taskId: undefined as string | undefined,
+    phaseId: undefined as string | undefined,
+    mode: undefined as ActivityMode | undefined,
+    confidence: 0,
+    reason: 'No match found'
+  }
+
+  const sortedPatterns = [...patterns].sort((a, b) => b.priority - a.priority)
+
+  for (const pattern of sortedPatterns) {
+    let matches = false
+    
+    if (pattern.isRegex) {
+      try {
+        const regex = new RegExp(pattern.pattern, 'i')
+        matches = regex.test(event.title) || (event.description ? regex.test(event.description) : false)
+      } catch (e) {
+        continue
+      }
+    } else {
+      const searchText = `${event.title} ${event.description || ''}`.toLowerCase()
+      matches = searchText.includes(pattern.pattern.toLowerCase())
+    }
+
+    if (matches) {
+      if (pattern.action === 'ignore') {
+        return {
+          projectId: undefined,
+          taskId: undefined,
+          phaseId: undefined,
+          mode: undefined,
+          confidence: 100,
+          reason: `Ignored by pattern: "${pattern.pattern}"`
+        }
+      }
+
+      bestMatch = {
+        projectId: pattern.projectId,
+        taskId: pattern.taskId,
+        phaseId: pattern.phaseId,
+        mode: pattern.mode,
+        confidence: pattern.action === 'map' ? 95 : 70,
+        reason: `Matched pattern: "${pattern.pattern}"`
+      }
+      
+      if (pattern.action === 'map') {
+        return bestMatch
+      }
+    }
+  }
+
+  for (const project of projects) {
+    const projectNameLower = project.name.toLowerCase()
+    const eventTitleLower = event.title.toLowerCase()
+    
+    if (eventTitleLower.includes(projectNameLower)) {
+      const projectTasks = tasks.filter(t => t.projectId === project.id)
+      
+      for (const task of projectTasks) {
+        if (eventTitleLower.includes(task.name.toLowerCase())) {
+          return {
+            projectId: project.id,
+            taskId: task.id,
+            phaseId: task.phaseId,
+            mode: undefined,
+            confidence: 85,
+            reason: `Project "${project.name}" and Task "${task.name}" found in title`
+          }
+        }
+      }
+      
+      if (bestMatch.confidence < 75) {
+        bestMatch = {
+          projectId: project.id,
+          taskId: undefined,
+          phaseId: undefined,
+          mode: undefined,
+          confidence: 75,
+          reason: `Project "${project.name}" found in title`
+        }
+      }
+    }
+  }
+
+  const modeKeywords: Record<ActivityMode, string[]> = {
+    [ActivityMode.FAHRT]: ['fahrt', 'drive', 'travel', 'anfahrt'],
+    [ActivityMode.MONTAGE]: ['montage', 'installation', 'install', 'aufbau'],
+    [ActivityMode.DEMONTAGE]: ['demontage', 'abbau', 'removal', 'uninstall'],
+    [ActivityMode.PLANUNG]: ['planung', 'planning', 'plan', 'konzept'],
+    [ActivityMode.BERATUNG]: ['beratung', 'consulting', 'beratungsgespräch', 'consultation'],
+    [ActivityMode.WARTUNG]: ['wartung', 'maintenance', 'service', 'instandhaltung'],
+    [ActivityMode.DOKUMENTATION]: ['dokumentation', 'documentation', 'dokument', 'bericht'],
+    [ActivityMode.MEETING]: ['meeting', 'besprechung', 'call', 'termin'],
+    [ActivityMode.SONSTIGES]: []
+  }
+
+  const eventText = `${event.title} ${event.description || ''}`.toLowerCase()
+  
+  for (const [mode, keywords] of Object.entries(modeKeywords)) {
+    for (const keyword of keywords) {
+      if (eventText.includes(keyword)) {
+        if (bestMatch.projectId) {
+          bestMatch.mode = mode as ActivityMode
+          bestMatch.confidence = Math.min(bestMatch.confidence + 10, 95)
+          bestMatch.reason += ` + Mode "${mode}" detected`
+        } else {
+          bestMatch.mode = mode as ActivityMode
+          bestMatch.confidence = Math.max(bestMatch.confidence, 50)
+          bestMatch.reason = `Mode "${mode}" detected from keywords`
+        }
+        break
+      }
+    }
+  }
+
+  return bestMatch
+}
+
+export function createTimeEntryFromCalendarEvent(
+  event: CalendarEvent,
+  employeeId: string,
+  tenantId: string,
+  projectId: string,
+  taskId?: string,
+  phaseId?: string,
+  mode?: ActivityMode,
+  billable: boolean = true
+): Omit<TimeEntry, 'id'> {
+  const startDate = new Date(event.startTime)
+  const endDate = new Date(event.endTime)
+  const duration = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
+
+  return {
+    tenantId,
+    employeeId,
+    projectId,
+    phaseId,
+    taskId,
+    date: startDate.toISOString().split('T')[0],
+    startTime: event.startTime,
+    endTime: event.endTime,
+    duration,
+    tags: mode ? [mode] : [],
+    location: event.location,
+    notes: `${event.title}${event.description ? `\n\n${event.description}` : ''}`,
+    costCenter: undefined,
+    billable,
+    approvalStatus: ApprovalStatus.DRAFT,
+    locked: false,
+    calendarEventId: event.id,
+    calendarProvider: event.provider,
+    audit: {
+      createdBy: 'calendar-sync',
+      createdAt: new Date().toISOString()
+    },
+    changeLog: []
+  }
+}
+
+export function shouldIgnoreCalendarEvent(
+  event: CalendarEvent,
+  settings: CalendarSyncSettings
+): { ignore: boolean; reason?: string } {
+  if (settings.ignoredCalendars.includes(event.calendarId || '')) {
+    return { ignore: true, reason: 'Calendar is in ignored list' }
+  }
+
+  const startDate = new Date(event.startTime)
+  const endDate = new Date(event.endTime)
+  const durationMinutes = (endDate.getTime() - startDate.getTime()) / (1000 * 60)
+
+  if (durationMinutes < settings.minimumDurationMinutes) {
+    return { ignore: true, reason: `Duration ${durationMinutes}min below minimum ${settings.minimumDurationMinutes}min` }
+  }
+
+  if (settings.workingHoursOnly) {
+    const startHour = startDate.getHours()
+    const startMinute = startDate.getMinutes()
+    const startTimeStr = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`
+    
+    if (startTimeStr < settings.workingHoursStart || startTimeStr > settings.workingHoursEnd) {
+      return { ignore: true, reason: 'Outside working hours' }
+    }
+  }
+
+  const privateKeywords = ['private', 'privat', 'personal', 'persönlich']
+  const eventText = `${event.title} ${event.description || ''}`.toLowerCase()
+  
+  if (privateKeywords.some(keyword => eventText.includes(keyword))) {
+    return { ignore: true, reason: 'Marked as private' }
+  }
+
+  return { ignore: false }
+}
+
+export function createTimerEventsFromCalendarEvent(
+  event: CalendarEvent,
+  mode?: ActivityMode
+): TimerEvent[] {
+  const events: TimerEvent[] = []
+  const startDate = new Date(event.startTime)
+  const endDate = new Date(event.endTime)
+
+  events.push({
+    id: `${event.id}-start`,
+    type: TimerEventType.START,
+    timestamp: startDate.getTime(),
+    timestampFormatted: event.startTime,
+    mode,
+    notes: `Calendar: ${event.title}`
+  })
+
+  events.push({
+    id: `${event.id}-stop`,
+    type: TimerEventType.STOP,
+    timestamp: endDate.getTime(),
+    timestampFormatted: event.endTime,
+    mode
+  })
+
+  return events
+}
+
+export function exportTimeEntryToCalendarEvent(
+  entry: TimeEntry,
+  project?: Project,
+  task?: Task
+): Omit<CalendarEvent, 'id' | 'provider' | 'syncStatus'> {
+  const projectName = project?.name || 'Unknown Project'
+  const taskName = task?.name || ''
+  const mode = entry.tags?.[0] as ActivityMode | undefined
+  const modeLabel = mode ? ` [${mode.toUpperCase()}]` : ''
+  
+  const hours = Math.floor(entry.duration)
+  const minutes = Math.round((entry.duration % 1) * 60)
+  
+  return {
+    title: `${projectName}${taskName ? ` - ${taskName}` : ''}${modeLabel}`,
+    description: entry.notes || '',
+    startTime: entry.startTime,
+    endTime: entry.endTime,
+    location: entry.location,
+    attendees: []
+  }
+}
+
+export async function simulateCalendarSync(
+  provider: IntegrationProvider,
+  settings: CalendarSyncSettings,
+  projects: Project[],
+  tasks: Task[],
+  employeeId: string,
+  tenantId: string
+): Promise<{
+  events: CalendarEvent[]
+  suggestions: Array<{
+    event: CalendarEvent
+    mapping: ReturnType<typeof matchCalendarEventToProject>
+    timeEntry?: Omit<TimeEntry, 'id'>
+  }>
+}> {
+  const mockEvents: CalendarEvent[] = [
+    {
+      id: 'cal-evt-001',
+      title: 'Kurita Showroom Meeting',
+      description: 'Besprechung neuer Produktlinie',
+      startTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      endTime: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+      location: 'Kurita Office',
+      provider,
+      syncStatus: 'pending'
+    },
+    {
+      id: 'cal-evt-002',
+      title: 'Fahrt zur Baustelle Nord',
+      description: 'Anfahrt für Montage',
+      startTime: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+      endTime: new Date(Date.now() - 4.5 * 60 * 60 * 1000).toISOString(),
+      provider,
+      syncStatus: 'pending'
+    },
+    {
+      id: 'cal-evt-003',
+      title: 'Team Standup',
+      description: 'Daily standup meeting',
+      startTime: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(),
+      endTime: new Date(Date.now() - 6.75 * 60 * 60 * 1000).toISOString(),
+      provider,
+      syncStatus: 'pending'
+    }
+  ]
+
+  const suggestions = mockEvents.map(event => {
+    const shouldIgnore = shouldIgnoreCalendarEvent(event, settings)
+    
+    if (shouldIgnore.ignore) {
+      return {
+        event,
+        mapping: {
+          projectId: undefined,
+          taskId: undefined,
+          phaseId: undefined,
+          mode: undefined,
+          confidence: 0,
+          reason: shouldIgnore.reason || 'Ignored'
+        },
+        timeEntry: undefined
+      }
+    }
+
+    const mapping = matchCalendarEventToProject(event, projects, tasks, settings.titlePatterns)
+    
+    const timeEntry = mapping.projectId
+      ? createTimeEntryFromCalendarEvent(
+          event,
+          employeeId,
+          tenantId,
+          mapping.projectId,
+          mapping.taskId,
+          mapping.phaseId,
+          mapping.mode,
+          settings.defaultBillable
+        )
+      : undefined
+
+    return { event, mapping, timeEntry }
+  })
+
+  return { events: mockEvents, suggestions }
+}
