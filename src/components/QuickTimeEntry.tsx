@@ -2,13 +2,15 @@ import { useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { format, addMinutes } from 'date-fns'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
 import { Employee, Project, Task, Phase, TimeEntry, ApprovalStatus } from '@/lib/types'
 import { Clock, FloppyDisk } from '@phosphor-icons/react'
+import { useGlobalShortcuts } from '@/hooks/use-keyboard-shortcuts'
+import { announceToScreenReader } from '@/lib/accessibility'
 
 interface QuickTimeEntryProps {
   open: boolean
@@ -43,16 +45,19 @@ export function QuickTimeEntry({
   const handleSave = () => {
     if (!selectedEmployee) {
       toast.error('Bitte wählen Sie einen Mitarbeiter aus')
+      announceToScreenReader('Fehler: Mitarbeiter muss ausgewählt werden', 'assertive')
       return
     }
 
     if (!selectedProject) {
       toast.error('Bitte wählen Sie ein Projekt aus')
+      announceToScreenReader('Fehler: Projekt muss ausgewählt werden', 'assertive')
       return
     }
 
     if (!duration || parseFloat(duration) <= 0) {
       toast.error('Bitte geben Sie eine gültige Dauer ein')
+      announceToScreenReader('Fehler: Gültige Dauer erforderlich', 'assertive')
       return
     }
 
@@ -95,24 +100,34 @@ export function QuickTimeEntry({
     setDuration('')
     
     toast.success('Zeiteintrag erfolgreich gespeichert')
+    announceToScreenReader('Zeiteintrag erfolgreich gespeichert')
     onOpenChange(false)
   }
 
+  useGlobalShortcuts(
+    undefined,
+    handleSave,
+    open
+  )
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" aria-describedby="quick-entry-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" weight="duotone" />
+            <Clock className="h-5 w-5 text-primary" weight="duotone" aria-hidden="true" />
             Schnelleintrag
           </DialogTitle>
+          <DialogDescription id="quick-entry-description">
+            Erfassen Sie schnell einen Zeiteintrag. Pflichtfelder sind mit * markiert. Speichern mit Strg+S oder Cmd+S.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="employee">Mitarbeiter *</Label>
+            <Label htmlFor="employee">Mitarbeiter <span className="text-destructive" aria-label="Pflichtfeld">*</span></Label>
             <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-              <SelectTrigger id="employee">
+              <SelectTrigger id="employee" aria-label="Mitarbeiter auswählen" aria-required="true">
                 <SelectValue placeholder="Mitarbeiter wählen" />
               </SelectTrigger>
               <SelectContent>
@@ -126,7 +141,7 @@ export function QuickTimeEntry({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="project">Projekt *</Label>
+            <Label htmlFor="project">Projekt <span className="text-destructive" aria-label="Pflichtfeld">*</span></Label>
             <Select 
               value={selectedProject} 
               onValueChange={(val) => {
@@ -135,7 +150,7 @@ export function QuickTimeEntry({
                 setSelectedTask('')
               }}
             >
-              <SelectTrigger id="project">
+              <SelectTrigger id="project" aria-label="Projekt auswählen" aria-required="true">
                 <SelectValue placeholder="Projekt wählen" />
               </SelectTrigger>
               <SelectContent>
@@ -158,7 +173,7 @@ export function QuickTimeEntry({
                   setSelectedTask('')
                 }}
               >
-                <SelectTrigger id="phase">
+                <SelectTrigger id="phase" aria-label="Phase auswählen">
                   <SelectValue placeholder="Phase wählen" />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,7 +192,7 @@ export function QuickTimeEntry({
             <div className="space-y-2">
               <Label htmlFor="task">Task (optional)</Label>
               <Select value={selectedTask} onValueChange={setSelectedTask}>
-                <SelectTrigger id="task">
+                <SelectTrigger id="task" aria-label="Task auswählen">
                   <SelectValue placeholder="Task wählen" />
                 </SelectTrigger>
                 <SelectContent>
@@ -193,7 +208,7 @@ export function QuickTimeEntry({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="duration">Dauer (Stunden) *</Label>
+            <Label htmlFor="duration">Dauer (Stunden) <span className="text-destructive" aria-label="Pflichtfeld">*</span></Label>
             <Input
               id="duration"
               type="number"
@@ -202,15 +217,21 @@ export function QuickTimeEntry({
               placeholder="z.B. 2.5"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
+              aria-required="true"
+              aria-describedby="duration-help"
             />
+            <p id="duration-help" className="text-xs text-muted-foreground">
+              Geben Sie die Dauer in Stunden ein, z.B. 2.5 für 2 Stunden und 30 Minuten
+            </p>
           </div>
 
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2" role="group" aria-label="Schnellauswahl Dauer">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setDuration('0.5')}
+              aria-label="Dauer 0,5 Stunden setzen"
             >
               0.5h
             </Button>
@@ -219,6 +240,7 @@ export function QuickTimeEntry({
               variant="outline"
               size="sm"
               onClick={() => setDuration('1')}
+              aria-label="Dauer 1 Stunde setzen"
             >
               1h
             </Button>
@@ -227,6 +249,7 @@ export function QuickTimeEntry({
               variant="outline"
               size="sm"
               onClick={() => setDuration('2')}
+              aria-label="Dauer 2 Stunden setzen"
             >
               2h
             </Button>
@@ -235,6 +258,7 @@ export function QuickTimeEntry({
               variant="outline"
               size="sm"
               onClick={() => setDuration('4')}
+              aria-label="Dauer 4 Stunden setzen"
             >
               4h
             </Button>
@@ -242,11 +266,11 @@ export function QuickTimeEntry({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} aria-label="Dialog schließen ohne zu speichern">
             Abbrechen
           </Button>
-          <Button onClick={handleSave} className="gap-2">
-            <FloppyDisk className="h-4 w-4" weight="duotone" />
+          <Button onClick={handleSave} className="gap-2" aria-label="Zeiteintrag speichern (Tastenkürzel: Strg+S)">
+            <FloppyDisk className="h-4 w-4" weight="duotone" aria-hidden="true" />
             Speichern
           </Button>
         </DialogFooter>

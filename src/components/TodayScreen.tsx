@@ -24,6 +24,8 @@ import { AnomalyBanner } from '@/components/AnomalyBanner'
 import { useGapOvertimeDetection } from '@/hooks/use-gap-overtime-detection'
 import { InlineEditableTimeEntry } from '@/components/InlineEditableTimeEntry'
 import { EmptyDayView } from '@/components/EmptyStates'
+import { useGlobalShortcuts } from '@/hooks/use-keyboard-shortcuts'
+import { announceToScreenReader } from '@/lib/accessibility'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -363,6 +365,15 @@ export function TodayScreen({
     })
   }
 
+  useGlobalShortcuts(
+    () => {
+      setShowQuickEntry(true)
+      announceToScreenReader('Neuer Zeiteintrag Dialog geöffnet')
+    },
+    undefined,
+    true
+  )
+
   const handleStartFromFavorite = (projectId: string, phaseId?: string, taskId?: string) => {
     if (activeTimer) {
       toast.error('Stoppen Sie zuerst den aktiven Timer')
@@ -383,7 +394,7 @@ export function TodayScreen({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4 p-6 rounded-xl bg-gradient-to-r from-accent via-primary to-accent/80 shadow-xl">
+      <div className="flex items-center justify-between gap-4 p-6 rounded-xl bg-gradient-to-r from-accent via-primary to-accent/80 shadow-xl" role="region" aria-label="Schnellzugriff Zeiterfassung">
         <div className="flex-1">
           <h2 className="text-2xl font-bold text-white mb-1">Zeit erfassen</h2>
           <p className="text-white/90 text-sm">Schnelleintrag in nur 2 Klicks</p>
@@ -392,8 +403,9 @@ export function TodayScreen({
           size="lg" 
           onClick={() => setShowQuickEntry(true)}
           className="bg-white text-primary hover:bg-white/90 shadow-lg gap-2 text-lg px-8 py-6"
+          aria-label="Neuen Zeiteintrag erstellen (Tastenkürzel: N)"
         >
-          <Plus className="h-6 w-6" weight="bold" />
+          <Plus className="h-6 w-6" weight="bold" aria-hidden="true" />
           Zeit erfassen
         </Button>
       </div>
@@ -455,9 +467,9 @@ export function TodayScreen({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Mitarbeiter</label>
+              <label htmlFor="employee-select" className="text-sm font-medium">Mitarbeiter</label>
               <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                <SelectTrigger>
+                <SelectTrigger id="employee-select" aria-label="Mitarbeiter auswählen">
                   <SelectValue placeholder="Mitarbeiter wählen" />
                 </SelectTrigger>
                 <SelectContent>
@@ -471,7 +483,7 @@ export function TodayScreen({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Projekt *</label>
+              <label htmlFor="project-select" className="text-sm font-medium">Projekt <span className="text-destructive">*</span></label>
               <Select 
                 value={selectedProject} 
                 onValueChange={(val) => {
@@ -481,7 +493,7 @@ export function TodayScreen({
                 }}
                 disabled={!!activeTimer}
               >
-                <SelectTrigger>
+                <SelectTrigger id="project-select" aria-label="Projekt auswählen" aria-required="true">
                   <SelectValue placeholder="Projekt wählen" />
                 </SelectTrigger>
                 <SelectContent>
@@ -496,7 +508,7 @@ export function TodayScreen({
 
             {availablePhases.length > 0 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Phase (optional)</label>
+                <label htmlFor="phase-select" className="text-sm font-medium">Phase (optional)</label>
                 <Select 
                   value={selectedPhase} 
                   onValueChange={(val) => {
@@ -505,7 +517,7 @@ export function TodayScreen({
                   }}
                   disabled={!!activeTimer}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="phase-select" aria-label="Phase auswählen">
                     <SelectValue placeholder="Phase wählen" />
                   </SelectTrigger>
                   <SelectContent>
@@ -522,13 +534,13 @@ export function TodayScreen({
 
             {availableTasks.length > 0 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Task (optional)</label>
+                <label htmlFor="task-select" className="text-sm font-medium">Task (optional)</label>
                 <Select 
                   value={selectedTask} 
                   onValueChange={setSelectedTask}
                   disabled={!!activeTimer}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="task-select" aria-label="Task auswählen">
                     <SelectValue placeholder="Task wählen" />
                   </SelectTrigger>
                   <SelectContent>
@@ -547,14 +559,16 @@ export function TodayScreen({
           {!activeTimer && (
             <div className="space-y-3">
               <label className="text-sm font-medium">Aktivitätsmodus</label>
-              <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-2" role="group" aria-label="Aktivitätsmodus auswählen">
                 <Button
                   variant={selectedMode === ActivityMode.FAHRT ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.FAHRT)}
                   className="gap-2"
+                  aria-label="Fahrt Modus"
+                  aria-pressed={selectedMode === ActivityMode.FAHRT}
                 >
-                  <CarSimple className="h-4 w-4" weight="duotone" />
+                  <CarSimple className="h-4 w-4" weight="duotone" aria-hidden="true" />
                   Fahrt
                 </Button>
                 <Button
@@ -562,8 +576,10 @@ export function TodayScreen({
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.MONTAGE)}
                   className="gap-2"
+                  aria-label="Montage Modus"
+                  aria-pressed={selectedMode === ActivityMode.MONTAGE}
                 >
-                  <Wrench className="h-4 w-4" weight="duotone" />
+                  <Wrench className="h-4 w-4" weight="duotone" aria-hidden="true" />
                   Montage
                 </Button>
                 <Button
@@ -571,8 +587,10 @@ export function TodayScreen({
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.DEMONTAGE)}
                   className="gap-2"
+                  aria-label="Demontage Modus"
+                  aria-pressed={selectedMode === ActivityMode.DEMONTAGE}
                 >
-                  <Hammer className="h-4 w-4" weight="duotone" />
+                  <Hammer className="h-4 w-4" weight="duotone" aria-hidden="true" />
                   Demontage
                 </Button>
                 <Button
@@ -580,8 +598,10 @@ export function TodayScreen({
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.PLANUNG)}
                   className="gap-2"
+                  aria-label="Planung Modus"
+                  aria-pressed={selectedMode === ActivityMode.PLANUNG}
                 >
-                  <ClipboardText className="h-4 w-4" weight="duotone" />
+                  <ClipboardText className="h-4 w-4" weight="duotone" aria-hidden="true" />
                   Planung
                 </Button>
                 <Button
@@ -589,8 +609,10 @@ export function TodayScreen({
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.BERATUNG)}
                   className="gap-2"
+                  aria-label="Beratung Modus"
+                  aria-pressed={selectedMode === ActivityMode.BERATUNG}
                 >
-                  <ChatsCircle className="h-4 w-4" weight="duotone" />
+                  <ChatsCircle className="h-4 w-4" weight="duotone" aria-hidden="true" />
                   Beratung
                 </Button>
                 <Button
@@ -598,8 +620,10 @@ export function TodayScreen({
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.WARTUNG)}
                   className="gap-2"
+                  aria-label="Wartung Modus"
+                  aria-pressed={selectedMode === ActivityMode.WARTUNG}
                 >
-                  <Gear className="h-4 w-4" weight="duotone" />
+                  <Gear className="h-4 w-4" weight="duotone" aria-hidden="true" />
                   Wartung
                 </Button>
                 <Button
@@ -607,8 +631,10 @@ export function TodayScreen({
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.DOKUMENTATION)}
                   className="gap-2"
+                  aria-label="Dokumentation Modus"
+                  aria-pressed={selectedMode === ActivityMode.DOKUMENTATION}
                 >
-                  <FileText className="h-4 w-4" weight="duotone" />
+                  <FileText className="h-4 w-4" weight="duotone" aria-hidden="true" />
                   Doku
                 </Button>
                 <Button
@@ -616,8 +642,10 @@ export function TodayScreen({
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.MEETING)}
                   className="gap-2"
+                  aria-label="Meeting Modus"
+                  aria-pressed={selectedMode === ActivityMode.MEETING}
                 >
-                  <Users className="h-4 w-4" weight="duotone" />
+                  <Users className="h-4 w-4" weight="duotone" aria-hidden="true" />
                   Meeting
                 </Button>
                 <Button
@@ -625,8 +653,10 @@ export function TodayScreen({
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.SONSTIGES)}
                   className="gap-2"
+                  aria-label="Sonstiges Modus"
+                  aria-pressed={selectedMode === ActivityMode.SONSTIGES}
                 >
-                  <PushPin className="h-4 w-4" weight="duotone" />
+                  <PushPin className="h-4 w-4" weight="duotone" aria-hidden="true" />
                   Sonstiges
                 </Button>
               </div>
@@ -673,15 +703,17 @@ export function TodayScreen({
             </div>
           )}
 
-          <div className="flex items-center gap-3 justify-center">
+          <div className="flex items-center gap-3 justify-center" role="group" aria-label="Timer Steuerung">
             {!activeTimer ? (
               <Button 
                 onClick={handleStart} 
                 size="lg" 
                 className="gap-2"
                 disabled={!selectedProject}
+                aria-label="Timer starten"
+                aria-disabled={!selectedProject}
               >
-                <Play className="h-5 w-5" weight="fill" />
+                <Play className="h-5 w-5" weight="fill" aria-hidden="true" />
                 Starten
               </Button>
             ) : (
@@ -691,8 +723,9 @@ export function TodayScreen({
                   size="lg" 
                   variant="secondary" 
                   className="gap-2"
+                  aria-label={activeTimer.isPaused ? 'Timer fortsetzen' : 'Timer pausieren'}
                 >
-                  <Pause className="h-5 w-5" weight="fill" />
+                  <Pause className="h-5 w-5" weight="fill" aria-hidden="true" />
                   {activeTimer.isPaused ? 'Fortsetzen' : 'Pause'}
                 </Button>
                 <Button 
@@ -700,8 +733,9 @@ export function TodayScreen({
                   size="lg" 
                   variant="destructive" 
                   className="gap-2"
+                  aria-label="Timer stoppen und speichern"
                 >
-                  <Stop className="h-5 w-5" weight="fill" />
+                  <Stop className="h-5 w-5" weight="fill" aria-hidden="true" />
                   Stoppen
                 </Button>
               </>

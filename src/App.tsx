@@ -27,6 +27,7 @@ import { useReminderProcessor } from '@/hooks/use-reminder-processor'
 import { getDefaultAppSettings } from '@/lib/automation'
 import { EmailNotificationService } from '@/lib/email-notifications'
 import { EmailConfig } from '@/lib/email-service'
+import { skipLinkClasses } from '@/lib/accessibility'
 
 function App() {
   const [activeTab, setActiveTab] = useState('timepicker')
@@ -86,26 +87,38 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-20">
+      <a href="#main-content" className={skipLinkClasses}>
+        Zum Hauptinhalt springen
+      </a>
+      
+      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-20" role="banner">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Clock className="h-6 w-6 text-white" weight="bold" />
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center" role="img" aria-label="Zeiterfassung Logo">
+                <Clock className="h-6 w-6 text-white" weight="bold" aria-hidden="true" />
               </div>
               <div>
                 <h1 className="text-xl font-bold">Zeiterfassung</h1>
                 <p className="text-xs text-muted-foreground">Weltklasse Time Tracking</p>
               </div>
             </div>
-            <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 text-xs bg-muted rounded border">
-              <span className="text-muted-foreground">⌘K</span>
-            </kbd>
+            <div className="flex items-center gap-3">
+              <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 text-xs bg-muted rounded border" aria-label="Tastenkombination: Befehl K oder Strg K">
+                <span className="text-muted-foreground">⌘K</span>
+              </kbd>
+              <div className="hidden lg:flex items-center gap-2 text-xs text-muted-foreground" role="complementary" aria-label="Tastenkürzel">
+                <span className="px-2 py-1 bg-muted rounded border">N</span>
+                <span>Neuer Eintrag</span>
+                <span className="ml-2 px-2 py-1 bg-muted rounded border">⌘S</span>
+                <span>Speichern</span>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
+      <main id="main-content" className="container mx-auto px-4 py-6" role="main">
         {employees && employees.length > 0 && (
           <div className="mb-6">
             <ReminderNotificationDisplay
@@ -118,65 +131,65 @@ function App() {
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-14 lg:w-auto lg:inline-grid">
-            <TabsTrigger value="timepicker" className="gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
-              <Article className="h-4 w-4" weight="duotone" />
+          <TabsList className="grid w-full grid-cols-14 lg:w-auto lg:inline-grid" role="tablist" aria-label="Hauptnavigation">
+            <TabsTrigger value="timepicker" className="gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10" aria-label="Time Picker Ansicht">
+              <Article className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Time Picker</span>
             </TabsTrigger>
-            <TabsTrigger value="today" className="gap-2">
-              <Clock className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="today" className="gap-2" aria-label="Heute Ansicht">
+              <Clock className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Heute</span>
             </TabsTrigger>
-            <TabsTrigger value="week" className="gap-2">
-              <CalendarBlank className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="week" className="gap-2" aria-label="Wochenansicht">
+              <CalendarBlank className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Woche</span>
             </TabsTrigger>
-            <TabsTrigger value="projects" className="gap-2">
-              <FolderOpen className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="projects" className="gap-2" aria-label="Projektübersicht">
+              <FolderOpen className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Projekte</span>
             </TabsTrigger>
-            <TabsTrigger value="reports" className="gap-2">
-              <ChartBar className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="reports" className="gap-2" aria-label="Berichte">
+              <ChartBar className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Berichte</span>
             </TabsTrigger>
-            <TabsTrigger value="calendar" className="gap-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
-              <CalendarCheck className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="calendar" className="gap-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10" aria-label="Kalenderintegration">
+              <CalendarCheck className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Kalender</span>
             </TabsTrigger>
-            <TabsTrigger value="trust" className="gap-2">
-              <ShieldStar className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="trust" className="gap-2" aria-label="Vertrauensschicht">
+              <ShieldStar className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Vertrauen</span>
             </TabsTrigger>
-            <TabsTrigger value="forecast" className="gap-2">
-              <TrendUp className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="forecast" className="gap-2" aria-label="Prognose und Forecast">
+              <TrendUp className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Forecast</span>
             </TabsTrigger>
-            <TabsTrigger value="automation" className="gap-2">
-              <Lightning className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="automation" className="gap-2" aria-label="Automatisierung">
+              <Lightning className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Automation</span>
             </TabsTrigger>
-            <TabsTrigger value="offline" className="gap-2">
-              <CloudArrowUp className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="offline" className="gap-2" aria-label="Offline und Synchronisation">
+              <CloudArrowUp className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Offline/Sync</span>
             </TabsTrigger>
-            <TabsTrigger value="pro" className="gap-2 bg-gradient-to-r from-accent/10 to-primary/10">
-              <Rocket className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="pro" className="gap-2 bg-gradient-to-r from-accent/10 to-primary/10" aria-label="Pro Module">
+              <Rocket className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Pro</span>
             </TabsTrigger>
-            <TabsTrigger value="repair" className="gap-2">
-              <Wrench className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="repair" className="gap-2" aria-label="Reparaturmodus">
+              <Wrench className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Reparatur</span>
             </TabsTrigger>
-            <TabsTrigger value="validation" className="gap-2">
-              <ShieldCheck className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="validation" className="gap-2" aria-label="KI-Validierung">
+              <ShieldCheck className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">KI-Validierung</span>
             </TabsTrigger>
-            <TabsTrigger value="explainable" className="gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
-              <Brain className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="explainable" className="gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10" aria-label="Erklärbare KI">
+              <Brain className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Erklärbare KI</span>
             </TabsTrigger>
-            <TabsTrigger value="admin" className="gap-2">
-              <UserCircleGear className="h-4 w-4" weight="duotone" />
+            <TabsTrigger value="admin" className="gap-2" aria-label="Adminbereich">
+              <UserCircleGear className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Admin</span>
             </TabsTrigger>
           </TabsList>
