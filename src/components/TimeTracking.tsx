@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Clock, Trash } from '@phosphor-icons/react'
+import { Plus, Clock, Trash, Download } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
@@ -12,6 +12,7 @@ import { calculateDuration, formatDuration, getEmployeeName, getProjectName } fr
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { exportTimeEntriesToCSV } from '@/lib/csv-export'
 
 interface TimeTrackingProps {
   timeEntries: TimeEntry[]
@@ -79,6 +80,11 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
     toast.success('Time entry deleted')
   }
 
+  const handleExport = () => {
+    exportTimeEntriesToCSV(timeEntries, employees, projects)
+    toast.success('Time entries exported to CSV')
+  }
+
   const sortedEntries = [...timeEntries].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   )
@@ -97,13 +103,20 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
             Total: <span className="font-mono font-semibold text-primary">{formatDuration(totalHours)}</span>
           </p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button disabled={employees.length === 0 || projects.length === 0}>
-              <Plus className="mr-2 h-4 w-4" weight="bold" />
-              Add Time Entry
+        <div className="flex gap-2">
+          {timeEntries.length > 0 && (
+            <Button variant="outline" onClick={handleExport}>
+              <Download className="mr-2 h-4 w-4" weight="bold" />
+              Export CSV
             </Button>
-          </DialogTrigger>
+          )}
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button disabled={employees.length === 0 || projects.length === 0}>
+                <Plus className="mr-2 h-4 w-4" weight="bold" />
+                Add Time Entry
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Time Entry</DialogTitle>
@@ -202,6 +215,7 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {employees.length === 0 || projects.length === 0 ? (

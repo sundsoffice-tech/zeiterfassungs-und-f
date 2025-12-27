@@ -1,8 +1,21 @@
-import { Clock, FolderOpen, Users, Car } from '@phosphor-icons/react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState } from 'react'
+import { Clock, FolderOpen, Users, Car, Download, FileText } from '@phosphor-icons/react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { TimeEntry, MileageEntry, Employee, Project } from '@/lib/types'
 import { calculateDuration, formatDuration } from '@/lib/helpers'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
+import {
+  exportTimeEntriesToCSV,
+  exportMileageEntriesToCSV,
+  exportEmployeeTimeReportToCSV,
+  exportProjectTimeReportToCSV,
+  exportPayrollReportToCSV
+} from '@/lib/csv-export'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 
 interface DashboardProps {
   employees: Employee[]
@@ -12,6 +25,12 @@ interface DashboardProps {
 }
 
 export function Dashboard({ employees, projects, timeEntries, mileageEntries }: DashboardProps) {
+  const [payrollDialogOpen, setPayrollDialogOpen] = useState(false)
+  const [payrollDates, setPayrollDates] = useState({
+    startDate: '',
+    endDate: ''
+  })
+
   const totalHours = timeEntries.reduce(
     (sum, entry) => sum + calculateDuration(entry.startTime, entry.endTime),
     0
@@ -49,6 +68,42 @@ export function Dashboard({ employees, projects, timeEntries, mileageEntries }: 
     }
   ]
 
+  const handleExportTimeEntries = () => {
+    exportTimeEntriesToCSV(timeEntries, employees, projects)
+    toast.success('Time entries exported to CSV')
+  }
+
+  const handleExportMileageEntries = () => {
+    exportMileageEntriesToCSV(mileageEntries, employees)
+    toast.success('Mileage entries exported to CSV')
+  }
+
+  const handleExportEmployeeReport = () => {
+    exportEmployeeTimeReportToCSV(employees, timeEntries, projects)
+    toast.success('Employee time report exported to CSV')
+  }
+
+  const handleExportProjectReport = () => {
+    exportProjectTimeReportToCSV(projects, timeEntries, employees)
+    toast.success('Project time report exported to CSV')
+  }
+
+  const handleExportPayrollReport = () => {
+    if (payrollDates.startDate && payrollDates.endDate) {
+      if (payrollDates.startDate > payrollDates.endDate) {
+        toast.error('Start date must be before end date')
+        return
+      }
+      exportPayrollReportToCSV(employees, timeEntries, mileageEntries, payrollDates.startDate, payrollDates.endDate)
+      toast.success('Payroll report exported to CSV')
+      setPayrollDialogOpen(false)
+    } else {
+      exportPayrollReportToCSV(employees, timeEntries, mileageEntries)
+      toast.success('Payroll report exported to CSV')
+      setPayrollDialogOpen(false)
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -78,6 +133,149 @@ export function Dashboard({ employees, projects, timeEntries, mileageEntries }: 
           </motion.div>
         ))}
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-accent" weight="duotone" />
+            Export Reports
+          </CardTitle>
+          <CardDescription>
+            Download CSV reports for accounting and payroll purposes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <Button
+              variant="outline"
+              className="justify-start h-auto py-3"
+              onClick={handleExportTimeEntries}
+              disabled={timeEntries.length === 0}
+            >
+              <div className="flex items-start gap-3 w-full">
+                <Download className="h-5 w-5 mt-0.5 text-primary" weight="duotone" />
+                <div className="text-left">
+                  <div className="font-semibold">Time Entries</div>
+                  <div className="text-xs text-muted-foreground">
+                    Detailed time tracking data
+                  </div>
+                </div>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="justify-start h-auto py-3"
+              onClick={handleExportMileageEntries}
+              disabled={mileageEntries.length === 0}
+            >
+              <div className="flex items-start gap-3 w-full">
+                <Download className="h-5 w-5 mt-0.5 text-accent" weight="duotone" />
+                <div className="text-left">
+                  <div className="font-semibold">Mileage Entries</div>
+                  <div className="text-xs text-muted-foreground">
+                    Travel log for reimbursement
+                  </div>
+                </div>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="justify-start h-auto py-3"
+              onClick={handleExportEmployeeReport}
+              disabled={employees.length === 0 || timeEntries.length === 0}
+            >
+              <div className="flex items-start gap-3 w-full">
+                <Download className="h-5 w-5 mt-0.5 text-primary" weight="duotone" />
+                <div className="text-left">
+                  <div className="font-semibold">Employee Summary</div>
+                  <div className="text-xs text-muted-foreground">
+                    Hours by employee
+                  </div>
+                </div>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="justify-start h-auto py-3"
+              onClick={handleExportProjectReport}
+              disabled={projects.length === 0 || timeEntries.length === 0}
+            >
+              <div className="flex items-start gap-3 w-full">
+                <Download className="h-5 w-5 mt-0.5 text-accent" weight="duotone" />
+                <div className="text-left">
+                  <div className="font-semibold">Project Summary</div>
+                  <div className="text-xs text-muted-foreground">
+                    Hours by project
+                  </div>
+                </div>
+              </div>
+            </Button>
+
+            <Dialog open={payrollDialogOpen} onOpenChange={setPayrollDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="justify-start h-auto py-3"
+                  disabled={employees.length === 0}
+                >
+                  <div className="flex items-start gap-3 w-full">
+                    <Download className="h-5 w-5 mt-0.5 text-primary" weight="duotone" />
+                    <div className="text-left">
+                      <div className="font-semibold">Payroll Report</div>
+                      <div className="text-xs text-muted-foreground">
+                        Combined time & mileage
+                      </div>
+                    </div>
+                  </div>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Export Payroll Report</DialogTitle>
+                  <DialogDescription>
+                    Download a comprehensive report with time and mileage data for payroll processing. Optionally filter by date range.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="start-date">Start Date (Optional)</Label>
+                    <Input
+                      id="start-date"
+                      type="date"
+                      value={payrollDates.startDate}
+                      onChange={(e) => setPayrollDates({ ...payrollDates, startDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end-date">End Date (Optional)</Label>
+                    <Input
+                      id="end-date"
+                      type="date"
+                      value={payrollDates.endDate}
+                      onChange={(e) => setPayrollDates({ ...payrollDates, endDate: e.target.value })}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Leave dates empty to export all data
+                  </p>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setPayrollDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleExportPayrollReport}>
+                    <Download className="mr-2 h-4 w-4" weight="bold" />
+                    Export Report
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Car, Trash } from '@phosphor-icons/react'
+import { Plus, Car, Trash, Download } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
@@ -11,6 +11,7 @@ import { getEmployeeName } from '@/lib/helpers'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { exportMileageEntriesToCSV } from '@/lib/csv-export'
 
 interface MileageProps {
   mileageEntries: MileageEntry[]
@@ -73,6 +74,11 @@ export function Mileage({ mileageEntries, setMileageEntries, employees }: Mileag
     toast.success('Mileage entry deleted')
   }
 
+  const handleExport = () => {
+    exportMileageEntriesToCSV(mileageEntries, employees)
+    toast.success('Mileage entries exported to CSV')
+  }
+
   const sortedEntries = [...mileageEntries].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   )
@@ -88,13 +94,20 @@ export function Mileage({ mileageEntries, setMileageEntries, employees }: Mileag
             Total: <span className="font-mono font-semibold text-accent">{totalMileage.toLocaleString('de-DE')} km</span>
           </p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button disabled={employees.length === 0} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Plus className="mr-2 h-4 w-4" weight="bold" />
-              Add Mileage
+        <div className="flex gap-2">
+          {mileageEntries.length > 0 && (
+            <Button variant="outline" onClick={handleExport}>
+              <Download className="mr-2 h-4 w-4" weight="bold" />
+              Export CSV
             </Button>
-          </DialogTrigger>
+          )}
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button disabled={employees.length === 0} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                <Plus className="mr-2 h-4 w-4" weight="bold" />
+                Add Mileage
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Mileage Entry</DialogTitle>
@@ -189,6 +202,7 @@ export function Mileage({ mileageEntries, setMileageEntries, employees }: Mileag
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {employees.length === 0 ? (

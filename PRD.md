@@ -41,11 +41,18 @@ This application requires multiple interconnected features including employee ma
 - **Success criteria**: Mileage entries persist, calculate totals by employee/date range, and display distance summary
 
 ### Dashboard Overview
-- **Functionality**: Display summary cards with total hours worked, active projects, and total mileage
-- **Purpose**: Provide at-a-glance metrics for quick status checks
+- **Functionality**: Display summary cards with total hours worked, active projects, and total mileage, plus CSV export capabilities
+- **Purpose**: Provide at-a-glance metrics for quick status checks and export data for accounting/payroll
 - **Trigger**: Navigate to dashboard view (default landing page)
-- **Progression**: Load app → View summary metrics → Click into detailed views for more information
-- **Success criteria**: Dashboard accurately reflects current data and updates when new entries are added
+- **Progression**: Load app → View summary metrics → Click into detailed views for more information → Export reports as needed
+- **Success criteria**: Dashboard accurately reflects current data and updates when new entries are added, CSV exports contain complete data
+
+### CSV Report Exports
+- **Functionality**: Export time entries, mileage logs, and payroll reports to CSV format for accounting systems
+- **Purpose**: Enable data import into accounting software, payroll systems, and spreadsheet analysis
+- **Trigger**: Click export buttons on Dashboard, Time Tracking, or Mileage views
+- **Progression**: Click export button → Select report type → Optionally specify date range → Generate CSV → Browser downloads file
+- **Success criteria**: CSV files contain all relevant fields, proper formatting for German locale (date format, decimal separators), and descriptive filenames with timestamps
 
 ## Edge Case Handling
 - **Empty States**: Clear call-to-action messages when no employees, projects, time entries, or mileage logs exist
@@ -122,6 +129,8 @@ Animations should enhance the sense of organization and efficiency through purpo
   - Plus for add actions
   - PencilSimple for edit actions
   - BarChart for dashboard metrics
+  - Download for CSV exports
+  - FileText for reports section
   
 - **Spacing**: 
   - Page padding: p-6 for desktop, p-4 for mobile
