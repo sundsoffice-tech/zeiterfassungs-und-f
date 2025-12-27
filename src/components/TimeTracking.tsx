@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Clock, Trash, Download, Play, Pause, Stop, Star, ArrowsClockwise, CheckSquare, PencilSimple, Lightning, Tag, MapPin, Bank, CurrencyDollar, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogHeader, D
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TimeEntry, Employee, Project, ActiveTimer, TimeTemplate } from '@/lib/types'
-import { calculateDuration, formatDuration, getEmployeeName, getProjectName } from '@/lib/helpers'
-import { formatTimerDuration, getTimerElapsedTime, convertTimerToTimeEntry, getRecentProjects } from '@/lib/timer-helpers'
-import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'sonner'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { exportTimeEntriesToCSV } from '@/lib/csv-export'
+import { calculateDuration, formatDuration, g
+import { motion, AnimatePresence } from 'fram
+import { Table, TableBody, TableCell, TableHead, Ta
+import { useKV } from '@github/spark/hooks'
+import { Checkbox } from '@/components/ui/checkbox'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescrip
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Switch } from '@/components/ui/switch'
+interface TimeTrackingProps {
+  setTimeEntries: (updateFn: (prev: TimeEntry[]) => TimeEntry[]) => void
+  projects: Project[]
 import { useKV } from '@github/spark/hooks'
 import { useIdleDetection } from '@/hooks/use-idle-detection'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -31,237 +31,237 @@ interface TimeTrackingProps {
   projects: Project[]
 }
 
-export function TimeTracking({ timeEntries, setTimeEntries, employees, projects }: TimeTrackingProps) {
-  const [activeTimers, setActiveTimers] = useKV<ActiveTimer[]>('activeTimers', [])
-  const [templates, setTemplates] = useKV<TimeTemplate[]>('timeTemplates', [])
-  const [idleThreshold] = useKV<number>('idleThreshold', 15)
-  const [allowMultipleTimers] = useKV<boolean>('allowMultipleTimers', false)
-  
-  const [open, setOpen] = useState(false)
-  const [quickStartOpen, setQuickStartOpen] = useState(false)
-  const [bulkEditOpen, setBulkEditOpen] = useState(false)
-  const [templateDialogOpen, setTemplateDialogOpen] = useState(false)
-  
-  const [currentTime, setCurrentTime] = useState(Date.now())
-  const [selectedEntries, setSelectedEntries] = useState<Set<string>>(new Set())
-  const [idleAlertTimer, setIdleAlertTimer] = useState<ActiveTimer | null>(null)
-  const [idleAlertOpen, setIdleAlertOpen] = useState(false)
-  
-  const { isIdle, lastActivityTime, updateActivity } = useIdleDetection(idleThreshold)
 
-  const [formData, setFormData] = useState({
     employeeId: '',
-    projectId: '',
     date: new Date().toISOString().split('T')[0],
-    startTime: '09:00',
     endTime: '17:00',
-    duration: '',
     task: '',
-    subtask: '',
-    tags: [] as string[],
-    tagInput: '',
+  
     location: '',
-    notes: '',
     costCenter: '',
-    billable: true,
     useDuration: false
-  })
 
-  const [bulkEditData, setBulkEditData] = useState({
-    projectId: '',
-    notes: '',
+  
     adjustHours: 0
-  })
 
-  const [templateData, setTemplateData] = useState({
     name: '',
-    employeeId: '',
     projectId: '',
-    duration: '',
-    task: '',
-    subtask: '',
+  
     tags: [] as string[],
-    tagInput: '',
-    location: '',
-    notes: '',
+
     costCenter: '',
-    billable: true
   })
-
-  useEffect(() => {
-    const interval = setInterval(() => {
+  useEffect(() => 
       setCurrentTime(Date.now())
-    }, 100)
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearI
 
-  useEffect(() => {
-    if (isIdle && activeTimers && activeTimers.length > 0) {
-      const runningTimers = activeTimers.filter(t => !t.isPaused)
-      if (runningTimers.length > 0) {
-        setIdleAlertTimer(runningTimers[0])
-        setIdleAlertOpen(true)
-      }
+    if (isIdle &&
+      if (run
+        setIdleA
     }
-  }, [isIdle, activeTimers])
 
-  const startTimer = useCallback((employeeId: string, projectId: string, templateData?: Partial<TimeTemplate>) => {
-    if (!allowMultipleTimers && activeTimers && activeTimers.length > 0) {
-      toast.error('Stop the current timer before starting a new one')
+    if (!allowMul
       return
-    }
 
-    const newTimer: ActiveTimer = {
-      id: `timer_${Date.now()}`,
-      employeeId,
+      id: `timer_${
       projectId,
-      startTime: Date.now(),
-      pausedDuration: 0,
-      isPaused: false,
-      phaseId: templateData?.phaseId,
-      taskId: templateData?.taskId,
+    
+
       tags: templateData?.tags,
-      location: templateData?.location,
-      notes: templateData?.notes,
-      costCenter: templateData?.costCenter,
-      billable: templateData?.billable ?? true,
-      events: []
+      notes: templ
+      billable
     }
+    
 
-    setActiveTimers((prev) => [...(prev || []), newTimer])
-    toast.success('Timer started')
-    updateActivity()
-  }, [activeTimers, allowMultipleTimers, setActiveTimers, updateActivity])
 
-  const pauseTimer = useCallback((timerId: string) => {
-    setActiveTimers((prev) =>
-      (prev || []).map(timer =>
-        timer.id === timerId && !timer.isPaused
-          ? { ...timer, isPaused: true, pausedAt: Date.now() }
+    setActive
+        timer.id ==
           : timer
-      )
     )
-    toast.info('Timer paused')
-  }, [setActiveTimers])
-
-  const resumeTimer = useCallback((timerId: string) => {
-    setActiveTimers((prev) =>
-      (prev || []).map(timer => {
-        if (timer.id === timerId && timer.isPaused && timer.pausedAt) {
-          const pauseDuration = Date.now() - timer.pausedAt
-          return {
-            ...timer,
-            isPaused: false,
-            pausedAt: undefined,
-            pausedDuration: timer.pausedDuration + pauseDuration
+  }, [setActi
+  const resumeTi
+      (prev || []).map(ti
+          const p
+            ...ti
+            pa
           }
-        }
-        return timer
-      })
-    )
-    toast.success('Timer resumed')
-    updateActivity()
-  }, [setActiveTimers, updateActivity])
-
-  const stopTimer = useCallback((timerId: string) => {
-    const timer = activeTimers?.find(t => t.id === timerId)
-    if (!timer) return
-
-    const timeEntry = convertTimerToTimeEntry(timer)
-    const newEntry: TimeEntry = {
-      id: `time_${Date.now()}`,
-      ...timeEntry
-    }
-
-    setTimeEntries((prev) => [...prev, newEntry])
-    setActiveTimers((prev) => (prev || []).filter(t => t.id !== timerId))
+        return tim
     
-    toast.success('Timer stopped and entry saved')
-  }, [activeTimers, setActiveTimers, setTimeEntries])
 
-  const switchTimerProject = useCallback((timerId: string, newProjectId: string) => {
-    const timer = activeTimers?.find(t => t.id === timerId)
-    if (!timer) return
 
-    const timeEntry = convertTimerToTimeEntry(timer)
-    const newEntry: TimeEntry = {
-      id: `time_${Date.now()}`,
+    const timer = activeTimers?.find(t =
+
+    const n
       ...timeEntry
-    }
 
-    setTimeEntries((prev) => [...prev, newEntry])
 
-    setActiveTimers((prev) =>
+    toast.success('
+
+    const timer = activeTimers?.find(t => t.id === timerId)
+
+    const newEntry: TimeEntry = {
+      ...timeEntry
+
+
       (prev || []).map(t =>
-        t.id === timerId
-          ? {
-              ...t,
+
               projectId: newProjectId,
-              startTime: Date.now(),
               pausedDuration: 0,
-              isPaused: false,
               pausedAt: undefined
-            }
-          : t
-      )
+          : 
     )
 
-    toast.success('Switched to new project')
-  }, [activeTimers, setActiveTimers, setTimeEntries])
 
-  const handleIdleKeep = () => {
     setIdleAlertOpen(false)
-    setIdleAlertTimer(null)
-    updateActivity()
-  }
+    updateActivit
 
-  const handleIdleDiscard = () => {
     if (idleAlertTimer) {
-      const idleStartTime = lastActivityTime
-      const idleDuration = Date.now() - idleStartTime
-
-      setActiveTimers((prev) =>
-        (prev || []).map(timer =>
-          timer.id === idleAlertTimer.id
-            ? { ...timer, pausedDuration: timer.pausedDuration + idleDuration }
+      const idleDuration
+      setActiveTimers(
+          timer.id === idleAlertTimer
             : timer
-        )
       )
-      
-      toast.success('Idle time discarded')
-    }
+      toast.success('Idle time discarde
     setIdleAlertOpen(false)
-    setIdleAlertTimer(null)
     updateActivity()
-  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!formData.employeeId || !formData.projectId) {
-      toast.error('Please select employee and project')
+    e.preventDef
+    i
+
+
+    let endTime = formData.endTime
+    if (formData.use
+      const [startHour, startMin] = formData.startTime.split(':').map(Numb
+
+      const endHour = Math.floor(endMinutes / 60) % 24
+      endTime = `${endHour.to
+      const [startHour, startMi
+      const startMinutes = startHour * 60 + sta
+
+        toast.err
+      }
+
+      id: `time_${Date.now()}`
+      employeeId: formD
+
+      endTime: endTime,
+      tags: formData.tags.len
+      notes: formData.notes || un
+      billable: formData.billable,
+      locked: false,
+        createdBy:
+      },
+    }
+    setTimeEntries((prev) => [..
+
+      emplo
+      dat
+      endTime: '17:0
+      ta
+     
+      location: '',
+      costCenter: ''
+      useDuration: false
+
+
+    if (selectedEntries.size === 0) {
       return
+
+      prev.map(entry => {
+
+        
+          updates.
+     
+
+
+          const duration = calculateDuration(entry.startTime, entry.endTi
+    
+          const endMinutes = startMinutes + Math.r
+          const endHour = Math.floor(endMinutes / 60)
+
+
+      })
+
+
+    setBulkEditData({ projectId: '', notes: '', adju
+
+    if (!templateData.name || !
+      return
+
+
+      employeeId: templateData.employeeId,
+
+      location: templateData.
+      costCenter: templateD
+      isFavorite: false,
+    }
+    setTemplates((p
+    setTemplateDialogOpen(false)
+  }
+  const startFromTemplate = (tem
+    setTemplates((prev) =>
+        t.id === template.id ? { 
+    )
+  }
+  const
+     
+
+  }
+  const toggleTemplateFavorite = (templateId: string)
+
+      )
+  }
+  const deleteTemplate = (t
+    toast.success('T
+
+
+    setSelectedEntries(new Set(sele
+  }
+  const handleExport = () => {
+    toast.success('Time entries exported to CSV')
+
+    const newSelected = new Set
+      newSelected.delete(entryId)
+      newSelected.add(entryId)
+    setSelectedEntries(newSelected)
+
+    if (s
+    } e
     }
 
-    let startTime = formData.startTime
-    let endTime = formData.endTime
+    n
 
-    if (formData.useDuration && formData.duration) {
-      const durationMinutes = parseInt(formData.duration)
-      const [startHour, startMin] = formData.startTime.split(':').map(Number)
-      const startMinutes = startHour * 60 + startMin
-      const endMinutes = startMinutes + durationMinutes
+  const favoriteTemplates =
+  const totalHours =
+   
+
+    <div className="space-y-6">
+        <div>
+    
+          </p>
+        <div className="flex gap-2">
+            
+     
+
+            <DialogTrigger asChild>
+                <Lightning classNa
+
+            <DialogContent className="max-w-2xl">
+                <DialogTitle>Quick Start Timer</DialogTit
+              <Tabs defaultValue="favorites" className="w-full">
+                  <TabsTrigger value="favorites">Fav
+                  <TabsTrigger value="templates">Templa
       
-      const endHour = Math.floor(endMinutes / 60) % 24
-      const endMin = endMinutes % 60
-      endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`
-    } else {
-      const [startHour, startMin] = formData.startTime.split(':').map(Number)
-      const [endHour, endMin] = formData.endTime.split(':').map(Number)
-      const startMinutes = startHour * 60 + startMin
-      const endMinutes = endHour * 60 + endMin
+                    {favoriteTemplates.length === 0 ? 
+                        <Star classN
+                      </div>
+            
+                          <Card key={template.id} className="hover:bg-accent/
+                              <div className="flex items-start justify-
+                                  <div className="fl
+                                    <Badge var
 
-      if (endMinutes <= startMinutes) {
+                                  <p cl
         toast.error('End time must be after start time')
         return
       }
@@ -367,6 +367,8 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
       employeeId: templateData.employeeId,
       projectId: templateData.projectId,
       duration: templateData.duration ? parseInt(templateData.duration) : undefined,
+      task: templateData.task || undefined,
+      subtask: templateData.subtask || undefined,
       tags: templateData.tags.length > 0 ? templateData.tags : undefined,
       location: templateData.location || undefined,
       notes: templateData.notes || undefined,
@@ -524,990 +526,994 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                                   }}
                                 >
                                   <Star className="h-4 w-4" weight="fill" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </ScrollArea>
-                </TabsContent>
-                <TabsContent value="recent" className="space-y-4">
-                  <ScrollArea className="h-[300px]">
-                    {recentProjects.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                        <Clock className="h-12 w-12 mb-2" />
-                        <p>No recent projects</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {recentProjects.map((recent, idx) => (
-                          <Card 
-                            key={idx} 
-                            className="hover:bg-accent/50 transition-colors cursor-pointer"
-                            onClick={() => {
-                              startTimer(recent.employeeId, recent.projectId)
-                              setQuickStartOpen(false)
-                            }}
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge variant="secondary">
-                                  {getEmployeeName(employees, recent.employeeId)}
-                                </Badge>
-                              </div>
-                              <p className="font-medium">
-                                {getProjectName(projects, recent.projectId)}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Last used: {new Date(recent.lastUsed).toLocaleDateString('de-DE')}
-                              </p>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </ScrollArea>
-                </TabsContent>
-                <TabsContent value="templates" className="space-y-4">
-                  <div className="flex justify-end">
-                    <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button size="sm" variant="outline">
-                          <Plus className="mr-2 h-4 w-4" />
-                          New Template
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Create Template</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="template-name">Template Name *</Label>
-                            <Input
-                              id="template-name"
-                              value={templateData.name}
-                              onChange={(e) => setTemplateData({ ...templateData, name: e.target.value })}
-                              placeholder="e.g., Daily Standup"
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="template-employee">Employee *</Label>
-                              <Select
-                                value={templateData.employeeId}
-                                onValueChange={(value) => setTemplateData({ ...templateData, employeeId: value })}
-                              >
-                                <SelectTrigger id="template-employee">
-                                  <SelectValue placeholder="Select employee" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {employees.map((emp) => (
-                                    <SelectItem key={emp.id} value={emp.id}>
-                                      {emp.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="template-project">Project *</Label>
-                              <Select
-                                value={templateData.projectId}
-                                onValueChange={(value) => setTemplateData({ ...templateData, projectId: value })}
-                              >
-                                <SelectTrigger id="template-project">
-                                  <SelectValue placeholder="Select project" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {projects.map((proj) => (
-                                    <SelectItem key={proj.id} value={proj.id}>
-                                      {proj.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="template-duration">Default Duration (minutes)</Label>
-                            <Input
-                              id="template-duration"
-                              type="number"
-                              value={templateData.duration}
-                              onChange={(e) => setTemplateData({ ...templateData, duration: e.target.value })}
-                              placeholder="Optional"
-                            />
-                          </div>
-
-                          <Separator />
-
-                          <div className="space-y-4">
-                            <h4 className="text-sm font-medium text-muted-foreground">Optional Defaults</h4>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label htmlFor="template-task">Task</Label>
-                                <Input
-                                  id="template-task"
-                                  value={templateData.task}
-                                  onChange={(e) => setTemplateData({ ...templateData, task: e.target.value })}
-                                  placeholder="e.g., Development"
-                                />
-                              </div>
-
-                              <div className="space-y-2">
-                                <Label htmlFor="template-subtask">Subtask</Label>
-                                <Input
-                                  id="template-subtask"
-                                  value={templateData.subtask}
-                                  onChange={(e) => setTemplateData({ ...templateData, subtask: e.target.value })}
-                                  placeholder="e.g., Bug fix"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label htmlFor="template-tags">Tags</Label>
-                              <div className="flex gap-2">
-                                <Input
-                                  id="template-tags"
-                                  value={templateData.tagInput}
-                                  onChange={(e) => setTemplateData({ ...templateData, tagInput: e.target.value })}
-                                  placeholder="Add tag and press Enter"
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault()
-                                      if (templateData.tagInput.trim()) {
-                                        setTemplateData({
-                                          ...templateData,
-                                          tags: [...templateData.tags, templateData.tagInput.trim()],
-                                          tagInput: ''
-                                        })
-                                      }
-                                    }
-                                  }}
-                                />
-                                <Button
-                                  type="button"
-                                  size="icon"
-                                  variant="outline"
-                                  onClick={() => {
-                                    if (templateData.tagInput.trim()) {
-                                      setTemplateData({
-                                        ...templateData,
-                                        tags: [...templateData.tags, templateData.tagInput.trim()],
-                                        tagInput: ''
-                                      })
-                                    }
-                                  }}
-                                >
-                                  <Plus className="h-4 w-4" />
-                                </Button>
-                              </div>
-                              {templateData.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                  {templateData.tags.map((tag, idx) => (
-                                    <Badge key={idx} variant="secondary" className="gap-1">
-                                      <Tag className="h-3 w-3" />
-                                      {tag}
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          setTemplateData({
-                                            ...templateData,
-                                            tags: templateData.tags.filter((_, i) => i !== idx)
-                                          })
-                                        }}
-                                        className="ml-1 hover:text-destructive"
-                                      >
-                                        <X className="h-3 w-3" />
-                                      </button>
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label htmlFor="template-location">Location</Label>
-                                <Input
-                                  id="template-location"
-                                  value={templateData.location}
-                                  onChange={(e) => setTemplateData({ ...templateData, location: e.target.value })}
-                                  placeholder="e.g., Home Office"
-                                />
-                              </div>
-
-                              <div className="space-y-2">
-                                <Label htmlFor="template-costCenter">Cost Center</Label>
-                                <Input
-                                  id="template-costCenter"
-                                  value={templateData.costCenter}
-                                  onChange={(e) => setTemplateData({ ...templateData, costCenter: e.target.value })}
-                                  placeholder="e.g., CC-001"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between p-3 rounded-lg border">
-                              <div className="flex items-center gap-2">
-                                <CurrencyDollar className="h-5 w-5 text-muted-foreground" />
-                                <div>
-                                  <Label htmlFor="template-billable" className="cursor-pointer">Billable</Label>
-                                  <p className="text-xs text-muted-foreground">Default billable setting</p>
-                                </div>
-                              </div>
-                              <Switch
-                                id="template-billable"
-                                checked={templateData.billable}
-                                onCheckedChange={(checked) => setTemplateData({ ...templateData, billable: checked })}
+                                placehold
                               />
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label htmlFor="template-notes">Default Notes</Label>
-                              <Textarea
-                                id="template-notes"
-                                value={templateData.notes}
-                                onChange={(e) => setTemplateData({ ...templateData, notes: e.target.value })}
-                                placeholder="Optional"
-                                rows={3}
-                              />
-                            </div>
                           </div>
-                        </div>
-                        <DialogFooter>
-                          <Button variant="outline" onClick={() => setTemplateDialogOpen(false)}>
-                            Cancel
-                          </Button>
-                          <Button onClick={saveTemplate}>Save Template</Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                  <ScrollArea className="h-[250px]">
-                    {(templates || []).length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                        <Lightning className="h-12 w-12 mb-2" />
-                        <p>No templates created yet</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {(templates || []).map(template => (
-                          <Card key={template.id} className="hover:bg-accent/50 transition-colors">
-                            <CardContent className="p-4">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1 cursor-pointer" onClick={() => startFromTemplate(template)}>
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="font-semibold">{template.name}</h4>
-                                    <Badge variant="secondary">
-                                      {getEmployeeName(employees, template.employeeId)}
-                                    </Badge>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {getProjectName(projects, template.projectId)}
-                                  </p>
-                                </div>
-                                <div className="flex gap-1">
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() => toggleTemplateFavorite(template.id)}
-                                  >
-                                    <Star className="h-4 w-4" weight={template.isFavorite ? "fill" : "regular"} />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() => deleteTemplate(template.id)}
-                                  >
-                                    <Trash className="h-4 w-4 text-destructive" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
-            </DialogContent>
-          </Dialog>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button disabled={employees.length === 0 || projects.length === 0}>
-                <Plus className="mr-2 h-4 w-4" weight="bold" />
-                Add Time Entry
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Add Time Entry</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="employee">Employee *</Label>
-                      <Select
-                        value={formData.employeeId}
-                        onValueChange={(value) => setFormData({ ...formData, employeeId: value })}
-                      >
-                        <SelectTrigger id="employee">
-                          <SelectValue placeholder="Select employee" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {employees.map((emp) => (
-                            <SelectItem key={emp.id} value={emp.id}>
-                              {emp.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="project">Project *</Label>
-                      <Select
-                        value={formData.projectId}
-                        onValueChange={(value) => setFormData({ ...formData, projectId: value })}
-                      >
-                        <SelectTrigger id="project">
-                          <SelectValue placeholder="Select project" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {projects.map((proj) => (
-                            <SelectItem key={proj.id} value={proj.id}>
-                              {proj.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="date">Date *</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="use-duration"
-                      checked={formData.useDuration}
-                      onCheckedChange={(checked) => 
-                        setFormData({ ...formData, useDuration: checked as boolean })
-                      }
-                    />
-                    <Label htmlFor="use-duration" className="text-sm font-normal cursor-pointer">
-                      Use duration instead of end time
-                    </Label>
-                  </div>
-
-                  {formData.useDuration ? (
-                    <div className="space-y-2">
-                      <Label htmlFor="duration">Duration (minutes) *</Label>
-                      <Input
-                        id="duration"
-                        type="number"
-                        value={formData.duration}
-                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                        placeholder="e.g., 60"
-                        required
-                      />
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="startTime">Start Time *</Label>
-                        <Input
-                          id="startTime"
-                          type="time"
-                          value={formData.startTime}
-                          onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="endTime">End Time *</Label>
-                        <Input
-                          id="endTime"
-                          type="time"
-                          value={formData.endTime}
-                          onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                          required
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <Separator />
-
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-medium text-muted-foreground">Optional Details</h4>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="task">Task</Label>
-                        <Input
-                          id="task"
-                          value={formData.task}
-                          onChange={(e) => setFormData({ ...formData, task: e.target.value })}
-                          placeholder="e.g., Development"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="subtask">Subtask</Label>
-                        <Input
-                          id="subtask"
-                          value={formData.subtask}
-                          onChange={(e) => setFormData({ ...formData, subtask: e.target.value })}
-                          placeholder="e.g., Bug fix"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="tags">Tags</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="tags"
-                          value={formData.tagInput}
-                          onChange={(e) => setFormData({ ...formData, tagInput: e.target.value })}
-                          placeholder="Add tag and press Enter"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault()
-                              if (formData.tagInput.trim()) {
-                                setFormData({
-                                  ...formData,
-                                  tags: [...formData.tags, formData.tagInput.trim()],
-                                  tagInput: ''
-                                })
-                              }
-                            }
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="outline"
-                          onClick={() => {
-                            if (formData.tagInput.trim()) {
-                              setFormData({
-                                ...formData,
-                                tags: [...formData.tags, formData.tagInput.trim()],
-                                tagInput: ''
-                              })
-                            }
-                          }}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      {formData.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {formData.tags.map((tag, idx) => (
-                            <Badge key={idx} variant="secondary" className="gap-1">
-                              <Tag className="h-3 w-3" />
-                              {tag}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFormData({
-                                    ...formData,
-                                    tags: formData.tags.filter((_, i) => i !== idx)
-                                  })
-                                }}
-                                className="ml-1 hover:text-destructive"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="location" className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          Location
-                        </Label>
-                        <Input
-                          id="location"
-                          value={formData.location}
-                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                          placeholder="e.g., Home Office"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="costCenter" className="flex items-center gap-2">
-                          <Bank className="h-4 w-4" />
-                          Cost Center
-                        </Label>
-                        <Input
-                          id="costCenter"
-                          value={formData.costCenter}
-                          onChange={(e) => setFormData({ ...formData, costCenter: e.target.value })}
-                          placeholder="e.g., CC-001"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 rounded-lg border">
-                      <div className="flex items-center gap-2">
-                        <CurrencyDollar className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <Label htmlFor="billable" className="cursor-pointer">Billable</Label>
-                          <p className="text-xs text-muted-foreground">Can this time be billed to a client?</p>
-                        </div>
-                      </div>
-                      <Switch
-                        id="billable"
-                        checked={formData.billable}
-                        onCheckedChange={(checked) => setFormData({ ...formData, billable: checked })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="notes">Notes</Label>
-                      <Textarea
-                        id="notes"
-                        value={formData.notes}
-                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        placeholder="Additional details about this time entry..."
-                        rows={3}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">Add Entry</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      {activeTimers && activeTimers.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Clock className="h-5 w-5" weight="duotone" />
-            Active Timers
-          </h2>
-          <div className="grid gap-3">
-            {activeTimers.map((timer) => {
-              const elapsed = getTimerElapsedTime(timer)
-              const hours = Math.floor(elapsed / (1000 * 60 * 60))
-              const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60))
-              
-              return (
-                <motion.div
-                  key={timer.id}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                >
-                  <Card className="border-accent/50 bg-accent/5">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <Badge variant="secondary">
-                              {getEmployeeName(employees, timer.employeeId)}
-                            </Badge>
-                            {timer.isPaused && (
-                              <Badge variant="outline" className="text-orange-600 border-orange-600">
-                                Paused
-                              </Badge>
-                            )}
-                            {timer.billable && (
-                              <Badge variant="outline" className="text-green-600 border-green-600">
-                                <CurrencyDollar className="h-3 w-3 mr-1" />
-                                Billable
-                              </Badge>
-                            )}
-                          </div>
-                          <h3 className="font-semibold text-lg">
-                            {getProjectName(projects, timer.projectId)}
-                          </h3>
-                          {timer.taskId && (
-                            <p className="text-sm font-medium mt-1">
-                              Task ID: {timer.taskId}
-                            </p>
-                          )}
-                          {timer.tags && timer.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {timer.tags.map((tag, idx) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  <Tag className="h-3 w-3 mr-1" />
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          {(timer.location || timer.costCenter) && (
-                            <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
-                              {timer.location && (
-                                <span className="flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />
-                                  {timer.location}
-                                </span>
-                              )}
-                              {timer.costCenter && (
-                                <span className="flex items-center gap-1">
-                                  <Bank className="h-3 w-3" />
-                                  {timer.costCenter}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {timer.notes && (
-                            <p className="text-sm text-muted-foreground mt-2">{timer.notes}</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <div className="font-mono text-3xl font-bold text-primary">
-                            {formatTimerDuration(elapsed)}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {hours}h {minutes}m
-                          </p>
-                        </div>
-                      </div>
-                      <Separator className="mb-3" />
-                      <div className="flex items-center gap-2">
-                        {timer.isPaused ? (
-                          <Button
-                            size="sm"
-                            onClick={() => resumeTimer(timer.id)}
-                            className="flex-1"
-                          >
-                            <Play className="mr-2 h-4 w-4" weight="fill" />
-                            Resume
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => pauseTimer(timer.id)}
-                            className="flex-1"
-                          >
-                            <Pause className="mr-2 h-4 w-4" weight="fill" />
-                            Pause
-                          </Button>
-                        )}
-                        <Select
-                          value={timer.projectId}
-                          onValueChange={(value) => switchTimerProject(timer.id, value)}
-                        >
-                          <SelectTrigger className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <ArrowsClockwise className="h-4 w-4" />
-                              Switch Project
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {projects.map((proj) => (
-                              <SelectItem key={proj.id} value={proj.id}>
-                                {proj.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          size="sm"
-                          onClick={() => stopTimer(timer.id)}
-                          className="bg-accent hover:bg-accent/90"
-                        >
-                          <Stop className="mr-2 h-4 w-4" weight="fill" />
-                          Stop
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {employees.length === 0 || projects.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Clock className="h-16 w-16 text-muted-foreground/30 mb-4" weight="duotone" />
-            <h3 className="text-lg font-semibold mb-2">Setup Required</h3>
-            <p className="text-muted-foreground text-center mb-4">
-              {employees.length === 0 && projects.length === 0
-                ? 'Add employees and projects to start tracking time'
-                : employees.length === 0
-                ? 'Add employees to start tracking time'
-                : 'Add projects to start tracking time'}
-            </p>
-          </CardContent>
-        </Card>
-      ) : timeEntries.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Clock className="h-16 w-16 text-muted-foreground/30 mb-4" weight="duotone" />
-            <h3 className="text-lg font-semibold mb-2">No time entries yet</h3>
-            <p className="text-muted-foreground text-center mb-4">
-              Start tracking time by adding your first entry or starting a timer
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {selectedEntries.size > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Card className="border-primary">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium">
-                      {selectedEntries.size} {selectedEntries.size === 1 ? 'entry' : 'entries'} selected
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedEntries(new Set())}
-                      >
-                        Clear Selection
-                      </Button>
-                      <Dialog open={bulkEditOpen} onOpenChange={setBulkEditOpen}>
-                        <DialogTrigger asChild>
-                          <Button size="sm">
-                            <PencilSimple className="mr-2 h-4 w-4" />
-                            Bulk Edit
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Bulk Edit Entries</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4 py-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="bulk-project">Change Project</Label>
-                              <Select
-                                value={bulkEditData.projectId}
-                                onValueChange={(value) => setBulkEditData({ ...bulkEditData, projectId: value })}
-                              >
-                                <SelectTrigger id="bulk-project">
-                                  <SelectValue placeholder="Keep unchanged" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {projects.map((proj) => (
-                                    <SelectItem key={proj.id} value={proj.id}>
-                                      {proj.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="bulk-notes">Update Notes</Label>
-                              <Textarea
-                                id="bulk-notes"
-                                value={bulkEditData.notes}
-                                onChange={(e) => setBulkEditData({ ...bulkEditData, notes: e.target.value })}
-                                placeholder="Leave empty to keep unchanged"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="bulk-adjust">Adjust Duration (hours)</Label>
-                              <Input
-                                id="bulk-adjust"
-                                type="number"
-                                step="0.5"
-                                value={bulkEditData.adjustHours}
-                                onChange={(e) => setBulkEditData({ ...bulkEditData, adjustHours: parseFloat(e.target.value) || 0 })}
-                                placeholder="e.g., 0.5 to add 30 min, -1 to subtract 1 hour"
-                              />
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <Button variant="outline" onClick={() => setBulkEditOpen(false)}>
-                              Cancel
-                            </Button>
-                            <Button onClick={handleBulkEdit}>Apply Changes</Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-          
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">
-                        <Checkbox
-                          checked={selectedEntries.size === sortedEntries.length && sortedEntries.length > 0}
-                          onCheckedChange={selectAllEntries}
-                        />
-                      </TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Project</TableHead>
-                      <TableHead>Task</TableHead>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Duration</TableHead>
-                      <TableHead>Details</TableHead>
-                      <TableHead className="w-[100px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedEntries.map((entry, index) => {
-                      const duration = calculateDuration(entry.startTime, entry.endTime)
-                      const isSelected = selectedEntries.has(entry.id)
+                        <DialogFo
+                           
+                          <B
                       
-                      return (
-                        <motion.tr
-                          key={entry.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: index * 0.02 }}
-                          className={`group ${isSelected ? 'bg-accent/20' : ''}`}
-                        >
-                          <TableCell>
-                            <Checkbox
-                              checked={isSelected}
-                              onCheckedChange={() => toggleSelectEntry(entry.id)}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {new Date(entry.date).toLocaleDateString('de-DE')}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {getEmployeeName(employees, entry.employeeId)}
-                              {entry.billable && (
-                                <CurrencyDollar className="h-4 w-4 text-green-600" weight="bold" />
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>{getProjectName(projects, entry.projectId)}</TableCell>
-                          <TableCell className="text-sm">
-                            {entry.taskId ? `Task: ${entry.taskId}` : '-'}
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {entry.startTime} - {entry.endTime}
-                          </TableCell>
-                          <TableCell className="font-mono font-medium text-primary">
-                            {formatDuration(duration)}
-                          </TableCell>
-                          <TableCell className="max-w-[250px]">
-                            <div className="space-y-1">
-                              {entry.tags && entry.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                  {entry.tags.map((tag, idx) => (
-                                    <Badge key={idx} variant="outline" className="text-xs">
-                                      {tag}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                              {(entry.location || entry.costCenter) && (
-                                <div className="flex gap-2 text-xs text-muted-foreground">
-                                  {entry.location && (
-                                    <span className="flex items-center gap-1">
-                                      <MapPin className="h-3 w-3" />
-                                      {entry.location}
-                                    </span>
-                                  )}
-                                  {entry.costCenter && (
-                                    <span className="flex items-center gap-1">
-                                      <Bank className="h-3 w-3" />
-                                      {entry.costCenter}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                              {entry.notes && (
-                                <p className="text-xs text-muted-foreground truncate">{entry.notes}</p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => toggleFavorite(entry.id)}
-                              >
-                                <Star 
-                                  className="h-4 w-4" 
-                                  weight={entry.isFavorite ? "fill" : "regular"} 
-                                />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDelete(entry.id)}
-                              >
-                                <Trash className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </motion.tr>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
+                  </div>
+                    {(template
+                        <Lightning className="h-12 w-12 mb-2" />
+                      </div>
+                      <div className="space-y-2">
+                          <Card key={template.id} className="hover:bg-accent/50 transition-colors">
+                              <div className="flex items-sta
+                                  <div className=
+                            
+                         
+                                  <p className="t
+                                  </p>
+                                
+                                    si
+                                    onClick={() => toggleTemplateFavorite(template.id)}
+                                    <Star cl
+                                  <Button
+                                    variant="ghost"
+                              
+                           
+                              </div>
+                          </Card>
+                      </div>
+                  </ScrollArea>
+              </Tabs>
+          </Dialog>
+            <DialogTrigger asChild>
+                <Plus className="mr-2 h-4 w-4" weight="bold" />
+              </Button>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogTitle>Add Time Entry</DialogTitle>
+              <form onSubmit={hand
+                  <div className="grid gri
+                      <Label html
+                        val
+                      >
+                      
+                        <Select
+                            <S
+                            </SelectItem>
+                        </SelectContent>
+                    </div>
+                    <div className="space-y-2
+                      <Select
+                        onValueChange={(value) => setFormDa
+                        <SelectTrigger
+                        </SelectT
+                          {projects.ma
+                              {proj.name}
+                          ))}
+                      </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Input
+                      type="date"
+                      onChange={(e
+                    />
 
-      <AlertDialog open={idleAlertOpen} onOpenChange={setIdleAlertOpen}>
-        <AlertDialogContent>
+                    <Checkbox
+                      checked={formData.useDuration}
+                        setFor
+                    />
+                      Use duration instead of end time
+                  </div>
+                  {formData.useDuration ? (
+                      <Label htmlFor=
+                        id="duration"
+                        value={formData.duration}
+                        placeho
+                      />
+                  ) : (
+                      <div className="space-y-2"
+                        <Input
+                          type="time"
+                          onChange={(e) => setFormData({ ...formData, startT
+                        />
+                      <div className="space-y-2">
+                        <Input
+                          type="time"
+                          onChange={(e)
+                        />
+                    </div>
+
+
+                    <h4 className="text-sm font-medium text-mu
+                    <div className="grid grid-cols-2 gap-4">
+                        <Label 
+                          id="task"
+                          onChange={(e) => setFormData({ ...formData, task: e.
+                        />
+
+                        <Label htmlFor="subtask">Subtask</L
+                          id="subtask"
+                          onChange={(e) => setFor
+                        />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="f
+                          id="tags
+                          onChan
+                          onKeyDown={(e) => {
+                              e.preventDefault()
+                                se
+                                  tags: [...formData
+                                })
+                            }
+                        />
+                          type="button"
+                          vari
+                            if (
+
+                                tagInpu
+
+                        >
+                        </Button>
+                      {formD
+                          {formData.tags.map((tag, idx) => (
+                              <Tag className="h-3 w-3" />
+                              <button
+                                onClic
+                                    ...formData,
+                                  })
+                                className="ml-1 hover:text-destructive"
+                                <X className="h-3 w-3" />
+                            </Badg
+                        </div>
+
+                    <div className="grid grid-cols-2 gap-
+                        <Label htmlFor="location" className="flex items-center ga
+                          Location
+                        <Input
+                          value={formData.location}
+                          placeholder="e.g., Home Office"
+                      </div>
+                      <div classNa
+                          <Bank clas
+                        </Label>
+
+                          onChange={(e) => setFormData(
+                        />
+                    </div>
+                    <div className="fl
+                        <CurrencyDollar className="h
+                          <Label htmlFor="billable" className="
+                        </div>
+                      <Switch
+                        checked={formData.billable}
+                      />
+
+                      <Label htmlFor="notes">Notes</Label>
+                        id="notes"
+                        onChange={(e) => setFormData({ ...
+                        rows={3}
+                    </div>
+                </div>
+                  <Button type="button"
+                  </Button>
+                </DialogFooter>
+            </DialogContent>
+        </div>
+
+        <div className="space-y-3">
+            <Clock className="h-5 w-5" weight="duot
+          </h2>
+            {activeTimers.map((timer) => {
+              const hours = Math.floor(elapsed / (1000 
+              
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  exit={{ opacity: 0, y:
+                  <Card className="bo
+                      <div className
+                          <div cl
+                              {getEmployeeName(employees, time
+                            {timer.isPaus
+                                Paus
+                            )}
+                              <Badge variant="outline" className="text-gree
+                                Billable
+                            )}
+                          <h3 className="font-semibold text-lg">
+                          </h3>
+                            <p className="tex
+                            </p>
+                          {timer.tags && timer.tags.leng
+                              {timer.tags.map((tag, idx) =>
+                                  <Tag className="h-3 w-3 mr
+                                </Badge>
+                            </div>
+                          {(timer.location
+                              {timer.location && (
+                                  <MapP
+                                </span>
+                              {timer.costCenter
+                                  <Bank clas
+                                </spa
+                            </div>
+                          {timer
+                          )}
+
+                            {formatTimerDuration(elapsed)}
+                          <p className="text-xs text-mute
+                          </p>
+                      </div>
+                      <div className="flex items-center 
+                          <Button
+                            onClick={() => resumeTimer(timer.id)}
+                          >
+                            Resume
+                        ) : (
+
+                            onClick={() => pauseTimer(tim
+                          >
+                            Pause
+                        )}
+                          value={timer.projectId}
+                        >
+                            <div className="flex items-cente
+                              Swit
+                          </SelectTr
+                            {proje
+
+                            ))}
+                        </Select>
+                          size="sm"
+                          className="
+                          <Stop className="mr-2 h-4 w-4" weight="fill" />
+                        </Button>
+                    </CardContent>
+                </motion.div>
+            })}
+        </div>
+
+        <Card>
+            <Clock className="h-
+            <p className="text-mut
+
+                ? 'Add employees to start tracking time
+            </p>
+        </Card>
+        <Card>
+            <Clock className="h-16 w-16 text-muted-foregro
+            <p className="text-muted-foreground text-center mb-4">
+            </p>
+        </Card>
+        <>
+            <motion.div
+              animate={{ opacity
+              <Card className=
+                  <div className="flex
+                      {selectedEntries.size} {selectedEntries.size === 1 ? 'entry' : 'entries'} s
+                    <div className
+                        size="sm"
+                        onClick={() => setSelectedEntries(new Set())}
+                        Clear Selection
+                      <Dialog open={bu
+                          <Bu
+                        
+                        </DialogTrigger>
+                          <DialogHeader>
+                          </DialogHeader>
+                            <div className="space-y-2">
+                              <Select
+                            
+                         
+                                </SelectTrigger>
+                                  {projects.map((proj) => (
+                                      {proj.name}
+                                  ))}
+                              </Select>
+                            <div className="space-y-2">
+                              <Textarea
+                                value={bulkEditData.notes}
+                                placeholder="Leave empty to kee
+                            </div>
+                              <Label htmlFor
+                                id="bulk
+                                step="0.5"
+                                onChange={(e) => setBulkEditData({ ...bulkEditData
+                              />
+                          </div>
+                            <Button variant="outline" onClic
+                            </Button>
+                          </DialogFooter>
+                      </Dialog>
+                  </div>
+              </Card>
+          )}
+          <Card>
+              <div className="overflow-x-
+                  <TableHeader>
+                      <TableHead className="w-[50px
+                          checked={selectedEntries.size === sortedEntries.lengt
+                        />
+                      <TableHead>Date</TableHead>
+                      <TableHead>Project</T
+                      <TableHead>Time<
+                      <TableHead>Det
+                    </TableRow>
+                  <TableBody>
+                      const
+                      
+                      
+                          initi
+                          tran
+                     
+                            
+                   
+                          </TableCell>
+                            {new Da
+                          <TableCell>
+                              {getEmployeeName(employees, entry
+                              
+                       
+                          <T
+                            {entry.taskId ? `Task: ${entry.taskId}` : '-'}
+                          <T
+                          </TableCell>
+                            {
+                          <TableCell classNa
+                              {entry.tags && ent
+                                  {entry.tags.map((tag, id
+                                      {tag}
+                                  ))}
+                             
+                                <div className="fle
+                                    <span className="flex items-center gap-1">
+                       
+                                  )}
+                                    <span className="flex items-center 
+                                      {e
+                                  )}
+                              )}
+                                <p className="text-xs text-muted-for
+                            </div>
+                          <TableCell>
+                             
+                                size="ic
+                              >
+                          
+
+                              <Button
+                                size="icon"
+                             
+                              </Button>
+                          </TableCell>
+                      )
+                  </TableBody>
+              </div>
+          </Card>
+      )}
+      <AlertDialog open={idleAlertOpen} onOpenChang
           <AlertDialogHeader>
-            <AlertDialogTitle>Idle Time Detected</AlertDialogTitle>
             <AlertDialogDescription>
-              You've been idle for {idleThreshold} minutes. Would you like to keep or discard this idle time from your timer?
             </AlertDialogDescription>
-          </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleIdleDiscard}>
               Discard Idle Time
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleIdleKeep}>
-              Keep All Time
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  )
+            <AlertDialogAction 
+            </AlertDialogA
+        </AlertDialogCon
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
