@@ -19,9 +19,11 @@ import { ExplainableAIScreen } from '@/components/ExplainableAIScreen'
 import { CalendarIntegrationScreen } from '@/components/CalendarIntegrationScreen'
 import { TimePickerDemo } from '@/components/TimePickerDemo'
 import { CommandPalette } from '@/components/CommandPalette'
+import { ReminderNotificationDisplay } from '@/components/ReminderNotificationDisplay'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 import { useAutomation } from '@/hooks/use-automation'
 import { useCalendarAutoSync } from '@/hooks/use-calendar-auto-sync'
+import { useReminderProcessor } from '@/hooks/use-reminder-processor'
 import { getDefaultAppSettings } from '@/lib/automation'
 import { EmailNotificationService } from '@/lib/email-notifications'
 import { EmailConfig } from '@/lib/email-service'
@@ -64,6 +66,12 @@ function App() {
     phases || []
   )
 
+  useReminderProcessor(
+    employees && employees.length > 0 ? employees[0] : null,
+    timeEntries || [],
+    absences || []
+  )
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -98,6 +106,17 @@ function App() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
+        {employees && employees.length > 0 && (
+          <div className="mb-6">
+            <ReminderNotificationDisplay
+              employee={employees[0]}
+              timeEntries={timeEntries || []}
+              absences={absences || []}
+              onNavigate={setActiveTab}
+            />
+          </div>
+        )}
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-14 lg:w-auto lg:inline-grid">
             <TabsTrigger value="timepicker" className="gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10">

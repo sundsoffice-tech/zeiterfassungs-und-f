@@ -230,7 +230,11 @@ export function AdminScreen({
         </TabsContent>
 
         <TabsContent value="employee-settings">
-          <EmployeeSettingsScreen employees={employees} />
+          <EmployeeSettingsScreen 
+            employees={employees}
+            timeEntries={timeEntries}
+            absences={absences}
+          />
         </TabsContent>
 
         <TabsContent value="validation">
