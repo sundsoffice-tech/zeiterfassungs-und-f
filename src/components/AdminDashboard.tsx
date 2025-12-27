@@ -39,6 +39,7 @@ import {
 import { calculateLiveStatuses, detectWarnings, calculateKPIs, getOpenApprovals } from '@/lib/admin-helpers'
 import { format, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { AdminAnomalyOverview } from '@/components/AdminAnomalyOverview'
 
 interface AdminDashboardProps {
   employees: Employee[]
@@ -218,6 +219,7 @@ export function AdminDashboard({
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList>
           <TabsTrigger value="overview">Übersicht</TabsTrigger>
+          <TabsTrigger value="anomalies">Anomalien</TabsTrigger>
           <TabsTrigger value="live">Live-Status</TabsTrigger>
           <TabsTrigger value="kpis">KPIs</TabsTrigger>
           <TabsTrigger value="warnings">Warnungen</TabsTrigger>
@@ -317,6 +319,14 @@ export function AdminDashboard({
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="anomalies" className="space-y-4">
+          <AdminAnomalyOverview
+            employees={employees}
+            timeEntries={timeEntries}
+            absences={absences}
+          />
         </TabsContent>
 
         <TabsContent value="live" className="space-y-4">

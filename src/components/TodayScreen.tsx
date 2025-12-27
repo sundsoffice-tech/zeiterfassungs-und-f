@@ -20,6 +20,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { QuickTimeEntry } from '@/components/QuickTimeEntry'
 import { NaturalLanguageInput } from '@/components/NaturalLanguageInput'
 import { ContinueWorkTile } from '@/components/ContinueWorkTile'
+import { AnomalyBanner } from '@/components/AnomalyBanner'
+import { useGapOvertimeDetection } from '@/hooks/use-gap-overtime-detection'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -278,6 +280,12 @@ export function TodayScreen({
 
   const validationResults = getAllValidationResults()
 
+  const gapOvertimeAnalysis = useGapOvertimeDetection(
+    currentEmployee || null,
+    timeEntries,
+    absences || []
+  )
+
   const handleApplyFix = (result: ValidationResult, fix: ValidationQuickFix) => {
     const { action } = fix
 
@@ -399,6 +407,16 @@ export function TodayScreen({
           setTimeEntries((current = []) => [...current, entry])
         }}
       />
+
+      {gapOvertimeAnalysis && gapOvertimeAnalysis.issues.length > 0 && (
+        <AnomalyBanner
+          analysis={gapOvertimeAnalysis}
+          onFillGaps={() => {
+            setShowQuickEntry(true)
+            toast.info('Bitte ergänzen Sie die fehlenden Zeiteinträge')
+          }}
+        />
+      )}
 
       <ContinueWorkTile
         employees={employees}

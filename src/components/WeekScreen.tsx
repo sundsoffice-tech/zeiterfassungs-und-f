@@ -16,6 +16,8 @@ import { ValidationDisplay } from '@/components/ValidationDisplay'
 import { TimeEntryValidator, ValidationContext, ValidationResult, ValidationQuickFix } from '@/lib/validation-rules'
 import { TimeEntryDetailView } from '@/components/TimeEntryDetailView'
 import { NaturalLanguageInput } from '@/components/NaturalLanguageInput'
+import { AnomalyBanner } from '@/components/AnomalyBanner'
+import { useGapOvertimeDetection } from '@/hooks/use-gap-overtime-detection'
 
 interface WeekScreenProps {
   employees: Employee[]
@@ -205,6 +207,13 @@ export function WeekScreen({
 
   const validationResults = getWeekValidationResults()
 
+  const currentEmployee = employees.find(e => e.id === selectedEmployee)
+  const gapOvertimeAnalysis = useGapOvertimeDetection(
+    currentEmployee || null,
+    timeEntries,
+    absences || []
+  )
+
   const handleApplyFix = (result: ValidationResult, fix: ValidationQuickFix) => {
     const { action } = fix
 
@@ -276,6 +285,15 @@ export function WeekScreen({
 
   return (
     <div className="space-y-6">
+      {gapOvertimeAnalysis && gapOvertimeAnalysis.issues.length > 0 && (
+        <AnomalyBanner
+          analysis={gapOvertimeAnalysis}
+          onFillGaps={() => {
+            toast.info('Bitte ergänzen Sie die fehlenden Zeiteinträge in der Tabelle unten')
+          }}
+        />
+      )}
+
       {employees.find(e => e.id === selectedEmployee) && (
         <NaturalLanguageInput
           employee={employees.find(e => e.id === selectedEmployee)!}
