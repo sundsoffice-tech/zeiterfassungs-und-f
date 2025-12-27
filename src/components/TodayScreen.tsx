@@ -595,7 +595,7 @@ export function TodayScreen({
                   variant={selectedMode === ActivityMode.FAHRT ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.FAHRT)}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                   aria-label="Fahrt Modus"
                   aria-pressed={selectedMode === ActivityMode.FAHRT}
                 >
@@ -606,7 +606,7 @@ export function TodayScreen({
                   variant={selectedMode === ActivityMode.MONTAGE ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.MONTAGE)}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                   aria-label="Montage Modus"
                   aria-pressed={selectedMode === ActivityMode.MONTAGE}
                 >
@@ -617,7 +617,7 @@ export function TodayScreen({
                   variant={selectedMode === ActivityMode.DEMONTAGE ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.DEMONTAGE)}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                   aria-label="Demontage Modus"
                   aria-pressed={selectedMode === ActivityMode.DEMONTAGE}
                 >
@@ -628,7 +628,7 @@ export function TodayScreen({
                   variant={selectedMode === ActivityMode.PLANUNG ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.PLANUNG)}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                   aria-label="Planung Modus"
                   aria-pressed={selectedMode === ActivityMode.PLANUNG}
                 >
@@ -639,7 +639,7 @@ export function TodayScreen({
                   variant={selectedMode === ActivityMode.BERATUNG ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.BERATUNG)}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                   aria-label="Beratung Modus"
                   aria-pressed={selectedMode === ActivityMode.BERATUNG}
                 >
@@ -650,7 +650,7 @@ export function TodayScreen({
                   variant={selectedMode === ActivityMode.WARTUNG ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.WARTUNG)}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                   aria-label="Wartung Modus"
                   aria-pressed={selectedMode === ActivityMode.WARTUNG}
                 >
@@ -661,7 +661,7 @@ export function TodayScreen({
                   variant={selectedMode === ActivityMode.DOKUMENTATION ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.DOKUMENTATION)}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                   aria-label="Dokumentation Modus"
                   aria-pressed={selectedMode === ActivityMode.DOKUMENTATION}
                 >
@@ -672,7 +672,7 @@ export function TodayScreen({
                   variant={selectedMode === ActivityMode.MEETING ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.MEETING)}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                   aria-label="Meeting Modus"
                   aria-pressed={selectedMode === ActivityMode.MEETING}
                 >
@@ -683,7 +683,7 @@ export function TodayScreen({
                   variant={selectedMode === ActivityMode.SONSTIGES ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedMode(ActivityMode.SONSTIGES)}
-                  className="gap-2"
+                  className="gap-2 min-h-[44px]"
                   aria-label="Sonstiges Modus"
                   aria-pressed={selectedMode === ActivityMode.SONSTIGES}
                 >
@@ -716,7 +716,7 @@ export function TodayScreen({
                     size="sm"
                     onClick={() => handleModeSwitch(mode)}
                     disabled={activeTimer.isPaused}
-                    className="gap-2"
+                    className="gap-2 min-h-[44px]"
                   >
                     {mode === ActivityMode.FAHRT && <CarSimple className="h-4 w-4" weight="duotone" />}
                     {mode === ActivityMode.MONTAGE && <Wrench className="h-4 w-4" weight="duotone" />}
