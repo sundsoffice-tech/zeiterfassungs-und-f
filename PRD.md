@@ -8,7 +8,7 @@ A comprehensive, enterprise-grade time tracking application with intuitive UI/UX
 3. **Automatisch** - Self-running system with recurring entries, intelligent reminders, auto-start timers, and automated tagging that minimizes manual data entry
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This application requires sophisticated features including active timer management, automation engine with recurring entries and rules, AI-powered reminders and forecasting, weekly timesheet with copy/paste/drag-drop, global search with filter chips, command palette for keyboard-driven workflows, multi-tenant architecture, role-based access control, approval workflows, and comprehensive reporting - warranting a sophisticated multi-view architecture optimized for speed, automation, and usability.
+This application requires sophisticated features including active timer management, automation engine with recurring entries and rules, AI-powered reminders and forecasting, weekly timesheet with copy/paste/drag-drop, global search with filter chips, command palette for keyboard-driven workflows, multi-tenant architecture, role-based access control, approval workflows, comprehensive reporting, **Pro Module capabilities** (automatic GPS mileage tracking, shift planning, geo-fencing automation, material/tool logging, invoice generation, customer portal) - warranting a sophisticated multi-view architecture optimized for speed, automation, and usability.
 
 ## Essential Features
 
@@ -314,9 +314,53 @@ This application requires sophisticated features including active timer manageme
 - **Progression**: System loads → Initializes automation hook → Checks recurring entries (creates if needed) → Checks reminders (sends if triggered) → Checks auto-start rules (starts timer if matched) → User configures automation settings → Adds recurring entries → Enables/disables rules → Customizes reminders → System continues background processing → User receives automated entries and alerts → Minimal manual intervention required
 - **Success criteria**: Recurring entries created at correct times without duplicates, auto-start timer works on app open (when enabled), reminders trigger at specified times with correct context, dismissals prevent repeated notifications, settings persist across sessions, background processing runs efficiently without performance impact, toast notifications clear and actionable, automation UI intuitive with inline editing, all automation can be disabled per user preference
 
+### Pro Module Features
+
+#### Automatic GPS Mileage Tracking
+- **Functionality**: Real-time GPS tracking with automatic mileage calculation based on actual route traveled, manual override capability, route visualization on map, automatic location detection for start/end addresses
+- **Purpose**: Eliminate manual mileage entry for field workers and traveling employees, ensure accurate distance calculations, provide verifiable location data for tax/expense compliance
+- **Trigger**: User enables GPS tracking toggle in Mileage screen or starts "driving mode" timer
+- **Progression**: Enable GPS tracking → Grant location permissions → System tracks movement in background → Calculates distance using Haversine formula → Detects stops (idle >5 min) → Suggests mileage entry with start/end locations → User reviews and confirms → Entry saved with route data
+- **Success criteria**: GPS tracking accurate within 50m, distance calculation within 5% of actual route, battery consumption <5% per hour, automatic entries suggested after trips, manual override always available, DSGVO-compliant with explicit consent
+
+#### Shift Planning (Schichtplanung)
+- **Functionality**: Visual shift scheduler with drag-and-drop interface, recurring shift templates, employee availability management, shift assignment with project/task allocation, conflict detection (overlapping shifts, over-allocation), shift swap requests, export to calendar (iCal)
+- **Purpose**: Enable managers to plan employee schedules efficiently, ensure adequate project coverage, prevent scheduling conflicts, support shift-based operations (construction, manufacturing, healthcare)
+- **Trigger**: Manager navigates to Shift Planning screen, clicks "Plan Shift" or drags shift template
+- **Progression**: Manager views weekly/monthly calendar → Creates shift template (time, project, required role) → Assigns to employee(s) → System checks conflicts → Highlights issues (overtime, absence conflicts) → Manager resolves → Publishes shifts → Employees notified → Shifts appear in employee calendar → Actual time tracked against planned shifts
+- **Success criteria**: Shifts can be created/edited/deleted/copied, drag-and-drop between employees/dates works, conflicts detected and highlighted, employees see assigned shifts, actual vs planned variance calculated, templates reduce repetitive scheduling
+
+#### Geo-Fencing (Automatic Timer Control)
+- **Functionality**: Define geographic zones (construction sites, offices, client locations) with radius (50m-500m), automatic timer start when entering zone, automatic timer stop when leaving zone, project/task auto-assignment based on location, optional: require confirmation before auto-actions
+- **Purpose**: Eliminate manual timer management for field workers, ensure accurate on-site time tracking, prevent forgotten timers, reduce administrative overhead, provide location-verified time entries
+- **Trigger**: User enters or exits defined geo-fence boundary with active GPS tracking
+- **Progression**: Admin creates geo-fence (name, lat/lng, radius, linked project/task) → Employee enables geo-fencing in settings → Employee approaches site → System detects entry → Shows notification "Entering [Site Name] - Start timer?" → User confirms or dismisses → Timer auto-starts with project/task → Employee works → Exits boundary → System detects exit → Shows "Leaving [Site Name] - Stop timer?" → User confirms → Timer stops → Entry saved with location verification
+- **Success criteria**: Geo-fences can be created for any project/location, entry/exit detection accurate within radius tolerance, notifications clear and actionable, auto-start/stop work reliably, location data attached to entries for audit, works in background with minimal battery drain, user can disable geo-fencing per site or globally
+
+#### Material & Tool Logging
+- **Functionality**: Project-specific material usage tracking (name, quantity, unit, cost, supplier, receipt photo), tool checkout system (tool name, employee, checkout/return dates, condition notes), inventory dashboard showing available tools, material cost aggregation per project, low-stock alerts
+- **Purpose**: Track material costs for accurate project costing and invoicing, manage tool inventory to prevent loss, support construction/manufacturing operations, enable material-based billing
+- **Trigger**: Employee logs material usage on project or checks out tool from inventory
+- **Progression**: Navigate to Project Materials tab → Click "Add Material Usage" → Enter material details (cement, 50, bags, €500, supplier) → Attach receipt photo → Assign to project → Save → Material cost added to project total → Low stock alert if quantity threshold reached → Manager reviews in project cost report
+- **Success criteria**: Materials can be logged with quantity/cost/unit, tools can be checked out/returned with condition tracking, receipt photos attachable, project cost reports include material costs, inventory dashboard shows available tools, low-stock alerts configurable, material costs included in invoices
+
+#### Invoice Generation
+- **Functionality**: Generate professional invoices from approved time entries and expenses, customizable invoice templates with company branding, line-item breakdown (employee hours, rates, materials, mileage, expenses), automatic tax calculations (VAT/MwSt), invoice numbering system, PDF export, payment tracking (unpaid/partial/paid), integration with accounting systems (DATEV, Lexware, sevDesk)
+- **Purpose**: Streamline billing process by converting approved hours directly to invoices, ensure billing accuracy, reduce manual invoice creation time, support project-based billing, enable customer self-service
+- **Trigger**: Project manager clicks "Create Invoice" for project or customer
+- **Progression**: Manager navigates to Invoicing screen → Selects project/customer → Chooses date range → System aggregates approved time entries, mileage, expenses, materials → Shows line-item preview with rates applied → Manager reviews/edits → Adds payment terms, notes → Generates PDF invoice → Sends to customer via email/portal → Tracks payment status → Marks as paid → Syncs to accounting system
+- **Success criteria**: Invoices auto-populate from approved entries, rates applied correctly per hierarchy (task>project>employee), materials and expenses included, tax calculated accurately, PDF professionally formatted with branding, invoice numbers sequential and unique, payment status tracked, accounting system integration works, customer can view/download in portal
+
+#### Customer Portal
+- **Functionality**: Secure web portal for customers to view project reports, time entry details, expense summaries, material usage, approve/reject time entries, view invoices, download reports as PDF, communicate with project manager
+- **Purpose**: Provide transparency to customers, enable customer approval workflow, reduce back-and-forth emails, improve customer satisfaction, support client-facing projects
+- **Trigger**: Customer receives portal invitation link via email, logs in with credentials
+- **Progression**: Admin invites customer → Customer receives email with login link → Creates password → Logs into portal → Sees assigned projects → Clicks project → Views time entries, expenses, materials with details → Reviews for accuracy → Approves or rejects with comment → Manager notified → Views invoices → Downloads PDF reports → Communicates via messages
+- **Success criteria**: Customers can register/login securely, see only assigned projects (data isolation), view detailed time/expense breakdowns, approve/reject entries with reasons, download PDF reports, view invoices and payment status, send/receive messages with PM, mobile-responsive interface, DSGVO-compliant data access controls
+
 ### Offline Sync & Mobile Capabilities (Without Compromise)
-- **Functionality**: Complete offline-first time tracking with automatic synchronization, conflict resolution, GPS tracking (DSGVO-compliant), attachments (photos, receipts, documents), and battery-optimized background timers
-- **Purpose**: Enable seamless time tracking anywhere without internet connectivity, automatically sync when connection restored, prevent data loss, support field workers, and provide rich context through attachments and location data
+- **Functionality**: Complete offline-first time tracking with automatic synchronization, conflict resolution, GPS tracking (DSGVO-compliant), attachments (photos, receipts, documents), battery-optimized background timers, **Pro Module GPS features** (automatic mileage tracking, geo-fencing, shift check-in/out)
+- **Purpose**: Enable seamless time tracking anywhere without internet connectivity, automatically sync when connection restored, prevent data loss, support field workers with GPS-based automation, and provide rich context through attachments and location data
 - **Core Features**:
   - **Offline Queue Management**: All time entries, mileage, and changes queued locally when offline. Automatic batch synchronization when online. Priority-based queue (critical entries sync first). Retry mechanism with configurable max attempts. Real-time queue status with pending/synced/error counts.
   - **Conflict Resolution System**: Four resolution strategies: Newest Wins (default, uses latest timestamp), Local Wins (always keep device changes), Server Wins (always accept server version), Manual (user reviews and resolves). Automatic detection of conflicted fields. Visual conflict comparison UI showing local vs server versions. Configurable per-user preference with inline explanation of each strategy.

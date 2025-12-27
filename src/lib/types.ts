@@ -643,3 +643,214 @@ export type LegacyEmployee = Omit<Employee, 'tenantId' | 'role' | 'hourlyRate' |
 export type LegacyProject = Omit<Project, 'tenantId' | 'clientId' | 'code' | 'startDate' | 'endDate' | 'budget' | 'active' | 'audit'>
 export type LegacyTimeEntry = Omit<TimeEntry, 'tenantId' | 'phaseId' | 'taskId' | 'duration' | 'approvalStatus' | 'approvedBy' | 'approvedAt' | 'locked' | 'rate' | 'audit' | 'changeLog'>
 export type LegacyMileageEntry = Omit<MileageEntry, 'tenantId' | 'projectId' | 'rate' | 'amount' | 'approvalStatus' | 'approvedBy' | 'approvedAt' | 'locked' | 'audit' | 'changeLog'>
+
+export interface GeoFence {
+  id: string
+  tenantId: string
+  name: string
+  description?: string
+  latitude: number
+  longitude: number
+  radius: number
+  projectId: string
+  phaseId?: string
+  taskId?: string
+  autoStartTimer: boolean
+  autoStopTimer: boolean
+  requireConfirmation: boolean
+  active: boolean
+  audit: AuditMetadata
+}
+
+export interface GPSLocation {
+  latitude: number
+  longitude: number
+  accuracy: number
+  timestamp: number
+  address?: string
+}
+
+export interface GPSMileageEntry extends MileageEntry {
+  gpsTracked: boolean
+  startGPS?: GPSLocation
+  endGPS?: GPSLocation
+  routePoints?: GPSLocation[]
+  manualOverride: boolean
+}
+
+export interface Shift {
+  id: string
+  tenantId: string
+  employeeId: string
+  projectId: string
+  phaseId?: string
+  taskId?: string
+  date: string
+  startTime: string
+  endTime: string
+  breakMinutes: number
+  notes?: string
+  templateId?: string
+  status: 'planned' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
+  checkedInAt?: string
+  checkedOutAt?: string
+  checkedInLocation?: GPSLocation
+  checkedOutLocation?: GPSLocation
+  actualHours?: number
+  audit: AuditMetadata
+}
+
+export interface ShiftTemplate {
+  id: string
+  tenantId: string
+  name: string
+  description?: string
+  startTime: string
+  endTime: string
+  breakMinutes: number
+  projectId?: string
+  phaseId?: string
+  taskId?: string
+  requiredRole?: UserRole
+  daysOfWeek?: number[]
+  color?: string
+  audit: AuditMetadata
+}
+
+export interface MaterialUsage {
+  id: string
+  tenantId: string
+  projectId: string
+  employeeId: string
+  date: string
+  materialName: string
+  quantity: number
+  unit: string
+  cost: number
+  supplier?: string
+  receiptUrl?: string
+  notes?: string
+  audit: AuditMetadata
+}
+
+export interface ToolCheckout {
+  id: string
+  tenantId: string
+  toolId: string
+  employeeId: string
+  projectId?: string
+  checkoutDate: string
+  checkoutTime: string
+  returnDate?: string
+  returnTime?: string
+  conditionOut: 'excellent' | 'good' | 'fair' | 'poor'
+  conditionIn?: 'excellent' | 'good' | 'fair' | 'poor'
+  notes?: string
+  audit: AuditMetadata
+}
+
+export interface Tool {
+  id: string
+  tenantId: string
+  name: string
+  category: string
+  serialNumber?: string
+  purchaseDate?: string
+  purchaseCost?: number
+  currentCondition: 'excellent' | 'good' | 'fair' | 'poor'
+  status: 'available' | 'checked_out' | 'maintenance' | 'retired'
+  location?: string
+  notes?: string
+  audit: AuditMetadata
+}
+
+export interface Invoice {
+  id: string
+  invoiceNumber: string
+  tenantId: string
+  clientId: string
+  projectId?: string
+  invoiceDate: string
+  dueDate: string
+  lineItems: InvoiceLineItem[]
+  subtotal: number
+  taxRate: number
+  taxAmount: number
+  total: number
+  currency: string
+  paymentStatus: 'unpaid' | 'partial' | 'paid' | 'overdue'
+  paidAmount: number
+  paidDate?: string
+  notes?: string
+  paymentTerms?: string
+  pdfUrl?: string
+  sentToCustomer: boolean
+  sentAt?: string
+  audit: AuditMetadata
+}
+
+export interface InvoiceLineItem {
+  id: string
+  type: 'time' | 'mileage' | 'expense' | 'material' | 'custom'
+  description: string
+  quantity: number
+  unit: string
+  rate: number
+  amount: number
+  employeeName?: string
+  date?: string
+  referenceId?: string
+}
+
+export interface CustomerPortalAccess {
+  id: string
+  tenantId: string
+  clientId: string
+  email: string
+  name: string
+  passwordHash: string
+  active: boolean
+  lastLogin?: string
+  invitedBy: string
+  invitedAt: string
+  acceptedAt?: string
+  assignedProjects: string[]
+  permissions: {
+    viewTimeEntries: boolean
+    viewExpenses: boolean
+    viewMaterials: boolean
+    approveEntries: boolean
+    viewInvoices: boolean
+    downloadReports: boolean
+    sendMessages: boolean
+  }
+  audit: AuditMetadata
+}
+
+export interface CustomerPortalMessage {
+  id: string
+  tenantId: string
+  projectId: string
+  senderId: string
+  senderType: 'employee' | 'customer'
+  recipientId: string
+  recipientType: 'employee' | 'customer'
+  subject: string
+  message: string
+  sentAt: string
+  readAt?: string
+  attachments?: string[]
+}
+
+export interface CustomerApproval {
+  id: string
+  tenantId: string
+  customerId: string
+  projectId: string
+  entryType: 'time' | 'mileage' | 'expense' | 'material'
+  entryId: string
+  status: 'pending' | 'approved' | 'rejected'
+  approvedAt?: string
+  rejectedAt?: string
+  comment?: string
+}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
@@ -13,6 +13,7 @@ import { RepairModeScreen } from '@/components/RepairModeScreen'
 import { ForecastScreen } from '@/components/ForecastScreen'
 import { AutomationScreen } from '@/components/AutomationScreen'
 import { OfflineSyncScreen } from '@/components/OfflineSyncScreen'
+import { ProModuleScreen } from '@/components/ProModuleScreen'
 import { CommandPalette } from '@/components/CommandPalette'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 import { useAutomation } from '@/hooks/use-automation'
@@ -73,7 +74,7 @@ function App() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-11 lg:w-auto lg:inline-grid">
             <TabsTrigger value="today" className="gap-2">
               <Clock className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Heute</span>
@@ -101,6 +102,10 @@ function App() {
             <TabsTrigger value="offline" className="gap-2">
               <CloudArrowUp className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Offline/Sync</span>
+            </TabsTrigger>
+            <TabsTrigger value="pro" className="gap-2 bg-gradient-to-r from-accent/10 to-primary/10">
+              <Rocket className="h-4 w-4" weight="duotone" />
+              <span className="hidden sm:inline">Pro</span>
             </TabsTrigger>
             <TabsTrigger value="repair" className="gap-2">
               <Wrench className="h-4 w-4" weight="duotone" />
@@ -189,6 +194,15 @@ function App() {
 
           <TabsContent value="offline" className="mt-6">
             <OfflineSyncScreen />
+          </TabsContent>
+
+          <TabsContent value="pro" className="mt-6">
+            <ProModuleScreen
+              employees={employees || []}
+              setEmployees={setEmployees}
+              projects={projects || []}
+              setProjects={setProjects}
+            />
           </TabsContent>
 
           <TabsContent value="repair" className="mt-6">
