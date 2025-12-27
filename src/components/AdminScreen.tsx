@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon, Lock, Sliders, Brain } from '@phosphor-icons/react'
+import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon, Lock, Sliders, Brain, Bell, User } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
@@ -16,6 +16,8 @@ import { IntegrationsScreen } from '@/components/IntegrationsScreen'
 import { PrivacySecurityScreen } from '@/components/PrivacySecurityScreen'
 import { ValidationRulesScreen } from '@/components/ValidationRulesScreen'
 import { AIDecisionTrendsScreen } from '@/components/AIDecisionTrendsScreen'
+import { AnomalyNotificationCenter } from '@/components/AnomalyNotificationCenter'
+import { EmployeeSettingsScreen } from '@/components/EmployeeSettingsScreen'
 import { useKV } from '@github/spark/hooks'
 import { AdminDecision } from '@/lib/explainable-ai'
 
@@ -166,6 +168,14 @@ export function AdminScreen({
             <Brain className="h-4 w-4" weight="duotone" />
             KI-Trends
           </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+            <Bell className="h-4 w-4" weight="duotone" />
+            Benachrichtigungen
+          </TabsTrigger>
+          <TabsTrigger value="employee-settings" className="gap-2">
+            <User className="h-4 w-4" weight="duotone" />
+            Mitarbeiter-Einstellungen
+          </TabsTrigger>
           <TabsTrigger value="users" className="gap-2">
             <UserCircleGear className="h-4 w-4" weight="duotone" />
             Benutzerverwaltung
@@ -204,6 +214,18 @@ export function AdminScreen({
             employees={employees}
             tasks={tasks}
           />
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <AnomalyNotificationCenter
+            employees={employees}
+            timeEntries={timeEntries}
+            absences={absences}
+          />
+        </TabsContent>
+
+        <TabsContent value="employee-settings">
+          <EmployeeSettingsScreen employees={employees} />
         </TabsContent>
 
         <TabsContent value="validation">
