@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
-import { Button } from '@/components/ui/butto
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+
 interface TimePickerProps {
-  onChange: (value: string) => v
-
+  value: string
+  label?: string
+  id?: string
+  error?: string
   disabled?: boolean
-  compareWith?:
-  onValidationChange?: (isValid: bo
-
-  value,
-  id,
-  disabled = false,
-  compareWith,
-  onChange,
+  showShortcuts?: boolean
+  compareWith?: string
   compareType?: 'start' | 'end'
+  onChange: (value: string) => void
   onValidationChange?: (isValid: boolean, message?: string) => void
 }
 
@@ -62,92 +62,88 @@ export function TimePicker({
 
     if (currentMinutes === 0 && compareMinutes === 0) return undefined
 
-      const validationMessage = validateTimeComparison(newVal
-      onValidationChange?.(validationMessage === 
-     
+    if (type === 'end' && currentMinutes <= compareMinutes) {
+      return 'Endzeit muss nach Startzeit liegen'
+    }
 
+    if (type === 'start' && currentMinutes >= compareMinutes) {
+      return 'Startzeit muss vor Endzeit liegen'
+    }
 
+    return undefined
+  }
+
+  const setCurrentTime = () => {
     const now = new Date()
-    c
+    const hours = now.getHours().toString().padStart(2, '0')
+    const minutes = now.getMinutes().toString().padStart(2, '0')
+    const currentTime = `${hours}:${minutes}`
+    handleTimeChange(currentTime)
+  }
 
-  const adjustTime =
-   
+  const adjustTime = (minutesOffset: number) => {
+    if (!value) {
+      setCurrentTime()
+      return
+    }
 
+    const totalMinutes = timeToMinutes(value) + minutesOffset
+    
+    if (totalMinutes < 0) {
+      return
     } else if (totalMinutes >= 1440) {
+      return
     }
 
-
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+    const newTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
     handleTimeChange(newTime)
+  }
 
-    const match = value.match(/^(\d{1,2}):?(\d{2})?$/)
-      const 
-      if (hours >= 0 && hours < 24 
+  const handleTimeChange = (newValue: string) => {
+    const match = newValue.match(/^(\d{1,2}):?(\d{2})?$/)
+    if (match) {
+      const hours = parseInt(match[1], 10)
+      const minutes = match[2] ? parseInt(match[2], 10) : 0
+      if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
+        const formatted = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
         onChange(formatted)
+        
+        if (compareWith && compareType) {
+          const validationMessage = validateTimeComparison(formatted, compareWith, compareType)
+          setValidationError(validationMessage)
+          onValidationChange?.(validationMessage === undefined, validationMessage)
+        }
+      }
     }
+  }
 
-
-        <Label htmlFor={id} clas
-        </Label>
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        {label && (
+          <Label htmlFor={id} className="text-sm font-medium whitespace-nowrap min-w-fit">
+            {label}
+          </Label>
+        )}
 
         <div className="flex-1">
+          <Input
             type="text"
-   
-
+            id={id}
+            value={value}
+            onChange={(e) => handleTimeChange(e.target.value)}
+            disabled={disabled}
             placeholder="HH:MM"
+            className={cn(
               'font-mono text-base',
+              validationError && 'border-destructive focus-visible:ring-destructive'
             )}
-
-        {showShortcuts && !
-            <Button
-              size="sm"
-              onClick={se
-     
-
-          </div>
-      </div>
-
-          <Button
-            size="sm"
-   
-
-          >
-          </Button>
-            type
-            variant="outline"
-            disabled={disabled}
-            className="h-10 px-2.5"
-            -15
-          <Button
-       
-     
-   
-
-          
-            type="button"
-            varia
-            disabled={disabled}
-            class
-            +30
-        
-
-        <div className="flex items-center gap-2
+          />
         </div>
-    </div>
-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+        {showShortcuts && !disabled && (
           <div className="flex gap-1">
             <Button
               type="button"

@@ -18,6 +18,7 @@ import { createTimerEvent, formatTimerEventForDisplay, formatMode, getModeIcon, 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { QuickTimeEntry } from '@/components/QuickTimeEntry'
+import { NaturalLanguageInput } from '@/components/NaturalLanguageInput'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -754,6 +755,17 @@ export function TodayScreen({
           </CardContent>
         </Card>
       </div>
+
+      {currentEmployee && (
+        <NaturalLanguageInput
+          employee={currentEmployee}
+          projects={projects}
+          date={format(new Date(), 'yyyy-MM-dd')}
+          onEntriesCreated={(entries) => {
+            setTimeEntries((current = []) => [...current, ...entries])
+          }}
+        />
+      )}
 
       <SmartCategorization
         employeeId={selectedEmployee}

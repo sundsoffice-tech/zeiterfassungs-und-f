@@ -47,6 +47,13 @@ This application requires sophisticated features including active timer manageme
 - **Progression**: User enters time manually OR clicks "Jetzt" for current time OR uses +15/+30/-15/-30 shortcuts → System validates time format (HH:MM) → If part of start/end pair, validates start < end constraint → Shows inline error message if invalid → Prevents submission until corrected
 - **Success criteria**: Monospace font for clarity, clock icon indicator, red error styling with warning icon for validation failures, smooth UX with button shortcuts reducing manual typing, timezone-aware time capture
 
+### Natural Language Time Entry Parser
+- **Functionality**: Parse free-text time entries in natural language format (e.g., "8-12 ProjektA, 13-17 ProjektB") and convert them into structured time entries with inline error display for invalid input.
+- **Purpose**: Enable rapid bulk time entry through conversational text input, reducing tedious form interactions for power users while maintaining data quality through immediate validation feedback.
+- **Trigger**: User types or pastes natural language text into dedicated parser input field on Today/Week screens
+- **Progression**: User enters text → Real-time parsing with visual feedback → Invalid segments highlighted with inline error messages → Valid segments show preview with green check → User confirms → System creates time entries
+- **Success criteria**: Supports multiple time formats (8-12, 8:00-12:00, 8.5h, 2h), project name fuzzy matching, comma/newline separation, inline error messages with specific reasons (unknown project, invalid time format, overlapping times), green success indicators for valid entries, prevents submission of entries with errors
+
 ### Approval Workflows
 - **Functionality**: Timesheet period submissions with approval chain: Draft → Submitted → Approved/Rejected. Managers can approve/reject with comments.
 - **Purpose**: Ensure time entry accuracy and provide formal authorization before payroll/billing processing

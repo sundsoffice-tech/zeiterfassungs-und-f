@@ -15,6 +15,7 @@ import { createAuditMetadata } from '@/lib/data-model-helpers'
 import { ValidationDisplay } from '@/components/ValidationDisplay'
 import { TimeEntryValidator, ValidationContext, ValidationResult, ValidationQuickFix } from '@/lib/validation-rules'
 import { TimeEntryDetailView } from '@/components/TimeEntryDetailView'
+import { NaturalLanguageInput } from '@/components/NaturalLanguageInput'
 
 interface WeekScreenProps {
   employees: Employee[]
@@ -275,6 +276,17 @@ export function WeekScreen({
 
   return (
     <div className="space-y-6">
+      {employees.find(e => e.id === selectedEmployee) && (
+        <NaturalLanguageInput
+          employee={employees.find(e => e.id === selectedEmployee)!}
+          projects={projects}
+          date={format(currentWeekStart, 'yyyy-MM-dd')}
+          onEntriesCreated={(entries) => {
+            setTimeEntries((current = []) => [...current, ...entries])
+          }}
+        />
+      )}
+
       {validationResults.length > 0 && (
         <ValidationDisplay
           results={validationResults}
