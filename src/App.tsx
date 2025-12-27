@@ -66,7 +66,7 @@ function ReportsLoadingSkeleton() {
 function App() {
   usePerformanceMonitor('App')
   
-  const [activeTab, setActiveTab] = useState('timepicker')
+  const [activeTab, setActiveTab] = useState('today')
   const [employees, setEmployees] = useKV<Employee[]>('employees_v2', [])
   const [projects, setProjects] = useKV<Project[]>('projects_v2', [])
   const [tasks, setTasks] = useKV<Task[]>('tasks', [])
@@ -127,16 +127,16 @@ function App() {
         Zum Hauptinhalt springen
       </a>
       
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-20" role="banner">
-        <div className="container mx-auto px-4 py-3">
+      <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-20 shadow-sm" role="banner">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center" role="img" aria-label="Zeiterfassung Logo">
-                <Clock className="h-6 w-6 text-white" weight="bold" aria-hidden="true" />
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md" role="img" aria-label="Zeiterfassung Logo">
+                <Clock className="h-6 w-6 text-primary-foreground" weight="bold" aria-hidden="true" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Zeiterfassung</h1>
-                <p className="text-xs text-muted-foreground">Weltklasse Time Tracking</p>
+                <h1 className="text-xl font-bold tracking-tight">Zeiterfassung</h1>
+                <p className="text-xs text-muted-foreground">Professionelles Time Tracking</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
