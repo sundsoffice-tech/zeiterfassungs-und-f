@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar, Brain, CalendarCheck, Article, Gauge } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar, Brain, CalendarCheck, Article, Gauge, Lighthouse } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
@@ -21,6 +21,7 @@ import { CommandPalette } from '@/components/CommandPalette'
 import { ReminderNotificationDisplay } from '@/components/ReminderNotificationDisplay'
 import { PerformanceAlertProvider } from '@/components/PerformanceAlertProvider'
 import { PerformanceBudgetMonitor } from '@/components/PerformanceBudgetMonitor'
+import { WebVitalsMonitor } from '@/components/WebVitalsMonitor'
 import { PerformanceSeverity } from '@/lib/performance-budgets'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 import { useAutomation } from '@/hooks/use-automation'
@@ -164,7 +165,7 @@ function App() {
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-15 lg:w-auto lg:inline-grid" role="tablist" aria-label="Hauptnavigation">
+          <TabsList className="grid w-full grid-cols-16 lg:w-auto lg:inline-grid" role="tablist" aria-label="Hauptnavigation">
             <TabsTrigger value="timepicker" className="gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10" aria-label="Time Picker Ansicht">
               <Article className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Time Picker</span>
@@ -212,6 +213,10 @@ function App() {
             <TabsTrigger value="performance" className="gap-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10" aria-label="Performance Monitor">
               <Gauge className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Performance</span>
+            </TabsTrigger>
+            <TabsTrigger value="lighthouse" className="gap-2 bg-gradient-to-r from-orange-500/10 to-yellow-500/10" aria-label="Lighthouse CI">
+              <Lighthouse className="h-4 w-4" weight="duotone" aria-hidden="true" />
+              <span className="hidden sm:inline">Lighthouse</span>
             </TabsTrigger>
             <TabsTrigger value="repair" className="gap-2" aria-label="Reparaturmodus">
               <Wrench className="h-4 w-4" weight="duotone" aria-hidden="true" />
@@ -343,6 +348,10 @@ function App() {
 
           <TabsContent value="performance" className="mt-6">
             <PerformanceBudgetMonitor />
+          </TabsContent>
+
+          <TabsContent value="lighthouse" className="mt-6">
+            <WebVitalsMonitor />
           </TabsContent>
 
           <TabsContent value="repair" className="mt-6">
