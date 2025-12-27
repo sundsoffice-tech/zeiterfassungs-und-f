@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
@@ -29,105 +29,105 @@ export function QuickTimeEntry({
   phases,
   onSave
 }: QuickTimeEntryProps) {
-  const [selectedEmployee, setSelectedEmployee] = useState<string>(employees.length > 0 ? employees[0].id : '')
-  const [selectedProject, setSelectedProject] = useState<string>('')
-  const [selectedPhase, setSelectedPhase] = useState<string>('')
+  const [selectedEmployee, setSelectedEmployee] = useState<string>('')
   const [selectedTask, setSelectedTask] = useState<string>('')
-  const [duration, setDuration] = useState<string>('')
 
-  const availablePhases = phases.filter(ph => ph.projectId === selectedProject)
   const availableTasks = tasks.filter(t => 
-    t.projectId === selectedProject && 
     (!selectedPhase || t.phaseId === selectedPhase)
-  )
 
-  const handleSave = () => {
     if (!selectedEmployee) {
-      toast.error('Bitte wählen Sie einen Mitarbeiter aus')
       return
-    }
 
-    if (!selectedProject) {
-      toast.error('Bitte wählen Sie ein Projekt aus')
+      toast.error('Bitte wählen Sie ein Projekt aus
+   
+
       return
-    }
 
-    if (!duration || parseFloat(duration) <= 0) {
-      toast.error('Bitte geben Sie eine gültige Dauer ein')
-      return
-    }
-
-    const durationHours = parseFloat(duration)
     const now = new Date()
-    const startTime = format(now, 'HH:mm')
-    const endDate = new Date(now.getTime() + durationHours * 60 * 60 * 1000)
-    const endTime = format(endDate, 'HH:mm')
+    const en
 
-    const audit: AuditMetadata = createAuditMetadata(selectedEmployee, 'Browser')
 
-    const newEntry: TimeEntry = {
-      id: `time-${Date.now()}`,
-      tenantId: 'default',
+      id: `time-${Date.now(
       employeeId: selectedEmployee,
-      projectId: selectedProject,
-      phaseId: selectedPhase || undefined,
-      taskId: selectedTask || undefined,
-      date: format(now, 'yyyy-MM-dd'),
-      startTime,
-      endTime,
-      duration: durationHours,
+      phaseI
+     
+
       tags: [],
-      billable: true,
       approvalStatus: ApprovalStatus.DRAFT,
-      locked: false,
       audit,
-      changeLog: [],
-      evidenceAnchors: [{
-        type: 'system',
-        timestamp: new Date().toISOString(),
-        value: 'Schnelleintrag',
+     
+
         verified: true
-      }]
     }
-
     onSave(newEntry)
-    toast.success(`${durationHours} Stunden gespeichert`)
     
-    setDuration('')
     onOpenChange(false)
-  }
 
-  return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" weight="duotone" />
-            Zeit erfassen
+
+            <Clock className="h-5
           </DialogTitle>
-          <DialogDescription>
-            Schnelleintrag - maximal 2 Klicks bis zum Speichern
-          </DialogDescription>
+            Schnelleintrag
         </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="employee">Mitarbeiter *</Label>
-            <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-              <SelectTrigger id="employee">
-                <SelectValue placeholder="Mitarbeiter wählen" />
+        <div className="space-y-4
+            <Label htmlFor="employee">Mita
+              <SelectTrigger id="employe
               </SelectTrigger>
-              <SelectContent>
-                {employees.map(emp => (
-                  <SelectItem key={emp.id} value={emp.id}>
-                    {emp.name}
-                  </SelectItem>
+                
+              
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
+            </S
 
+            <Label htmlFor="project">Projek
+              value=
+            
+                setS
+            >
+                <Select
+              <SelectContent>
+                  <SelectItem ke
+                  </Se
+        
+     
+
+              <Label
+                value={selectedPhase} 
+    
+                }}
+                <Select
+   
+
+          
+                    </SelectItem>
+                </SelectContent>
+            </div>
+
+            <div className="space-y-2">
+              <Select val
+                  <Selec
+                <SelectConten
+                  {availableTasks.map(task => (
+                      {task.na
+                  ))}
+
+          )}
           <div className="space-y-2">
+            <Input
+              type="number"
+              min="0"
+              value={duration}
+            />
+
+            <Button
+              variant="outline"
+              onClick={() => s
+              0.5h
+            <Button
+              variant="outline
+              onClick
+              1h
+
+              variant="outline"
             <Label htmlFor="project">Projekt *</Label>
             <Select 
               value={selectedProject} 
@@ -227,6 +227,35 @@ export function QuickTimeEntry({
             <Button
               type="button"
               variant="outline"
+              size="sm"
+              onClick={() => setDuration('2')}
+            >
+              2h
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setDuration('4')}
+            >
+              4h
+            </Button>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Abbrechen
+          </Button>
+          <Button onClick={handleSave} className="gap-2">
+            <FloppyDisk className="h-4 w-4" weight="duotone" />
+            Speichern
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
               size="sm"
               onClick={() => setDuration('2')}
             >
