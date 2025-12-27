@@ -12,6 +12,7 @@ import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
+import { EmptyProjects } from '@/components/EmptyStates'
 
 interface ProjectsProps {
   projects: Project[]
@@ -142,15 +143,7 @@ export function Projects({ projects, setProjects, tasks, setTasks, phases, setPh
       </div>
 
       {projects.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <FolderOpen className="h-16 w-16 text-muted-foreground/30 mb-4" weight="duotone" />
-            <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
-            <p className="text-muted-foreground text-center mb-4">
-              Create your first project to start tracking time
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyProjects onAdd={() => setOpen(true)} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map((project, index) => {

@@ -22,6 +22,8 @@ import { NaturalLanguageInput } from '@/components/NaturalLanguageInput'
 import { ContinueWorkTile } from '@/components/ContinueWorkTile'
 import { AnomalyBanner } from '@/components/AnomalyBanner'
 import { useGapOvertimeDetection } from '@/hooks/use-gap-overtime-detection'
+import { InlineEditableTimeEntry } from '@/components/InlineEditableTimeEntry'
+import { EmptyDayView } from '@/components/EmptyStates'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -913,57 +915,33 @@ export function TodayScreen({
           </div>
         </CardHeader>
         <CardContent>
-          {todayEntries.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <Clock className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>Keine Einträge für heute</p>
+          {todayEntries.length === 0 ? (
+            <EmptyDayView onAddTime={() => setShowQuickEntry(true)} />
+          ) : (
+            <div className="space-y-3">
+              {todayEntries.map((entry) => (
+                <InlineEditableTimeEntry
+                  key={entry.id}
+                  entry={entry}
+                  projects={projects}
+                  tasks={tasks}
+                  phases={phases}
+                  onSave={(updatedEntry) => {
+                    setTimeEntries((current = []) =>
+                      current.map(e => e.id === updatedEntry.id ? updatedEntry : e)
+                    )
+                    toast.success('Eintrag aktualisiert')
+                  }}
+                  onDelete={(entryId) => {
+                    setTimeEntries((current = []) =>
+                      current.filter(e => e.id !== entryId)
+                    )
+                    toast.success('Eintrag gelöscht')
+                  }}
+                />
+              ))}
             </div>
           )}
-          <div className="space-y-3">
-            {todayEntries.map((entry) => {
-              const project = projects.find(p => p.id === entry.projectId)
-              const employee = employees.find(e => e.id === entry.employeeId)
-              const modeTags = entry.tags?.filter(tag => Object.values(ActivityMode).includes(tag as ActivityMode)) || []
-              
-              return (
-                <div 
-                  key={entry.id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium">{project?.name || 'Unbekanntes Projekt'}</span>
-                      {entry.billable && (
-                        <Badge variant="secondary" className="text-xs">Abrechenbar</Badge>
-                      )}
-                      {modeTags.map(tag => (
-                        <Badge 
-                          key={tag}
-                          variant="outline" 
-                          className="text-xs gap-1"
-                        >
-                          {getModeIcon(tag as ActivityMode)} {formatMode(tag as ActivityMode)}
-                        </Badge>
-                      ))}
-                      {entry.evidenceAnchors && entry.evidenceAnchors.some(a => a.type === 'system') && (
-                        <Badge variant="outline" className="text-xs gap-1">
-                          <Clock className="h-3 w-3" weight="duotone" />
-                          Automatisch
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {employee?.name} • {entry.startTime} - {entry.endTime}
-                      {entry.notes && ` • ${entry.notes}`}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-mono font-bold">{entry.duration.toFixed(2)}h</div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
         </CardContent>
       </Card>
     </div>

@@ -1,14 +1,14 @@
 # Planning Guide
 
-A comprehensive, enterprise-grade time tracking application with intuitive UI/UX featuring a minimalist navigation (Heute/Today, Woche/Week, Projekte/Projects, Berichte/Reports, Forecast, Automation, Admin), weltklasse timer interface, keyboard shortcuts, command palette (Ctrl+K), powerful automation capabilities including recurring entries and intelligent reminders, AI-powered forecasting, and comprehensive admin dashboard for efficient time management that runs itself.
+A comprehensive, enterprise-grade time tracking application with intuitive UI/UX featuring a minimalist navigation (Heute/Today, Woche/Week, Projekte/Projects, Berichte/Reports, Forecast, Automation, Admin), weltklasse timer interface, keyboard shortcuts, command palette (Ctrl+K), powerful automation capabilities including recurring entries and intelligent reminders, AI-powered forecasting, inline editing for seamless data management, skeleton loading states for perceived performance, and comprehensive admin dashboard for efficient time management that runs itself.
 
 **Experience Qualities**: 
-1. **Intuitiv** - World-class interface that feels natural and requires zero training with large timer, smart project selection, instant feedback, and automation that works in the background
-2. **Schnell** - Lightning-fast interactions with keyboard shortcuts, command palette (Ctrl+K), one-click actions, and automated processes that never delay the user
+1. **Intuitiv** - World-class interface that feels natural and requires zero training with large timer, smart project selection, instant feedback, inline editing without page changes, and automation that works in the background
+2. **Schnell** - Lightning-fast interactions with keyboard shortcuts, command palette (Ctrl+K), one-click actions, inline editing, skeleton loading states, and automated processes that never delay the user
 3. **Automatisch** - Self-running system with recurring entries, intelligent reminders, auto-start timers, and automated tagging that minimizes manual data entry
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This application requires sophisticated features including active timer management, automation engine with recurring entries and rules, AI-powered reminders and forecasting, weekly timesheet with copy/paste/drag-drop, global search with filter chips, command palette for keyboard-driven workflows, multi-tenant architecture, role-based access control, approval workflows, comprehensive reporting, **Pro Module capabilities** (automatic GPS mileage tracking, shift planning, geo-fencing automation, material/tool logging, invoice generation, customer portal) - warranting a sophisticated multi-view architecture optimized for speed, automation, and usability.
+This application requires sophisticated features including active timer management, automation engine with recurring entries and rules, AI-powered reminders and forecasting, weekly timesheet with copy/paste/drag-drop, global search with filter chips, command palette for keyboard-driven workflows, multi-tenant architecture, role-based access control, approval workflows, comprehensive reporting, inline editing for all time entries, skeleton loading states, empty states with CTAs, **Pro Module capabilities** (automatic GPS mileage tracking, shift planning, geo-fencing automation, material/tool logging, invoice generation, customer portal) - warranting a sophisticated multi-view architecture optimized for speed, automation, and usability.
 
 ## Essential Features
 
@@ -53,6 +53,27 @@ This application requires sophisticated features including active timer manageme
 - **Trigger**: User types or pastes natural language text into dedicated parser input field on Today/Week screens
 - **Progression**: User enters text → Real-time parsing with visual feedback → Invalid segments highlighted with inline error messages → Valid segments show preview with green check → User confirms → System creates time entries
 - **Success criteria**: Supports multiple time formats (8-12, 8:00-12:00, 8.5h, 2h), project name fuzzy matching, comma/newline separation, inline error messages with specific reasons (unknown project, invalid time format, overlapping times), green success indicators for valid entries, prevents submission of entries with errors
+
+### Inline Editing for Time Entries
+- **Functionality**: Click-to-edit time entries directly in lists without navigating to separate pages or dialogs. All time entry lists (Today screen, Week screen, Reports) support inline editing with visual feedback.
+- **Purpose**: Dramatically reduce friction in editing time entries, enabling rapid corrections and updates without context switching or modal dialogs that interrupt workflow.
+- **Trigger**: User clicks on any time entry in a list view
+- **Progression**: User clicks entry → Entry expands inline with editable fields (project, task, phase, start time, end time, notes) → Edit fields → Click save/cancel or use keyboard shortcuts (Enter to save, Escape to cancel) → Entry updates instantly with toast notification
+- **Success criteria**: All time entry lists support inline editing, edit mode clearly distinguished with visual styling (border highlight, expanded state), unsaved changes preserved until explicit save/cancel, keyboard navigation support (Tab between fields, Enter/Escape shortcuts), hover state shows edit icon, smooth animations for expand/collapse transitions, no page refresh required
+
+### Skeleton Loading States
+- **Functionality**: Display skeleton placeholders that mimic the structure of loading content (cards, tables, lists) while data is being fetched or processed, providing visual continuity and perceived performance improvements.
+- **Purpose**: Improve perceived performance by showing users that content is loading and will appear shortly, reducing perceived wait time and preventing jarring layout shifts when content loads.
+- **Trigger**: Data fetch operations, page navigation, async operations requiring user to wait
+- **Progression**: User navigates to screen → Skeleton placeholders appear immediately matching expected layout → Data loads → Skeletons smoothly transition to actual content with fade animation
+- **Success criteria**: Skeletons match layout of final content (table skeletons for tables, card skeletons for cards, list skeletons for lists), shimmer/pulse animation indicates active loading, graceful fade transition when content loads, no layout shift when content replaces skeletons, used consistently across all screens with async data
+
+### Empty States with CTAs
+- **Functionality**: When lists or screens have no data to display, show contextually-aware empty states with clear calls-to-action guiding users to create their first entry, project, or configuration.
+- **Purpose**: Transform potentially confusing empty screens into opportunities for onboarding and guidance, reducing user confusion and clearly communicating next steps for new users or empty data states.
+- **Trigger**: User navigates to screen with no data (no projects, no time entries, no reports, etc.)
+- **Progression**: User lands on empty screen → Contextual empty state displays with icon, title, description, and primary CTA → User clicks CTA → Redirected to appropriate creation flow or action
+- **Success criteria**: All list views have dedicated empty states, empty states include relevant icon (large, duotone style), clear title explaining what's missing, brief description of value/next steps, prominent CTA button with action verb ("Jetzt Zeit erfassen", "Projekt erstellen", etc.), secondary CTA where appropriate, visually distinct from error states, friendly and encouraging tone
 
 ### Approval Workflows
 - **Functionality**: Timesheet period submissions with approval chain: Draft → Submitted → Approved/Rejected. Managers can approve/reject with comments.

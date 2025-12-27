@@ -18,6 +18,7 @@ import { TimeEntryDetailView } from '@/components/TimeEntryDetailView'
 import { NaturalLanguageInput } from '@/components/NaturalLanguageInput'
 import { AnomalyBanner } from '@/components/AnomalyBanner'
 import { useGapOvertimeDetection } from '@/hooks/use-gap-overtime-detection'
+import { EmptyWeekView, EmptyProjects } from '@/components/EmptyStates'
 
 interface WeekScreenProps {
   employees: Employee[]
@@ -393,80 +394,94 @@ export function WeekScreen({
           </div>
 
           <div className="border rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-48 bg-muted/50">Projekt</TableHead>
-                  {weekDays.map((day, i) => (
-                    <TableHead key={i} className="text-center bg-muted/50">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-normal text-muted-foreground">
-                          {format(day, 'EEE', { locale: de })}
-                        </span>
-                        <span className="font-medium">{format(day, 'dd.MM')}</span>
-                      </div>
-                    </TableHead>
-                  ))}
-                  <TableHead className="text-center bg-muted/50 font-bold">Gesamt</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {activeProjects.map(project => (
-                  <TableRow key={project.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-primary" />
-                        {project.name}
-                      </div>
-                    </TableCell>
-                    {weekDays.map((day, i) => {
-                      const total = getDayTotal(project.id, day)
-                      const hasEntries = getEntriesForDay(project.id, day).length > 0
-                      return (
-                        <TableCell key={i} className="p-1">
-                          <div className="flex items-center gap-1">
-                            <Input
-                              type="number"
-                              step="0.5"
-                              min="0"
-                              value={total > 0 ? total.toFixed(1) : ''}
-                              onChange={(e) => handleCellChange(project.id, day, e.target.value)}
-                              className="text-center h-9 font-mono"
-                              placeholder="-"
-                              disabled={weekStatus === 'submitted' || weekStatus === 'approved'}
-                            />
-                            {hasEntries && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-9 w-9 p-0"
-                                onClick={() => handleViewEntryDetails(project.id, day)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            )}
+            {activeProjects.length === 0 ? (
+              <div className="p-8">
+                <EmptyProjects onAdd={() => toast.info('Gehen Sie zur Projekte-Seite, um Projekte zu erstellen')} />
+              </div>
+            ) : (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-48 bg-muted/50">Projekt</TableHead>
+                      {weekDays.map((day, i) => (
+                        <TableHead key={i} className="text-center bg-muted/50">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-normal text-muted-foreground">
+                              {format(day, 'EEE', { locale: de })}
+                            </span>
+                            <span className="font-medium">{format(day, 'dd.MM')}</span>
+                          </div>
+                        </TableHead>
+                      ))}
+                      <TableHead className="text-center bg-muted/50 font-bold">Gesamt</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {activeProjects.map(project => (
+                      <TableRow key={project.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                            {project.name}
                           </div>
                         </TableCell>
-                      )
-                    })}
-                    <TableCell className="text-center font-mono font-bold bg-muted/30">
-                      {getProjectWeekTotal(project.id).toFixed(1)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                <TableRow className="bg-muted/50 font-bold">
-                  <TableCell>Gesamt</TableCell>
-                  {weekDays.map((day, i) => (
-                    <TableCell key={i} className="text-center font-mono">
-                      {getDayColumnTotal(day).toFixed(1)}
-                    </TableCell>
-                  ))}
-                  <TableCell className="text-center font-mono text-lg text-primary">
-                    {getWeekGrandTotal().toFixed(1)}h
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+                        {weekDays.map((day, i) => {
+                          const total = getDayTotal(project.id, day)
+                          const hasEntries = getEntriesForDay(project.id, day).length > 0
+                          return (
+                            <TableCell key={i} className="p-1">
+                              <div className="flex items-center gap-1">
+                                <Input
+                                  type="number"
+                                  step="0.5"
+                                  min="0"
+                                  value={total > 0 ? total.toFixed(1) : ''}
+                                  onChange={(e) => handleCellChange(project.id, day, e.target.value)}
+                                  className="text-center h-9 font-mono"
+                                  placeholder="-"
+                                  disabled={weekStatus === 'submitted' || weekStatus === 'approved'}
+                                />
+                                {hasEntries && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-9 w-9 p-0"
+                                    onClick={() => handleViewEntryDetails(project.id, day)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          )
+                        })}
+                        <TableCell className="text-center font-mono font-bold bg-muted/30">
+                          {getProjectWeekTotal(project.id).toFixed(1)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow className="bg-muted/50 font-bold">
+                      <TableCell>Gesamt</TableCell>
+                      {weekDays.map((day, i) => (
+                        <TableCell key={i} className="text-center font-mono">
+                          {getDayColumnTotal(day).toFixed(1)}
+                        </TableCell>
+                      ))}
+                      <TableCell className="text-center font-mono text-lg text-primary">
+                        {getWeekGrandTotal().toFixed(1)}h
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+                
+                {getWeekGrandTotal() === 0 && (
+                  <div className="p-4 border-t">
+                    <EmptyWeekView onAddTime={() => toast.info('Erfassen Sie Zeit, indem Sie Stunden in die Tabelle eingeben')} />
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           <div className="flex items-center justify-between pt-4">
