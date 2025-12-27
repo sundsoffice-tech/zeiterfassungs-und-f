@@ -7,11 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar } from '@phosphor-icons/react'
+import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
 import { AdminDashboard } from '@/components/AdminDashboard'
+import { IntegrationsScreen } from '@/components/IntegrationsScreen'
 
 interface AdminScreenProps {
   employees: Employee[]
@@ -158,6 +159,10 @@ export function AdminScreen({
             <UserCircleGear className="h-4 w-4" weight="duotone" />
             Benutzerverwaltung
           </TabsTrigger>
+          <TabsTrigger value="integrations" className="gap-2">
+            <LinkIcon className="h-4 w-4" weight="duotone" />
+            Integrationen
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
@@ -170,6 +175,10 @@ export function AdminScreen({
             activeTimer={activeTimer}
             absences={absences}
           />
+        </TabsContent>
+
+        <TabsContent value="integrations">
+          <IntegrationsScreen />
         </TabsContent>
 
         <TabsContent value="users" className="space-y-6">

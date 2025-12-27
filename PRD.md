@@ -48,8 +48,8 @@ This application requires sophisticated features including active timer manageme
 - **Success criteria**: Status tracking, email notifications (simulated), rejection reasons captured, resubmission flow
 
 ### Admin Dashboard (Kontrolle ohne Micromanagement)
-- **Functionality**: Comprehensive administrative control center featuring live status tracking, KPIs, warnings, approval management, and user administration. Includes five tabs: Overview (live status + top warnings), Live-Status (all employees), KPIs (key metrics), Warnungen (all warnings by severity), and Genehmigungen (pending approvals).
-- **Purpose**: Provide administrators and project managers with at-a-glance oversight without micromanagement, enabling proactive problem detection and efficient approval workflows while maintaining team autonomy.
+- **Functionality**: Comprehensive administrative control center featuring live status tracking, KPIs, warnings, approval management, user administration, and integrations management. Includes six tabs: Overview (live status + top warnings), Live-Status (all employees), KPIs (key metrics), Warnungen (all warnings by severity), Genehmigungen (pending approvals), and Integrationen (third-party integrations).
+- **Purpose**: Provide administrators and project managers with at-a-glance oversight without micromanagement, enabling proactive problem detection and efficient approval workflows while maintaining team autonomy. Centralize management of all external integrations for calendars, project management tools, communication platforms, accounting systems, SSO providers, webhooks, and mobile device management.
 - **Live Status (Heute aktiv)**: Real-time view of who is working on what with active timers, showing employee names, current project/task, status (working/paused), and elapsed time. Updates dynamically as timers start, pause, or stop.
 - **KPIs**: Five key performance indicators with targets and trend indicators:
   - **Auslastung (Utilization)**: Billable vs non-billable hours percentage (target: 75%)
@@ -71,11 +71,26 @@ This application requires sophisticated features including active timer manageme
   - **Projektleiter**: Approve team entries, manage own projects, view team data, create reports, view rates (own projects only)
   - **Mitarbeiter**: Track own time, view own entries, submit timesheets, view projects, export own reports, no rate visibility
   - **Extern**: Track own time only, restricted visibility, no other employees visible, assigned projects only, no rate visibility
+- **Integrationen Tab**: Comprehensive integration management for all third-party services required for a world-class app:
+  - **Calendar Integrations**: Google Calendar, Outlook Calendar, iCal/CalDAV with sync direction control (one-way/two-way)
+  - **Project Management**: Jira, Asana, Trello, Monday.com, ClickUp for syncing projects, tasks, and time tracking
+  - **Communication**: Microsoft Teams, Slack for notifications and updates via webhooks
+  - **Accounting**: DATEV export (CSV/XML), Lexware interface (CSV/API), sevDesk API integration for seamless accounting data transfer
+  - **SSO (Single Sign-On)**: Microsoft Entra ID (Azure AD), Google Workspace, SAML 2.0, OpenID Connect for enterprise authentication
+  - **Webhooks/API**: Custom webhook endpoints for Create/Update/Approve events with HMAC signature support
+  - **Mobile Device Management**: MDM compatibility configuration for corporate device policies (Intune, Jamf, MobileIron, VMware Workspace ONE)
+  - **Configuration Management**: Add, edit, delete, enable/disable integrations with full credential management (API keys, OAuth tokens, certificates)
+  - **Status Tracking**: Real-time status indicators (Active, Error, Configured, Deactivated), last sync timestamps, error messages
+  - **Credential Help**: Inline links showing where to obtain API keys, client IDs, secrets, and other required credentials for each integration
+  - **Validation**: Required field validation, connection testing, and error feedback for misconfigured integrations
+  - **Badge Indicators**: "Pflicht für beste App" badges on required integrations (all calendar, PM, accounting, SSO integrations)
+  - **Minimalist Presentation**: Category-based tabs (Kalender, PM-Tools, Kommunikation, Accounting, SSO, Webhooks/API, MDM) for easy navigation
+  - **Security**: Encrypted storage of all credentials, secure handling of OAuth tokens and secrets
 - **Summary Cards**: Four metric cards at top showing: Heute aktiv (active workers), Offene Genehmigungen (pending approvals), Warnungen (total warnings with critical/high count), Mitarbeiter (active users)
 - **Alert Banner**: Prominent orange alert at top when critical or high-severity warnings exist, showing counts and requiring attention
-- **Trigger**: Navigate to Admin tab, select Dashboard sub-tab (default view), system automatically calculates metrics and warnings on load
-- **Progression**: Open Admin → View Dashboard overview with live statuses and top warnings → Explore KPIs tab for metrics → Check Warnungen tab for all issues → Review Genehmigungen tab for approvals → Switch to Users tab for employee management → Return to Dashboard for ongoing monitoring
-- **Success criteria**: Live status updates in real-time as timers change, KPIs calculate correctly from time entry data, warnings detect all configured rule violations with correct severity levels, approval list shows only submitted entries, user management CRUD operations work, role permissions accurately reflect access levels, dashboard loads in <2 seconds with 100+ entries
+- **Trigger**: Navigate to Admin tab, select Dashboard/Users/Integrationen sub-tabs, system automatically calculates metrics and warnings on load
+- **Progression**: Open Admin → View Dashboard overview with live statuses and top warnings → Explore KPIs tab for metrics → Check Warnungen tab for all issues → Review Genehmigungen tab for approvals → Switch to Users tab for employee management → Navigate to Integrationen tab → Browse categories (Kalender, PM-Tools, etc.) → Click "Hinzufügen" on integration card → Enter credentials with help links → Save and enable integration → View status and last sync info → Toggle enabled/disabled → Edit or delete as needed → Return to Dashboard for ongoing monitoring
+- **Success criteria**: Live status updates in real-time as timers change, KPIs calculate correctly from time entry data, warnings detect all configured rule violations with correct severity levels, approval list shows only submitted entries, user management CRUD operations work, role permissions accurately reflect access levels, dashboard loads in <2 seconds with 100+ entries, integrations can be configured and enabled/disabled, credentials are stored securely, status tracking shows accurate connection state, help links direct to correct credential sources, validation prevents saving incomplete configurations, all required integrations are identified with badges
 
 ### AI-Assisted Time Logic (Validation & Suggestions)
 - **Functionality**: Comprehensive validation system with hard rules (blocking errors) and soft rules (warnings), plus AI-powered suggestions based on historical patterns, advanced AI-powered anomaly detection that identifies unusual behavior patterns, and smart auto-categorization that suggests projects/tasks based on multiple context signals

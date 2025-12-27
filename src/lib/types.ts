@@ -247,6 +247,86 @@ export interface ActiveTimer {
   isPaused: boolean
 }
 
+export enum IntegrationType {
+  CALENDAR = 'calendar',
+  PROJECT_MANAGEMENT = 'project_management',
+  COMMUNICATION = 'communication',
+  ACCOUNTING = 'accounting',
+  SSO = 'sso',
+  WEBHOOK = 'webhook',
+  MDM = 'mdm'
+}
+
+export enum IntegrationProvider {
+  GOOGLE_CALENDAR = 'google_calendar',
+  OUTLOOK_CALENDAR = 'outlook_calendar',
+  ICAL = 'ical',
+  JIRA = 'jira',
+  ASANA = 'asana',
+  TRELLO = 'trello',
+  MONDAY = 'monday',
+  CLICKUP = 'clickup',
+  TEAMS = 'teams',
+  SLACK = 'slack',
+  DATEV = 'datev',
+  LEXWARE = 'lexware',
+  SEVDESK = 'sevdesk',
+  MICROSOFT_ENTRA = 'microsoft_entra',
+  GOOGLE_WORKSPACE = 'google_workspace',
+  SAML = 'saml',
+  OIDC = 'oidc',
+  CUSTOM_WEBHOOK = 'custom_webhook',
+  CUSTOM_MDM = 'custom_mdm'
+}
+
+export interface IntegrationConfig {
+  id: string
+  tenantId: string
+  type: IntegrationType
+  provider: IntegrationProvider
+  name: string
+  description?: string
+  enabled: boolean
+  config: {
+    apiKey?: string
+    apiSecret?: string
+    clientId?: string
+    clientSecret?: string
+    accessToken?: string
+    refreshToken?: string
+    webhookUrl?: string
+    webhookSecret?: string
+    domain?: string
+    tenantId?: string
+    organizationId?: string
+    workspaceId?: string
+    serverId?: string
+    exportFormat?: 'csv' | 'xml' | 'json' | 'api'
+    syncDirection?: 'one_way' | 'two_way'
+    autoSync?: boolean
+    syncInterval?: number
+    fieldMappings?: Record<string, string>
+    [key: string]: any
+  }
+  lastSync?: string
+  lastSyncStatus?: 'success' | 'error' | 'pending'
+  lastSyncError?: string
+  audit: AuditMetadata
+}
+
+export interface WebhookEvent {
+  id: string
+  tenantId: string
+  integrationId: string
+  event: 'time_entry.created' | 'time_entry.updated' | 'time_entry.approved' | 'project.created' | 'project.updated' | 'employee.created' | 'employee.updated'
+  payload: Record<string, any>
+  sentAt?: string
+  status: 'pending' | 'sent' | 'failed'
+  retryCount: number
+  error?: string
+  audit: AuditMetadata
+}
+
 export interface TimeTemplate {
   id: string
   name: string
