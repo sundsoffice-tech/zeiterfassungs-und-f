@@ -279,6 +279,149 @@ export enum IntegrationProvider {
   CUSTOM_MDM = 'custom_mdm'
 }
 
+export enum DataRetentionPeriod {
+  MONTHS_6 = '6_months',
+  YEAR_1 = '1_year',
+  YEARS_3 = '3_years',
+  YEARS_5 = '5_years',
+  YEARS_10 = '10_years',
+  CUSTOM = 'custom'
+}
+
+export enum EncryptionLevel {
+  TRANSIT_ONLY = 'transit_only',
+  AT_REST = 'at_rest',
+  END_TO_END = 'end_to_end'
+}
+
+export enum AuditEventType {
+  USER_LOGIN = 'user_login',
+  USER_LOGOUT = 'user_logout',
+  DATA_ACCESS = 'data_access',
+  DATA_EXPORT = 'data_export',
+  DATA_DELETE = 'data_delete',
+  SETTINGS_CHANGE = 'settings_change',
+  APPROVAL_ACTION = 'approval_action',
+  RATE_CHANGE = 'rate_change',
+  PROJECT_CHANGE = 'project_change',
+  EMPLOYEE_CHANGE = 'employee_change',
+  INTEGRATION_CHANGE = 'integration_change',
+  RETENTION_POLICY_CHANGE = 'retention_policy_change',
+  DATA_ANONYMIZATION = 'data_anonymization',
+  GDPR_REQUEST = 'gdpr_request'
+}
+
+export interface PrivacySettings {
+  id: string
+  tenantId: string
+  dataMinimization: {
+    enabled: boolean
+    collectOnlyRequired: boolean
+    noAppTracking: boolean
+    noAnalytics: boolean
+  }
+  encryption: {
+    inTransit: boolean
+    atRest: boolean
+    endToEndNotes: boolean
+    endToEndAttachments: boolean
+    algorithm?: string
+  }
+  retention: {
+    timeEntriesMonths: number
+    mileageEntriesMonths: number
+    auditLogsMonths: number
+    deletedDataMonths: number
+    autoDeleteAfterRetention: boolean
+  }
+  gdprCompliance: {
+    enabled: boolean
+    dataProcessingAgreement: boolean
+    subprocessorListMaintained: boolean
+    rightToAccess: boolean
+    rightToErasure: boolean
+    rightToPortability: boolean
+    rightToRectification: boolean
+  }
+  hosting: {
+    region: string
+    euOnly: boolean
+    dataProcessingAgreementSigned: boolean
+    subprocessorList: string[]
+  }
+  audit: AuditMetadata
+}
+
+export interface AuditLog {
+  id: string
+  tenantId: string
+  eventType: AuditEventType
+  userId: string
+  userName?: string
+  userRole?: UserRole
+  timestamp: string
+  ipAddress?: string
+  userAgent?: string
+  resource?: string
+  resourceId?: string
+  action: string
+  details?: Record<string, any>
+  before?: Record<string, any>
+  after?: Record<string, any>
+  success: boolean
+  errorMessage?: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+}
+
+export interface DataRetentionPolicy {
+  id: string
+  tenantId: string
+  name: string
+  description?: string
+  dataType: 'time_entries' | 'mileage' | 'expenses' | 'audit_logs' | 'deleted_data' | 'attachments' | 'all'
+  retentionPeriod: DataRetentionPeriod
+  customDays?: number
+  autoDelete: boolean
+  archiveBeforeDelete: boolean
+  notifyBeforeDelete: boolean
+  notifyDaysBefore?: number
+  enabled: boolean
+  lastExecuted?: string
+  audit: AuditMetadata
+}
+
+export interface GDPRRequest {
+  id: string
+  tenantId: string
+  employeeId: string
+  employeeName?: string
+  requestType: 'access' | 'erasure' | 'portability' | 'rectification' | 'restriction'
+  status: 'pending' | 'processing' | 'completed' | 'rejected'
+  requestDate: string
+  completionDate?: string
+  processedBy?: string
+  notes?: string
+  dataExportUrl?: string
+  audit: AuditMetadata
+}
+
+export interface DataAnonymizationLog {
+  id: string
+  tenantId: string
+  employeeId: string
+  anonymizedAt: string
+  anonymizedBy: string
+  recordsAffected: {
+    timeEntries: number
+    mileageEntries: number
+    expenses: number
+    projects: number
+    auditLogs: number
+  }
+  retainedData: string[]
+  reason: string
+}
+
 export interface IntegrationConfig {
   id: string
   tenantId: string

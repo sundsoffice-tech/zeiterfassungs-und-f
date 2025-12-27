@@ -7,12 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon } from '@phosphor-icons/react'
+import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon, Lock } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
 import { AdminDashboard } from '@/components/AdminDashboard'
 import { IntegrationsScreen } from '@/components/IntegrationsScreen'
+import { PrivacySecurityScreen } from '@/components/PrivacySecurityScreen'
 
 interface AdminScreenProps {
   employees: Employee[]
@@ -163,6 +164,10 @@ export function AdminScreen({
             <LinkIcon className="h-4 w-4" weight="duotone" />
             Integrationen
           </TabsTrigger>
+          <TabsTrigger value="privacy" className="gap-2">
+            <Lock className="h-4 w-4" weight="duotone" />
+            Datenschutz & Sicherheit
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
@@ -179,6 +184,14 @@ export function AdminScreen({
 
         <TabsContent value="integrations">
           <IntegrationsScreen />
+        </TabsContent>
+
+        <TabsContent value="privacy">
+          <PrivacySecurityScreen
+            employees={employees}
+            timeEntries={timeEntries}
+            mileageEntries={mileageEntries}
+          />
         </TabsContent>
 
         <TabsContent value="users" className="space-y-6">

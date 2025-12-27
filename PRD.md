@@ -48,8 +48,8 @@ This application requires sophisticated features including active timer manageme
 - **Success criteria**: Status tracking, email notifications (simulated), rejection reasons captured, resubmission flow
 
 ### Admin Dashboard (Kontrolle ohne Micromanagement)
-- **Functionality**: Comprehensive administrative control center featuring live status tracking, KPIs, warnings, approval management, user administration, and integrations management. Includes six tabs: Overview (live status + top warnings), Live-Status (all employees), KPIs (key metrics), Warnungen (all warnings by severity), Genehmigungen (pending approvals), and Integrationen (third-party integrations).
-- **Purpose**: Provide administrators and project managers with at-a-glance oversight without micromanagement, enabling proactive problem detection and efficient approval workflows while maintaining team autonomy. Centralize management of all external integrations for calendars, project management tools, communication platforms, accounting systems, SSO providers, webhooks, and mobile device management.
+- **Functionality**: Comprehensive administrative control center featuring live status tracking, KPIs, warnings, approval management, user administration, integrations management, and DSGVO-compliant privacy & security controls. Includes seven tabs: Overview (live status + top warnings), Live-Status (all employees), KPIs (key metrics), Warnungen (all warnings by severity), Genehmigungen (pending approvals), Integrationen (third-party integrations), and Datenschutz & Sicherheit (GDPR-compliant privacy and security management).
+- **Purpose**: Provide administrators and project managers with at-a-glance oversight without micromanagement, enabling proactive problem detection and efficient approval workflows while maintaining team autonomy. Centralize management of all external integrations for calendars, project management tools, communication platforms, accounting systems, SSO providers, webhooks, and mobile device management. Ensure DSGVO compliance through comprehensive privacy settings, audit logging, data retention policies, and GDPR subject rights management.
 - **Live Status (Heute aktiv)**: Real-time view of who is working on what with active timers, showing employee names, current project/task, status (working/paused), and elapsed time. Updates dynamically as timers start, pause, or stop.
 - **KPIs**: Five key performance indicators with targets and trend indicators:
   - **Auslastung (Utilization)**: Billable vs non-billable hours percentage (target: 75%)
@@ -86,11 +86,51 @@ This application requires sophisticated features including active timer manageme
   - **Badge Indicators**: "Pflicht für beste App" badges on required integrations (all calendar, PM, accounting, SSO integrations)
   - **Minimalist Presentation**: Category-based tabs (Kalender, PM-Tools, Kommunikation, Accounting, SSO, Webhooks/API, MDM) for easy navigation
   - **Security**: Encrypted storage of all credentials, secure handling of OAuth tokens and secrets
+- **Privacy & Security Tab (Datenschutz & Sicherheit)**: Comprehensive DSGVO-compliant privacy and security management with five sub-tabs:
+  - **Overview (Übersicht)**: Four summary cards showing:
+    - **Datenminimierung**: Toggle switches for no app tracking (standard), no analytics, collect only required fields
+    - **Hosting & Verarbeitung**: EU region selection (eu-central, eu-west, eu-north), EU-only processing toggle, AVV signed badge
+    - **DSGVO-Compliance**: Checklist showing rights to access, erasure, portability, rectification, subprocessor list maintained
+    - **Subprozessoren**: Scrollable list of data processors with EU badges (e.g., AWS Europe Frankfurt, GitHub Spark)
+  - **Encryption (Verschlüsselung)**: Configure encryption levels for data protection:
+    - **In Transit (TLS)**: Always active HTTPS/TLS 1.3 with badge indicator
+    - **At Rest**: Toggle for AES-256-GCM encryption of stored data
+    - **End-to-End Notes**: Optional client-side encryption for sensitive notes
+    - **End-to-End Attachments**: Optional client-side encryption for receipts and documents
+    - **Algorithm Info**: Alert box listing encryption methods (TLS 1.3 PFS, AES-256-GCM, RSA-4096+AES-256, HSM key management)
+  - **Retention (Aufbewahrung)**: Data retention policy management with automated deletion:
+    - **Policy Creation**: Dialog to create new retention policies with name, data type (time entries, mileage, expenses, audit logs, deleted data, attachments, all), retention period (6 months, 1 year, 3 years, 5 years, 10 years), auto-delete toggle, archive before delete, notify before delete
+    - **Policy Cards**: Each policy displays name, description, data type, retention period, auto-delete status, last executed timestamp
+    - **Execute Now**: Manual execution button for immediate policy application
+    - **Enable/Disable**: Toggle policy active status without deletion
+    - **Automated Execution**: Background process checks and applies retention policies automatically
+  - **Audit Logs (Audit-Protokolle)**: Comprehensive activity logging for compliance and security:
+    - **Event Tracking**: All user actions logged with type (login, logout, data access, data export, data delete, settings change, approval action, rate change, project change, employee change, integration change, retention policy change, data anonymization, GDPR request)
+    - **Log Details**: Each log shows severity badge (low/medium/high/critical), event type, action description, timestamp (dd.MM.yyyy HH:mm:ss), user name/ID, role, IP address (optional), success/failure icon
+    - **Filtering**: Dropdown to filter by event type (all, user logins, data access, data exports, data deletions, settings changes, approvals, GDPR requests)
+    - **Expandable Details**: Click "Details anzeigen" to see full JSON metadata including before/after state, reason, device
+    - **Scroll View**: 600px scrollable area displaying up to 1000 most recent events
+    - **Count Display**: Header shows total logged events count
+  - **GDPR Rights (DSGVO-Betroffenenrechte)**: Manage subject access requests and data portability:
+    - **Request Creation**: Dialog to create new GDPR requests with employee selection, request type (access/Art. 15, erasure/Art. 17, portability/Art. 20, rectification/Art. 16, restriction/Art. 18)
+    - **Request Cards**: Each request shows employee name, request type label, status badge (pending/processing/completed/rejected), request date, completion date (if applicable)
+    - **Processing Actions**: Pending requests show "Export data & complete" button (for access/portability) or generic "Complete" button, plus "Reject" button
+    - **Data Export**: One-click JSON export of all personal data (employee profile, time entries, mileage entries) with timestamped filename
+    - **Re-export**: Completed access/portability requests allow re-downloading data
+    - **Audit Trail**: All GDPR request actions automatically logged in audit logs with critical severity
+    - **Status Tracking**: Visual workflow from pending → processing → completed/rejected with timestamp tracking
+- **Privacy by Design Principles**:
+  - **Datenminimierung**: No app tracking, no analytics, no unnecessary data collection by default
+  - **Verschlüsselung**: TLS 1.3 in transit (always), AES-256-GCM at rest (toggle), optional E2E for notes/attachments
+  - **Aufbewahrung**: Configurable retention periods per data type with automated deletion after expiry
+  - **Rechte/Protokolle**: Full audit logging of all admin actions, GDPR subject rights management (access, erasure, portability, rectification, restriction)
+  - **Hosting**: EU-only regions (Frankfurt, Ireland, Stockholm), AVV/DPA signed, subprocessor list maintained
+  - **Transparency**: Clear privacy badges, explicit consent toggles, detailed audit trails, accessible GDPR request workflow
 - **Summary Cards**: Four metric cards at top showing: Heute aktiv (active workers), Offene Genehmigungen (pending approvals), Warnungen (total warnings with critical/high count), Mitarbeiter (active users)
 - **Alert Banner**: Prominent orange alert at top when critical or high-severity warnings exist, showing counts and requiring attention
-- **Trigger**: Navigate to Admin tab, select Dashboard/Users/Integrationen sub-tabs, system automatically calculates metrics and warnings on load
-- **Progression**: Open Admin → View Dashboard overview with live statuses and top warnings → Explore KPIs tab for metrics → Check Warnungen tab for all issues → Review Genehmigungen tab for approvals → Switch to Users tab for employee management → Navigate to Integrationen tab → Browse categories (Kalender, PM-Tools, etc.) → Click "Hinzufügen" on integration card → Enter credentials with help links → Save and enable integration → View status and last sync info → Toggle enabled/disabled → Edit or delete as needed → Return to Dashboard for ongoing monitoring
-- **Success criteria**: Live status updates in real-time as timers change, KPIs calculate correctly from time entry data, warnings detect all configured rule violations with correct severity levels, approval list shows only submitted entries, user management CRUD operations work, role permissions accurately reflect access levels, dashboard loads in <2 seconds with 100+ entries, integrations can be configured and enabled/disabled, credentials are stored securely, status tracking shows accurate connection state, help links direct to correct credential sources, validation prevents saving incomplete configurations, all required integrations are identified with badges
+- **Trigger**: Navigate to Admin tab, select Dashboard/Users/Integrationen/Datenschutz & Sicherheit sub-tabs, system automatically calculates metrics and warnings on load
+- **Progression**: Open Admin → View Dashboard overview with live statuses and top warnings → Explore KPIs tab for metrics → Check Warnungen tab for all issues → Review Genehmigungen tab for approvals → Switch to Users tab for employee management → Navigate to Integrationen tab → Browse categories (Kalender, PM-Tools, etc.) → Click "Hinzufügen" on integration card → Enter credentials with help links → Save and enable integration → View status and last sync info → Toggle enabled/disabled → Edit or delete as needed → Navigate to Datenschutz & Sicherheit tab → Review Overview for privacy settings and compliance status → Configure Encryption levels → Create/manage Retention policies → Review Audit logs with filtering → Process GDPR requests (create, export data, complete/reject) → Return to Dashboard for ongoing monitoring
+- **Success criteria**: Live status updates in real-time as timers change, KPIs calculate correctly from time entry data, warnings detect all configured rule violations with correct severity levels, approval list shows only submitted entries, user management CRUD operations work, role permissions accurately reflect access levels, dashboard loads in <2 seconds with 100+ entries, integrations can be configured and enabled/disabled, credentials are stored securely, status tracking shows accurate connection state, help links direct to correct credential sources, validation prevents saving incomplete configurations, all required integrations are identified with badges, privacy settings persist and apply correctly, encryption toggles work as expected, retention policies execute and delete data after configured periods, audit logs capture all relevant events with full metadata, GDPR requests can be created/processed with data export functionality, all privacy & security features are DSGVO-compliant
 
 ### AI-Assisted Time Logic (Validation & Suggestions)
 - **Functionality**: Comprehensive validation system with hard rules (blocking errors) and soft rules (warnings), plus AI-powered suggestions based on historical patterns, advanced AI-powered anomaly detection that identifies unusual behavior patterns, and smart auto-categorization that suggests projects/tasks based on multiple context signals
