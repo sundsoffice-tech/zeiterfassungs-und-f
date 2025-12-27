@@ -123,9 +123,14 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <a href="#main-content" className={skipLinkClasses}>
-        Zum Hauptinhalt springen
-      </a>
+      <div className="skip-links">
+        <a href="#main-content" className={skipLinkClasses}>
+          Zum Hauptinhalt springen
+        </a>
+        <a href="#main-navigation" className={skipLinkClasses}>
+          Zur Navigation springen
+        </a>
+      </div>
       
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-20" role="banner">
         <div className="container mx-auto px-4 py-3">
@@ -167,7 +172,7 @@ function App() {
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="hidden md:block">
+          <div id="main-navigation" className="hidden md:block">
             <NavigationMenu activeTab={activeTab} onNavigate={setActiveTab} />
           </div>
 

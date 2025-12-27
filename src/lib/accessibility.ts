@@ -55,6 +55,58 @@ export function announceToScreenReader(message: string, priority: 'polite' | 'as
   }, 1000)
 }
 
+// Keyboard Navigation Helper
+export function trapFocus(element: HTMLElement) {
+  const focusableElements = element.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  const firstElement = focusableElements[0] as HTMLElement;
+  const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+  element.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    }
+  });
+}
+
+// Reduced Motion Check
+export function prefersReducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+// High Contrast Mode Check
+export function prefersHighContrast(): boolean {
+  return window.matchMedia('(prefers-contrast: more)').matches;
+}
+
+// Live Region for Dynamic Updates
+export function createLiveRegion(id: string): HTMLElement {
+  let region = document.getElementById(id);
+  if (!region) {
+    region = document.createElement('div');
+    region.id = id;
+    region.setAttribute('role', 'status');
+    region.setAttribute('aria-live', 'polite');
+    region.setAttribute('aria-atomic', 'true');
+    region.className = 'sr-only';
+    document.body.appendChild(region);
+  }
+  return region;
+}
+
+// Announce State Changes
+export function announceStateChange(message: string) {
+  const region = createLiveRegion('state-announcer');
+  region.textContent = message;
+}
+
 export const focusRingClasses = 'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background'
 
 export const skipLinkClasses = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md'

@@ -7,11 +7,28 @@
   }
   
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
+    letter-spacing: -0.011em;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  
+  /* Better readability for longer texts */
+  p, li {
+    max-width: 65ch;
   }
   
   .font-mono {
@@ -41,6 +58,11 @@
     clip: auto;
     white-space: normal;
   }
+  
+  /* Smooth transitions */
+  button, a, input, select, textarea {
+    transition: all 0.15s ease;
+  }
 }
 
 :root {
@@ -53,26 +75,44 @@
   --popover: oklch(0.99 0 0);
   --popover-foreground: oklch(0.25 0.01 250);
 
-  --primary: oklch(0.45 0.15 250);
+  /* Primary - Modern Blue */
+  --primary: oklch(0.55 0.18 250);
   --primary-foreground: oklch(0.99 0 0);
 
   --secondary: oklch(0.85 0.02 250);
   --secondary-foreground: oklch(0.25 0.01 250);
 
-  --muted: oklch(0.94 0.01 250);
-  --muted-foreground: oklch(0.50 0.02 250);
+  /* Better gray tones with slight blue undertone */
+  --muted: oklch(0.96 0.005 250);
+  --muted-foreground: oklch(0.45 0.02 250);
 
-  --accent: oklch(0.68 0.19 45);
-  --accent-foreground: oklch(0.99 0 0);
+  /* Accent - Warm Orange/Gold */
+  --accent: oklch(0.70 0.18 55);
+  --accent-foreground: oklch(0.15 0 0);
+  
+  /* Success - Green */
+  --success: oklch(0.65 0.2 145);
+  --success-foreground: oklch(0.99 0 0);
+  
+  /* Warning - Yellow/Orange */
+  --warning: oklch(0.75 0.15 85);
+  --warning-foreground: oklch(0.15 0 0);
 
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.88 0.01 250);
-  --input: oklch(0.88 0.01 250);
-  --ring: oklch(0.68 0.19 45);
+  /* Softer borders */
+  --border: oklch(0.90 0.01 250);
+  --input: oklch(0.90 0.01 250);
+  --ring: oklch(0.70 0.18 55);
 
   --radius: 0.5rem;
+  
+  /* Shadows & Depth */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-glow: 0 0 20px rgb(var(--primary) / 0.15);
 }
 
 @theme {
@@ -95,6 +135,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
 
   --radius-sm: calc(var(--radius) * 0.5);
   --radius-md: var(--radius);
@@ -102,6 +146,71 @@
   --radius-xl: calc(var(--radius) * 2);
   --radius-2xl: calc(var(--radius) * 3);
   --radius-full: 9999px;
+}
+
+/* Card Styles with Shadows */
+.card {
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Interactive Card Effects */
+.interactive-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Loading Skeleton Animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    oklch(from var(--muted-foreground) l c h / 0.1) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: more) {
+  :root {
+    --border: oklch(0.3 0 0);
+    --muted-foreground: oklch(0.3 0.02 250);
+  }
+  
+  button, a, input, select {
+    border-width: 2px;
+  }
+  
+  :focus {
+    outline-width: 3px;
+  }
 }
 
 /* Safe Area for iPhone */
