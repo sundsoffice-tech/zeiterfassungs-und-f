@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon, Lock, Sliders } from '@phosphor-icons/react'
+import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon, Lock, Sliders, Brain } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
@@ -15,6 +15,9 @@ import { AdminDashboard } from '@/components/AdminDashboard'
 import { IntegrationsScreen } from '@/components/IntegrationsScreen'
 import { PrivacySecurityScreen } from '@/components/PrivacySecurityScreen'
 import { ValidationRulesScreen } from '@/components/ValidationRulesScreen'
+import { AIDecisionTrendsScreen } from '@/components/AIDecisionTrendsScreen'
+import { useKV } from '@github/spark/hooks'
+import { AdminDecision } from '@/lib/explainable-ai'
 
 interface AdminScreenProps {
   employees: Employee[]
@@ -45,6 +48,8 @@ export function AdminScreen({
     role: UserRole.EMPLOYEE,
     hourlyRate: ''
   })
+
+  const [adminDecisions] = useKV<AdminDecision[]>('explainable-ai-admin-decisions', [])
 
   const handleAdd = () => {
     setEditingEmployee(null)
@@ -157,6 +162,10 @@ export function AdminScreen({
             <ChartBar className="h-4 w-4" weight="duotone" />
             Dashboard
           </TabsTrigger>
+          <TabsTrigger value="ai-trends" className="gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+            <Brain className="h-4 w-4" weight="duotone" />
+            KI-Trends
+          </TabsTrigger>
           <TabsTrigger value="users" className="gap-2">
             <UserCircleGear className="h-4 w-4" weight="duotone" />
             Benutzerverwaltung
@@ -184,6 +193,16 @@ export function AdminScreen({
             mileageEntries={mileageEntries}
             activeTimer={activeTimer}
             absences={absences}
+          />
+        </TabsContent>
+
+        <TabsContent value="ai-trends">
+          <AIDecisionTrendsScreen
+            adminDecisions={adminDecisions || []}
+            timeEntries={timeEntries}
+            projects={projects}
+            employees={employees}
+            tasks={tasks}
           />
         </TabsContent>
 
