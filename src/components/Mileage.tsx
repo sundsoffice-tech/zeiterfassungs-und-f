@@ -6,12 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MileageEntry, Employee } from '@/lib/types'
+import { MileageEntry, Employee, ApprovalStatus } from '@/lib/types'
 import { getEmployeeName } from '@/lib/helpers'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { exportMileageEntriesToCSV } from '@/lib/csv-export'
+import { createAuditMetadata } from '@/lib/data-model-helpers'
 
 interface MileageProps {
   mileageEntries: MileageEntry[]
@@ -46,13 +47,17 @@ export function Mileage({ mileageEntries, setMileageEntries, employees }: Mileag
 
     const newEntry: MileageEntry = {
       id: `mileage_${Date.now()}`,
+      tenantId: 'default',
       employeeId: formData.employeeId,
       date: formData.date,
       startLocation: formData.startLocation,
       endLocation: formData.endLocation,
       distance: distance,
       purpose: formData.purpose,
-      createdAt: new Date().toISOString()
+      approvalStatus: ApprovalStatus.DRAFT,
+      locked: false,
+      audit: createAuditMetadata(formData.employeeId),
+      changeLog: []
     }
 
     setMileageEntries((prev) => [...prev, newEntry])

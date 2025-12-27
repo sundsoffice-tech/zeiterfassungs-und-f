@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Employee, TimeEntry, MileageEntry } from '@/lib/types'
+import { Employee, TimeEntry, MileageEntry, UserRole } from '@/lib/types'
 import { getTotalHoursByEmployee, getTotalMileageByEmployee, formatDuration } from '@/lib/helpers'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
+import { createAuditMetadata } from '@/lib/data-model-helpers'
 
 interface EmployeesProps {
   employees: Employee[]
@@ -41,9 +42,12 @@ export function Employees({ employees, setEmployees, timeEntries, mileageEntries
     } else {
       const newEmployee: Employee = {
         id: `emp_${Date.now()}`,
+        tenantId: 'default',
         name: formData.name,
         email: formData.email,
-        createdAt: new Date().toISOString()
+        role: UserRole.EMPLOYEE,
+        active: true,
+        audit: createAuditMetadata('admin')
       }
       setEmployees((prev) => [...prev, newEmployee])
       toast.success('Employee added successfully')

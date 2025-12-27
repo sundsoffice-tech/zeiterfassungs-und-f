@@ -64,7 +64,7 @@ export function AISuggestions({
           notes: e.notes
         }))
 
-      const prompt = window.spark.llmPrompt`Du bist ein intelligenter Assistent für Zeiterfassung. Analysiere die folgenden Zeiteinträge und den aktuellen Eintrag, um hilfreiche Vorschläge zu machen.
+      const prompt = (window.spark.llmPrompt as any)`Du bist ein intelligenter Assistent für Zeiterfassung. Analysiere die folgenden Zeiteinträge und den aktuellen Eintrag, um hilfreiche Vorschläge zu machen.
 
 Letzte Zeiteinträge:
 ${JSON.stringify(recentEntries, null, 2)}

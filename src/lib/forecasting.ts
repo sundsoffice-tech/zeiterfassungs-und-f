@@ -423,7 +423,7 @@ export async function generateAIEnhancedForecast(
   
   if (topRisks.length > 0 && typeof window !== 'undefined' && window.spark) {
     try {
-      const prompt = window.spark.llmPrompt`Du bist ein Projektmanagement-Experte. Analysiere folgende Projekt-Risiken und gib präzise Handlungsempfehlungen:
+      const prompt = (window.spark.llmPrompt as any)`Du bist ein Projektmanagement-Experte. Analysiere folgende Projekt-Risiken und gib präzise Handlungsempfehlungen:
 
 ${JSON.stringify(topRisks.map(r => ({
   projekt: r.projectName,

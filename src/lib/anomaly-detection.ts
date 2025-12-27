@@ -66,7 +66,7 @@ export class AnomalyDetector {
       const projectStats = this.calculateProjectStats(context.projectHistory, context.currentEntry.projectId)
       const teamStats = this.calculateTeamStats(context.teamHistory)
 
-      const prompt = window.spark.llmPrompt`Du bist ein Experte für Zeiterfassungs-Anomalie-Erkennung. Analysiere den folgenden Zeiteintrag im Vergleich zu historischen Mustern und identifiziere ungewöhnliche Verhaltensweisen.
+      const prompt = (window.spark.llmPrompt as any)`Du bist ein Experte für Zeiterfassungs-Anomalie-Erkennung. Analysiere den folgenden Zeiteintrag im Vergleich zu historischen Mustern und identifiziere ungewöhnliche Verhaltensweisen.
 
 Aktueller Eintrag:
 - Projekt: ${context.projects.find(p => p.id === context.currentEntry.projectId)?.name || 'Unbekannt'}

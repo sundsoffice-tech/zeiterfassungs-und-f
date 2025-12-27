@@ -59,7 +59,7 @@ export function exportTimeEntriesToCSV(
         escapeCSV(employee?.name || 'Unknown'),
         escapeCSV(employee?.email || ''),
         escapeCSV(project?.name || 'Unknown'),
-        escapeCSV(project?.client || ''),
+        escapeCSV(project?.clientId || ''),
         escapeCSV(entry.startTime),
         escapeCSV(entry.endTime),
         escapeCSV(duration.toFixed(2)),
@@ -186,7 +186,7 @@ export function exportProjectTimeReportToCSV(
     
     return [
       escapeCSV(project.name),
-      escapeCSV(project.client || ''),
+      escapeCSV(project.clientId || ''),
       escapeCSV(totalHours.toFixed(2)),
       escapeCSV(projectEntries.length),
       escapeCSV(uniqueEmployees.size)

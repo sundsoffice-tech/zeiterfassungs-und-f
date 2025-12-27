@@ -56,7 +56,7 @@ export async function generateContextBasedSuggestions(
   
   const contextDescription = buildContextDescription(context, recentProjectUsage, timePatterns, locationPatterns)
   
-  const prompt = window.spark.llmPrompt`Du bist ein intelligenter Assistent für Zeiterfassung. Analysiere den gegebenen Kontext und schlage passende Projekte, Tasks und Tags vor.
+  const prompt = (window.spark.llmPrompt as any)`Du bist ein intelligenter Assistent für Zeiterfassung. Analysiere den gegebenen Kontext und schlage passende Projekte, Tasks und Tags vor.
 
 KONTEXT:
 ${contextDescription}
@@ -131,7 +131,7 @@ export async function analyzeCalendarEventForSuggestion(
 ): Promise<CalendarEventSuggestion | null> {
   const activeProjects = projects.filter(p => p.active)
   
-  const prompt = window.spark.llmPrompt`Du bist ein Assistent für Zeiterfassung. Analysiere diesen Kalendertermin und schlage vor, wie er als Zeiteintrag gebucht werden sollte.
+  const prompt = (window.spark.llmPrompt as any)`Du bist ein Assistent für Zeiterfassung. Analysiere diesen Kalendertermin und schlage vor, wie er als Zeiteintrag gebucht werden sollte.
 
 KALENDERTERMIN:
 Titel: "${eventTitle}"
