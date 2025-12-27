@@ -43,38 +43,6 @@
   }
 }
 
-:root {
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.25 0.01 250);
-
-  --card: oklch(0.99 0 0);
-  --card-foreground: oklch(0.25 0.01 250);
-  
-  --popover: oklch(0.99 0 0);
-  --popover-foreground: oklch(0.25 0.01 250);
-
-  --primary: oklch(0.45 0.15 250);
-  --primary-foreground: oklch(0.99 0 0);
-
-  --secondary: oklch(0.85 0.02 250);
-  --secondary-foreground: oklch(0.25 0.01 250);
-
-  --muted: oklch(0.94 0.01 250);
-  --muted-foreground: oklch(0.50 0.02 250);
-
-  --accent: oklch(0.68 0.19 45);
-  --accent-foreground: oklch(0.99 0 0);
-
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.99 0 0);
-
-  --border: oklch(0.88 0.01 250);
-  --input: oklch(0.88 0.01 250);
-  --ring: oklch(0.68 0.19 45);
-
-  --radius: 0.5rem;
-}
-
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -118,4 +86,46 @@
 .touch-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+/* Smooth transitions for color changes */
+@layer base {
+  * {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: ease;
+    transition-duration: 150ms;
+  }
+}
+
+/* Better focus states */
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* Card hover effect */
+.card-interactive {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Status colors utility classes */
+.text-success { color: var(--success); }
+.bg-success { background-color: var(--success); }
+.text-warning { color: var(--warning); }
+.bg-warning { background-color: var(--warning); }
+
+/* Gradient backgrounds for headers/features */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.55 0.16 220) 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, var(--accent) 0%, oklch(0.60 0.14 180) 100%);
 }
