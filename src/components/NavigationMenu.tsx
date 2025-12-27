@@ -65,12 +65,6 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           label: 'Woche',
           icon: <CalendarBlank className="h-4 w-4" weight="duotone" />,
         },
-        {
-          id: 'timepicker',
-          label: 'Time Picker',
-          icon: <Article className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-primary/10 to-accent/10',
-        },
       ],
     },
     {
@@ -159,6 +153,11 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
       gradient: 'from-orange-500/10 to-red-500/10',
       items: [
         {
+          id: 'timepicker',
+          label: 'Time Picker Demo',
+          icon: <Article className="h-4 w-4" weight="duotone" />,
+        },
+        {
           id: 'validation',
           label: 'KI-Validierung',
           icon: <ShieldCheck className="h-4 w-4" weight="duotone" />,
@@ -199,8 +198,8 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
         <DropdownMenu key={section.id}>
           <DropdownMenuTrigger asChild>
             <Button
-              variant={isSectionActive(section) ? "default" : "outline"}
-              className={`gap-2 ${section.gradient ? `bg-gradient-to-r ${section.gradient}` : ''} ${isSectionActive(section) ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+              variant={isSectionActive(section) ? "default" : "ghost"}
+              className={`gap-2 px-4 py-2 font-medium ${section.gradient ? `bg-gradient-to-r ${section.gradient}` : ''} ${isSectionActive(section) ? 'shadow-sm' : ''}`}
               aria-label={`${section.label} Menü`}
             >
               {section.icon}

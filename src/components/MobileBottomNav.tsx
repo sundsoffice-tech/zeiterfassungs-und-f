@@ -24,7 +24,6 @@ const mainNavItems = [
 
 const moreNavItems = [
   { id: 'week', label: 'Woche', icon: CalendarBlank },
-  { id: 'timepicker', label: 'Time Picker', icon: Article },
   { id: 'calendar', label: 'Kalender', icon: CalendarBlank },
   { id: 'trust', label: 'Vertrauen', icon: ShieldStar },
   { id: 'forecast', label: 'Prognose', icon: TrendUp },
