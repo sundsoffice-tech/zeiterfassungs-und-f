@@ -21,11 +21,13 @@ import {
   ChartBar,
   Trash,
   Eye,
-  EyeSlash
+  EyeSlash,
+  TestTube
 } from '@phosphor-icons/react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { PerformanceTestDashboard } from './PerformanceTestDashboard'
 
 export function PerformanceBudgetMonitor() {
   const [violations, setViolations] = useState<PerformanceViolation[]>([])
@@ -237,7 +239,15 @@ export function PerformanceBudgetMonitor() {
             <ChartBar className="h-4 w-4" />
             Stats
           </TabsTrigger>
+          <TabsTrigger value="test-dashboard" className="gap-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10">
+            <TestTube className="h-4 w-4" />
+            Test Dashboard
+          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="test-dashboard" className="space-y-4">
+          <PerformanceTestDashboard autoRefresh={autoRefresh} refreshInterval={2000} />
+        </TabsContent>
 
         <TabsContent value="violations" className="space-y-4">
           <Card>
