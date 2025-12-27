@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Employee, Project, Task, Phase, TimeEntry, ActiveTimer, UserRole, AuditMetadata, ApprovalStatus } from '@/lib/types'
+import { Employee, Project, Task, Phase, TimeEntry, ActiveTimer, UserRole, AuditMetadata, ApprovalStatus, Absence } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -7,11 +7,13 @@ import { Play, Pause, Stop, Star, Clock, Lightning, Plus } from '@phosphor-icons
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
+import { format, addMinutes } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
 import { SmartCategorization } from '@/components/SmartCategorization'
 import { CategorizationSuggestion } from '@/lib/ai-categorization'
+import { ValidationDisplay } from '@/components/ValidationDisplay'
+import { TimeEntryValidator, ValidationContext, ValidationResult, ValidationQuickFix } from '@/lib/validation-rules'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -22,6 +24,7 @@ interface TodayScreenProps {
   setTimeEntries: (value: TimeEntry[] | ((oldValue?: TimeEntry[]) => TimeEntry[])) => void
   activeTimer: ActiveTimer | null
   setActiveTimer: (value: ActiveTimer | null | ((oldValue?: ActiveTimer | null) => ActiveTimer | null)) => void
+  absences?: Absence[]
 }
 
 export function TodayScreen({
@@ -32,7 +35,8 @@ export function TodayScreen({
   timeEntries,
   setTimeEntries,
   activeTimer,
-  setActiveTimer
+  setActiveTimer,
+  absences = []
 }: TodayScreenProps) {
   const [selectedEmployee, setSelectedEmployee] = useState<string>('')
   const [selectedProject, setSelectedProject] = useState<string>('')
@@ -188,6 +192,82 @@ export function TodayScreen({
   )).slice(0, 5)
 
   const favoriteEntries = timeEntries.filter(e => e.isFavorite).slice(0, 3)
+
+  const getAllValidationResults = () => {
+    const allResults: ValidationResult[] = []
+    todayEntries.forEach(entry => {
+      const context: ValidationContext = {
+        entry,
+        allEntries: timeEntries,
+        projects,
+        employees,
+        absences: absences || [],
+        holidays: []
+      }
+      const results = TimeEntryValidator.validate(context)
+      allResults.push(...results)
+    })
+    return allResults
+  }
+
+  const validationResults = getAllValidationResults()
+
+  const handleApplyFix = (result: ValidationResult, fix: ValidationQuickFix) => {
+    const { action } = fix
+
+    if (action.type === 'update_field') {
+      const entryToUpdate = todayEntries.find(e => {
+        if (result.metadata?.conflictingEntryId) {
+          return false
+        }
+        const context: ValidationContext = {
+          entry: e,
+          allEntries: timeEntries,
+          projects,
+          employees,
+          absences: [],
+          holidays: []
+        }
+        const entryResults = TimeEntryValidator.validate(context)
+        return entryResults.some(r => r.code === result.code && r.message === result.message)
+      })
+
+      if (entryToUpdate) {
+        setTimeEntries((current = []) =>
+          current.map(e => {
+            if (e.id === entryToUpdate.id) {
+              if (action.field === 'times') {
+                return {
+                  ...e,
+                  startTime: action.value.startTime,
+                  endTime: action.value.endTime,
+                  duration: calculateDuration(action.value.startTime, action.value.endTime)
+                }
+              } else if (action.field) {
+                return { ...e, [action.field]: action.value }
+              }
+            }
+            return e
+          })
+        )
+        toast.success(`Fix angewendet: ${fix.label}`)
+      }
+    } else if (action.type === 'delete_entry') {
+      const entryIds = action.entries as string[]
+      setTimeEntries((current = []) =>
+        current.filter(e => !entryIds.includes(e.id))
+      )
+      toast.success('Eintrag gelöscht')
+    }
+  }
+
+  const calculateDuration = (startTime: string, endTime: string): number => {
+    const [startHours, startMinutes] = startTime.split(':').map(Number)
+    const [endHours, endMinutes] = endTime.split(':').map(Number)
+    const startTotalMinutes = startHours * 60 + startMinutes
+    const endTotalMinutes = endHours * 60 + endMinutes
+    return (endTotalMinutes - startTotalMinutes) / 60
+  }
 
   return (
     <div className="space-y-6">
@@ -438,6 +518,14 @@ export function TodayScreen({
           toast.success('Vorschlag angewendet')
         }}
       />
+
+      {validationResults.length > 0 && (
+        <ValidationDisplay
+          results={validationResults}
+          showSoftWarnings={true}
+          onApplyFix={handleApplyFix}
+        />
+      )}
 
       <Card>
         <CardHeader>

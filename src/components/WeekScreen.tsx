@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Employee, Project, Task, Phase, TimeEntry, ApprovalStatus, AuditMetadata } from '@/lib/types'
+import { Employee, Project, Task, Phase, TimeEntry, ApprovalStatus, AuditMetadata, Absence } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,8 @@ import { toast } from 'sonner'
 import { format, startOfWeek, addDays, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
+import { ValidationDisplay } from '@/components/ValidationDisplay'
+import { TimeEntryValidator, ValidationContext, ValidationResult, ValidationQuickFix } from '@/lib/validation-rules'
 
 interface WeekScreenProps {
   employees: Employee[]
@@ -19,6 +21,7 @@ interface WeekScreenProps {
   phases: Phase[]
   timeEntries: TimeEntry[]
   setTimeEntries: (value: TimeEntry[] | ((oldValue?: TimeEntry[]) => TimeEntry[])) => void
+  absences?: Absence[]
 }
 
 export function WeekScreen({
@@ -27,7 +30,8 @@ export function WeekScreen({
   tasks,
   phases,
   timeEntries,
-  setTimeEntries
+  setTimeEntries,
+  absences = []
 }: WeekScreenProps) {
   const [selectedEmployee, setSelectedEmployee] = useState<string>(employees[0]?.id || '')
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }))
@@ -173,8 +177,100 @@ export function WeekScreen({
 
   const weekStatus = getWeekStatus()
 
+  const getWeekValidationResults = () => {
+    const weekEntries = timeEntries.filter(e => {
+      return weekDays.some(day => format(day, 'yyyy-MM-dd') === e.date) && e.employeeId === selectedEmployee
+    })
+
+    const allResults: ValidationResult[] = []
+    weekEntries.forEach(entry => {
+      const context: ValidationContext = {
+        entry,
+        allEntries: timeEntries,
+        projects,
+        employees,
+        absences: absences || [],
+        holidays: []
+      }
+      const results = TimeEntryValidator.validate(context)
+      allResults.push(...results)
+    })
+    return allResults
+  }
+
+  const validationResults = getWeekValidationResults()
+
+  const handleApplyFix = (result: ValidationResult, fix: ValidationQuickFix) => {
+    const { action } = fix
+
+    if (action.type === 'update_field') {
+      const weekEntries = timeEntries.filter(e => {
+        return weekDays.some(day => format(day, 'yyyy-MM-dd') === e.date) && e.employeeId === selectedEmployee
+      })
+
+      const entryToUpdate = weekEntries.find(e => {
+        if (result.metadata?.conflictingEntryId) {
+          return false
+        }
+        const context: ValidationContext = {
+          entry: e,
+          allEntries: timeEntries,
+          projects,
+          employees,
+          absences: [],
+          holidays: []
+        }
+        const entryResults = TimeEntryValidator.validate(context)
+        return entryResults.some(r => r.code === result.code && r.message === result.message)
+      })
+
+      if (entryToUpdate) {
+        setTimeEntries((current = []) =>
+          current.map(e => {
+            if (e.id === entryToUpdate.id) {
+              if (action.field === 'times') {
+                return {
+                  ...e,
+                  startTime: action.value.startTime,
+                  endTime: action.value.endTime,
+                  duration: calculateDuration(action.value.startTime, action.value.endTime)
+                }
+              } else if (action.field) {
+                return { ...e, [action.field]: action.value }
+              }
+            }
+            return e
+          })
+        )
+        toast.success(`Fix angewendet: ${fix.label}`)
+      }
+    } else if (action.type === 'delete_entry') {
+      const entryIds = action.entries as string[]
+      setTimeEntries((current = []) =>
+        current.filter(e => !entryIds.includes(e.id))
+      )
+      toast.success('Eintrag gelöscht')
+    }
+  }
+
+  const calculateDuration = (startTime: string, endTime: string): number => {
+    const [startHours, startMinutes] = startTime.split(':').map(Number)
+    const [endHours, endMinutes] = endTime.split(':').map(Number)
+    const startTotalMinutes = startHours * 60 + startMinutes
+    const endTotalMinutes = endHours * 60 + endMinutes
+    return (endTotalMinutes - startTotalMinutes) / 60
+  }
+
   return (
     <div className="space-y-6">
+      {validationResults.length > 0 && (
+        <ValidationDisplay
+          results={validationResults}
+          showSoftWarnings={true}
+          onApplyFix={handleApplyFix}
+        />
+      )}
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
