@@ -17,6 +17,7 @@ import { TimeEntryValidator, ValidationContext, ValidationResult, ValidationQuic
 import { createTimerEvent, formatTimerEventForDisplay, formatMode, getModeIcon, getModeColor, getTimerSummary, formatDuration, createCalendarEventTitle } from '@/lib/timer-events'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { QuickTimeEntry } from '@/components/QuickTimeEntry'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -48,6 +49,7 @@ export function TodayScreen({
   const [selectedMode, setSelectedMode] = useState<ActivityMode>(ActivityMode.SONSTIGES)
   const [elapsedTime, setElapsedTime] = useState(0)
   const [showEventHistory, setShowEventHistory] = useState(false)
+  const [showQuickEntry, setShowQuickEntry] = useState(false)
 
   const currentEmployee = employees.find(e => e.id === selectedEmployee)
   const currentProject = projects.find(p => p.id === selectedProject)
@@ -333,6 +335,33 @@ export function TodayScreen({
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4 p-6 rounded-xl bg-gradient-to-r from-accent via-primary to-accent/80 shadow-xl">
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold text-white mb-1">Zeit erfassen</h2>
+          <p className="text-white/90 text-sm">Schnelleintrag in nur 2 Klicks</p>
+        </div>
+        <Button 
+          size="lg" 
+          onClick={() => setShowQuickEntry(true)}
+          className="bg-white text-primary hover:bg-white/90 shadow-lg gap-2 text-lg px-8 py-6"
+        >
+          <Plus className="h-6 w-6" weight="bold" />
+          Zeit erfassen
+        </Button>
+      </div>
+
+      <QuickTimeEntry
+        open={showQuickEntry}
+        onOpenChange={setShowQuickEntry}
+        employees={employees}
+        projects={projects}
+        tasks={tasks}
+        phases={phases}
+        onSave={(entry) => {
+          setTimeEntries((current = []) => [...current, entry])
+        }}
+      />
+
       <Card className="border-2 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
