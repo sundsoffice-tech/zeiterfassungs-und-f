@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/butto
 import { cn } from '@/lib/utils'
-
 interface TimePickerProps {
-  value: string
-  onChange: (value: string) => void
-  label?: string
-  id?: string
-  error?: string
+  onChange: (value: string) => v
+
   disabled?: boolean
-  showShortcuts?: boolean
-  compareWith?: string
+  compareWith?:
+  onValidationChange?: (isValid: bo
+
+  value,
+  id,
+  disabled = false,
+  compareWith,
+  onChange,
   compareType?: 'start' | 'end'
   onValidationChange?: (isValid: boolean, message?: string) => void
 }
@@ -62,92 +62,92 @@ export function TimePicker({
 
     if (currentMinutes === 0 && compareMinutes === 0) return undefined
 
-    if (type === 'end' && currentMinutes <= compareMinutes) {
-      return 'Endzeit muss nach Startzeit liegen'
-    }
+      const validationMessage = validateTimeComparison(newVal
+      onValidationChange?.(validationMessage === 
+     
 
-    if (type === 'start' && currentMinutes >= compareMinutes) {
-      return 'Startzeit muss vor Endzeit liegen'
-    }
 
-    return undefined
-  }
-
-  const handleTimeChange = (newValue: string) => {
-    onChange(newValue)
-
-    if (compareWith && compareType) {
-      const validationMessage = validateTimeComparison(newValue, compareWith, compareType)
-      setValidationError(validationMessage)
-      onValidationChange?.(validationMessage === undefined, validationMessage)
-    } else {
-      setValidationError(undefined)
-      onValidationChange?.(true)
-    }
-  }
-
-  const setCurrentTime = () => {
     const now = new Date()
-    const hours = String(now.getHours()).padStart(2, '0')
-    const minutes = String(now.getMinutes()).padStart(2, '0')
-    handleTimeChange(`${hours}:${minutes}`)
-  }
+    c
 
-  const adjustTime = (minutes: number) => {
-    const currentTime = timeToMinutes(value || '00:00')
-    let totalMinutes = currentTime + minutes
+  const adjustTime =
+   
 
-    if (totalMinutes < 0) {
-      totalMinutes = 0
     } else if (totalMinutes >= 1440) {
-      totalMinutes = 1439
     }
 
-    const hours = Math.floor(totalMinutes / 60)
-    const mins = totalMinutes % 60
 
-    const newTime = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`
     handleTimeChange(newTime)
-  }
 
-  const handleBlur = () => {
     const match = value.match(/^(\d{1,2}):?(\d{2})?$/)
-    if (match) {
-      const hours = parseInt(match[1], 10)
-      const minutes = match[2] ? parseInt(match[2], 10) : 0
-      if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
-        const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+      const 
+      if (hours >= 0 && hours < 24 
         onChange(formatted)
-      }
     }
-  }
 
-  return (
-    <div className="space-y-2">
-      {label && (
-        <Label htmlFor={id} className={cn(disabled && 'opacity-50')}>
-          {label}
+
+        <Label htmlFor={id} clas
         </Label>
-      )}
 
-      <div className="flex gap-2 items-center">
         <div className="flex-1">
-          <Input
             type="text"
-            id={id}
-            value={value}
-            onChange={(e) => handleTimeChange(e.target.value)}
-            onBlur={handleBlur}
-            disabled={disabled}
-            placeholder="HH:MM"
-            className={cn(
-              'font-mono text-base',
-              validationError && 'border-destructive focus-visible:ring-destructive'
-            )}
-          />
-        </div>
+   
 
-        {showShortcuts && !disabled && (
+            placeholder="HH:MM"
+              'font-mono text-base',
+            )}
+
+        {showShortcuts && !
+            <Button
+              size="sm"
+              onClick={se
+     
+
+          </div>
+      </div>
+
+          <Button
+            size="sm"
+   
+
+          >
+          </Button>
+            type
+            variant="outline"
+            disabled={disabled}
+            className="h-10 px-2.5"
+            -15
+          <Button
+       
+     
+   
+
+          
+            type="button"
+            varia
+            disabled={disabled}
+            class
+            +30
+        
+
+        <div className="flex items-center gap-2
+        </div>
+    </div>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <div className="flex gap-1">
             <Button
               type="button"
