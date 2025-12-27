@@ -103,3 +103,19 @@
   --radius-2xl: calc(var(--radius) * 3);
   --radius-full: 9999px;
 }
+
+/* Safe Area for iPhone */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Mobile Bottom Nav Height */
+.mobile-nav-height {
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Better Touch Scrolling */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}

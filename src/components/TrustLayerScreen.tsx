@@ -472,7 +472,7 @@ export function TrustLayerScreen({
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        <div className="grid grid-cols-4 gap-2 text-center">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                           <div className="space-y-1">
                             <div className="text-2xl font-bold text-green-600">{report.highTrust}</div>
                             <div className="text-xs text-muted-foreground">Hoch</div>
@@ -611,7 +611,7 @@ export function TrustLayerScreen({
                               <Separator />
                               <div className="space-y-2">
                                 <div className="text-sm font-medium">Plausibilitätsfaktoren:</div>
-                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                   <div className="flex justify-between">
                                     <span className="text-muted-foreground">Zeitl. Konsistenz:</span>
                                     <span className="font-medium">{entry.trustMetrics.factors.temporalConsistency}%</span>

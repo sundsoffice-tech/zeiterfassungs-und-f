@@ -4,6 +4,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Clock } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { NavigationMenu } from '@/components/NavigationMenu'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
 import { Projects } from '@/components/Projects'
@@ -153,7 +154,7 @@ function App() {
         </div>
       </header>
 
-      <main id="main-content" className="container mx-auto px-4 py-6" role="main">
+      <main id="main-content" className="container mx-auto px-4 py-6 pb-20 md:pb-6" role="main">
         {employees && employees.length > 0 && (
           <div className="mb-6">
             <ReminderNotificationDisplay
@@ -166,7 +167,9 @@ function App() {
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <NavigationMenu activeTab={activeTab} onNavigate={setActiveTab} />
+          <div className="hidden md:block">
+            <NavigationMenu activeTab={activeTab} onNavigate={setActiveTab} />
+          </div>
 
           <TabsContent value="timepicker" className="mt-6">
             <TimePickerDemo />
@@ -345,6 +348,8 @@ function App() {
       />
 
       <PerformanceAlertProvider enabled={true} minSeverity={PerformanceSeverity.WARNING} />
+
+      <MobileBottomNav activeTab={activeTab} onNavigate={setActiveTab} />
 
       <Toaster />
     </div>

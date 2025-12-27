@@ -340,7 +340,7 @@ export function ForecastScreen({
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="text-center p-3 bg-white/60 rounded-lg">
                       <div className="text-lg font-bold">{risk.spentHours}h</div>
                       <div className="text-xs text-muted-foreground">Verbraucht</div>
@@ -424,7 +424,7 @@ export function ForecastScreen({
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="grid grid-cols-3 gap-3 text-center">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
                         <div className="p-2 bg-muted rounded">
                           <div className="text-sm font-medium">{estimate.basedOn.historicalEntries}</div>
                           <div className="text-xs text-muted-foreground">Einträge</div>
