@@ -69,7 +69,7 @@ export function PrivacySecurityScreen({ employees, timeEntries, mileageEntries }
       ...event
     } as AuditLog
     
-    setAuditLogs((current) => [newLog, ...current].slice(0, 1000))
+    setAuditLogs((current) => [newLog, ...(current || [])].slice(0, 1000))
   }
 
   const handlePrivacySettingChange = (path: string, value: any) => {
@@ -118,7 +118,7 @@ export function PrivacySecurityScreen({ employees, timeEntries, mileageEntries }
     })
 
     setRetentionPolicies((current) =>
-      current.map((p) => p.id === policy.id ? { ...p, lastExecuted: new Date().toISOString() } : p)
+      (current || []).map((p) => p.id === policy.id ? { ...p, lastExecuted: new Date().toISOString() } : p)
     )
 
     toast.success(`Aufbewahrungsrichtlinie ausgeführt: ${deletedCount} Datensätze gelöscht`)
@@ -142,7 +142,7 @@ export function PrivacySecurityScreen({ employees, timeEntries, mileageEntries }
       }
     }
 
-    setRetentionPolicies((current) => [...current, newPolicy])
+    setRetentionPolicies((current) => [...(current || []), newPolicy])
     
     logAuditEvent({
       eventType: AuditEventType.RETENTION_POLICY_CHANGE,
@@ -173,7 +173,7 @@ export function PrivacySecurityScreen({ employees, timeEntries, mileageEntries }
       }
     }
 
-    setGdprRequests((current) => [...current, newRequest])
+    setGdprRequests((current) => [...(current || []), newRequest])
     
     logAuditEvent({
       eventType: AuditEventType.GDPR_REQUEST,
@@ -190,7 +190,7 @@ export function PrivacySecurityScreen({ employees, timeEntries, mileageEntries }
 
   const processGDPRRequest = (requestId: string, action: 'complete' | 'reject') => {
     setGdprRequests((current) =>
-      current.map((req) => {
+      (current || []).map((req) => {
         if (req.id === requestId) {
           logAuditEvent({
             eventType: AuditEventType.GDPR_REQUEST,
@@ -569,7 +569,7 @@ export function PrivacySecurityScreen({ employees, timeEntries, mileageEntries }
                         variant="ghost"
                         onClick={() => {
                           setRetentionPolicies((current) =>
-                            current.map((p) => p.id === policy.id ? { ...p, enabled: !p.enabled } : p)
+                            (current || []).map((p) => p.id === policy.id ? { ...p, enabled: !p.enabled } : p)
                           )
                         }}
                       >

@@ -147,7 +147,7 @@ export function detectWarnings(
     const weekEnd = endOfWeek(today, { weekStartsOn: 1 })
     
     const employeeDays = new Set(employeeEntries.map(e => e.date))
-    const missingDays = []
+    const missingDays: string[] = []
     
     for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
       const dateStr = format(d, 'yyyy-MM-dd')

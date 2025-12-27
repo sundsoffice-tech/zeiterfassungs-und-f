@@ -72,10 +72,10 @@ export function migrateLegacyMileageEntry(legacy: LegacyMileageEntry, tenantId: 
 }
 
 export async function migrateAllData(spark: any) {
-  const employees = await spark.kv.get<LegacyEmployee[]>('employees') || []
-  const projects = await spark.kv.get<LegacyProject[]>('projects') || []
-  const timeEntries = await spark.kv.get<LegacyTimeEntry[]>('timeEntries') || []
-  const mileageEntries = await spark.kv.get<LegacyMileageEntry[]>('mileageEntries') || []
+  const employees = (await spark.kv.get('employees') as LegacyEmployee[] | undefined) || []
+  const projects = (await spark.kv.get('projects') as LegacyProject[] | undefined) || []
+  const timeEntries = (await spark.kv.get('timeEntries') as LegacyTimeEntry[] | undefined) || []
+  const mileageEntries = (await spark.kv.get('mileageEntries') as LegacyMileageEntry[] | undefined) || []
 
   const migratedEmployees = employees.map(e => migrateLegacyEmployee(e))
   const migratedProjects = projects.map(p => migrateLegacyProject(p))

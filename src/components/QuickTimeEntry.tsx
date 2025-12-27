@@ -3,10 +3,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
+import { format, addMinutes } from 'date-fns'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
-import { createAuditMetadata } from '@/lib/data-model-helpers'
+import { Employee, Project, Task, Phase, TimeEntry, ApprovalStatus } from '@/lib/types'
 import { Clock, FloppyDisk } from '@phosphor-icons/react'
 
 interface QuickTimeEntryProps {

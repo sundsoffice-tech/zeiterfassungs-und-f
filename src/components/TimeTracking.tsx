@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TimeEntry, Employee, Project, ActiveTimer, TimeTemplate } from '@/lib/types'
 import { calculateDuration, formatDuration, getEmployeeName, getProjectName } from '@/lib/helpers'
-import { formatTimerDuration, getTimerElapsedTime, convertTimerToTimeEntry, getRecentProjects, millisecondsToDuration } from '@/lib/timer-helpers'
+import { formatTimerDuration, getTimerElapsedTime, convertTimerToTimeEntry, getRecentProjects } from '@/lib/timer-helpers'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -118,13 +118,14 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
       startTime: Date.now(),
       pausedDuration: 0,
       isPaused: false,
-      task: templateData?.task,
-      subtask: templateData?.subtask,
+      phaseId: templateData?.phaseId,
+      taskId: templateData?.taskId,
       tags: templateData?.tags,
       location: templateData?.location,
       notes: templateData?.notes,
       costCenter: templateData?.costCenter,
-      billable: templateData?.billable
+      billable: templateData?.billable ?? true,
+      events: []
     }
 
     setActiveTimers((prev) => [...(prev || []), newTimer])
@@ -169,8 +170,7 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
     const timeEntry = convertTimerToTimeEntry(timer)
     const newEntry: TimeEntry = {
       id: `time_${Date.now()}`,
-      ...timeEntry,
-      createdAt: new Date().toISOString()
+      ...timeEntry
     }
 
     setTimeEntries((prev) => [...prev, newEntry])
@@ -186,8 +186,7 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
     const timeEntry = convertTimerToTimeEntry(timer)
     const newEntry: TimeEntry = {
       id: `time_${Date.now()}`,
-      ...timeEntry,
-      createdAt: new Date().toISOString()
+      ...timeEntry
     }
 
     setTimeEntries((prev) => [...prev, newEntry])
@@ -270,19 +269,25 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
 
     const newEntry: TimeEntry = {
       id: `time_${Date.now()}`,
+      tenantId: 'default',
       employeeId: formData.employeeId,
       projectId: formData.projectId,
       date: formData.date,
       startTime: startTime,
       endTime: endTime,
-      task: formData.task || undefined,
-      subtask: formData.subtask || undefined,
+      duration: calculateDuration(startTime, endTime),
       tags: formData.tags.length > 0 ? formData.tags : undefined,
       location: formData.location || undefined,
       notes: formData.notes || undefined,
       costCenter: formData.costCenter || undefined,
       billable: formData.billable,
-      createdAt: new Date().toISOString()
+      approvalStatus: formData.employeeId ? ('DRAFT' as any) : ('DRAFT' as any),
+      locked: false,
+      audit: {
+        createdBy: formData.employeeId,
+        createdAt: new Date().toISOString()
+      },
+      changeLog: []
     }
 
     setTimeEntries((prev) => [...prev, newEntry])
@@ -362,8 +367,6 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
       employeeId: templateData.employeeId,
       projectId: templateData.projectId,
       duration: templateData.duration ? parseInt(templateData.duration) : undefined,
-      task: templateData.task || undefined,
-      subtask: templateData.subtask || undefined,
       tags: templateData.tags.length > 0 ? templateData.tags : undefined,
       location: templateData.location || undefined,
       notes: templateData.notes || undefined,
@@ -1115,7 +1118,8 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
           <div className="grid gap-3">
             {activeTimers.map((timer) => {
               const elapsed = getTimerElapsedTime(timer)
-              const { hours, minutes } = millisecondsToDuration(elapsed)
+              const hours = Math.floor(elapsed / (1000 * 60 * 60))
+              const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60))
               
               return (
                 <motion.div
@@ -1147,10 +1151,9 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                           <h3 className="font-semibold text-lg">
                             {getProjectName(projects, timer.projectId)}
                           </h3>
-                          {timer.task && (
+                          {timer.taskId && (
                             <p className="text-sm font-medium mt-1">
-                              {timer.task}
-                              {timer.subtask && <span className="text-muted-foreground"> • {timer.subtask}</span>}
+                              Task ID: {timer.taskId}
                             </p>
                           )}
                           {timer.tags && timer.tags.length > 0 && (
@@ -1415,10 +1418,7 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                           </TableCell>
                           <TableCell>{getProjectName(projects, entry.projectId)}</TableCell>
                           <TableCell className="text-sm">
-                            {entry.task || '-'}
-                            {entry.subtask && (
-                              <div className="text-xs text-muted-foreground">{entry.subtask}</div>
-                            )}
+                            {entry.taskId ? `Task: ${entry.taskId}` : '-'}
                           </TableCell>
                           <TableCell className="font-mono text-sm">
                             {entry.startTime} - {entry.endTime}
