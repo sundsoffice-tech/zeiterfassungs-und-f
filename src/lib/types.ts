@@ -22,6 +22,29 @@ export interface TimeEntry {
   endTime: string
   notes?: string
   createdAt: string
+  isFavorite?: boolean
+}
+
+export interface ActiveTimer {
+  id: string
+  employeeId: string
+  projectId: string
+  startTime: number
+  pausedAt?: number
+  pausedDuration: number
+  notes?: string
+  isPaused: boolean
+}
+
+export interface TimeTemplate {
+  id: string
+  name: string
+  employeeId: string
+  projectId: string
+  duration?: number
+  notes?: string
+  isFavorite: boolean
+  lastUsed: string
 }
 
 export interface MileageEntry {

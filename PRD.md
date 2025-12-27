@@ -26,12 +26,16 @@ This application requires multiple interconnected features including employee ma
 - **Progression**: Click add button → Enter project details in dialog → Save → Project appears in list and time entry dropdowns
 - **Success criteria**: Projects persist, can be assigned to multiple time entries, and show accumulated hours
 
-### Time Entry Tracking
-- **Functionality**: Log work sessions with employee, project, date, start/end time, and optional notes
-- **Purpose**: Record billable and non-billable hours for payroll, invoicing, and productivity analysis
-- **Trigger**: Click "Add Time Entry" button
-- **Progression**: Click add → Select employee → Select project → Choose date → Enter start/end times → Add notes → Save → Entry appears in timeline
-- **Success criteria**: Time entries calculate duration automatically, can be filtered by employee/project/date, and display total hours
+### Time Entry Tracking (Enhanced)
+- **Functionality**: Log work sessions with live timer (Start/Stop/Pause), manual time entry, project switching, templates, and bulk editing capabilities
+- **Purpose**: Record billable and non-billable hours for payroll, invoicing, and productivity analysis with maximum flexibility
+- **Trigger**: Click "Start Timer" for active tracking or "Add Time Entry" for manual entry
+- **Progression**: 
+  - Live Timer: Click start → Select employee/project → Timer runs → Pause/resume as needed → Switch project without stopping → Click stop → Entry saved
+  - Manual Entry: Click add → Select employee/project → Choose date → Enter start/end times or duration → Add notes → Save → Entry appears in timeline
+  - Quick Actions: Use favorites, recent projects, or templates for instant timer start → Bulk select entries for mass edits
+  - Auto-pause: Timer detects idle time → Prompts to discard or keep idle period → Optionally auto-resume on return
+- **Success criteria**: Active timer persists between sessions, can switch projects without stopping, supports multiple simultaneous timers (optional), manual entries validate time ranges, favorites speed up entry, bulk edit modifies multiple entries at once, idle detection prevents false time logging
 
 ### Mileage Logbook
 - **Functionality**: Record vehicle trips with employee, date, start/end locations, distance, and purpose
