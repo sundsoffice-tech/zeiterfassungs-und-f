@@ -119,16 +119,16 @@ export function TodayScreen({
     const startEvent = createTimerEvent(TimerEventType.START, {
       mode: selectedMode,
       projectId: selectedProject,
-      phaseId: selectedPhase || undefined,
-      taskId: selectedTask || undefined
+      phaseId: selectedPhase && selectedPhase !== 'none' ? selectedPhase : undefined,
+      taskId: selectedTask && selectedTask !== 'none' ? selectedTask : undefined
     })
 
     const newTimer: ActiveTimer = {
       id: `timer-${Date.now()}`,
       employeeId: selectedEmployee,
       projectId: selectedProject,
-      phaseId: selectedPhase || undefined,
-      taskId: selectedTask || undefined,
+      phaseId: selectedPhase && selectedPhase !== 'none' ? selectedPhase : undefined,
+      taskId: selectedTask && selectedTask !== 'none' ? selectedTask : undefined,
       startTime: Date.now(),
       pausedDuration: 0,
       billable: true,
@@ -552,7 +552,7 @@ export function TodayScreen({
                     <SelectValue placeholder="Phase wählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Keine Phase</SelectItem>
+                    <SelectItem value="none">Keine Phase</SelectItem>
                     {availablePhases.map(phase => (
                       <SelectItem key={phase.id} value={phase.id}>
                         {phase.name}
@@ -575,7 +575,7 @@ export function TodayScreen({
                     <SelectValue placeholder="Task wählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Kein Task</SelectItem>
+                    <SelectItem value="none">Kein Task</SelectItem>
                     {availableTasks.map(task => (
                       <SelectItem key={task.id} value={task.id}>
                         {task.name}

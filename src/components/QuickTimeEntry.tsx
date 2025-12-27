@@ -80,8 +80,8 @@ export function QuickTimeEntry({
       tenantId: 'default',
       employeeId: selectedEmployee,
       projectId: selectedProject,
-      phaseId: selectedPhase || undefined,
-      taskId: selectedTask || undefined,
+      phaseId: selectedPhase && selectedPhase !== 'none' ? selectedPhase : undefined,
+      taskId: selectedTask && selectedTask !== 'none' ? selectedTask : undefined,
       date: format(now, 'yyyy-MM-dd'),
       startTime: startTime,
       endTime: endTime,
@@ -193,7 +193,7 @@ export function QuickTimeEntry({
                   <SelectValue placeholder="Phase wählen" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Keine Phase</SelectItem>
+                  <SelectItem value="none">Keine Phase</SelectItem>
                   {availablePhases.map(phase => (
                     <SelectItem key={phase.id} value={phase.id}>
                       {phase.name}
@@ -212,7 +212,7 @@ export function QuickTimeEntry({
                   <SelectValue placeholder="Task wählen" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Kein Task</SelectItem>
+                  <SelectItem value="none">Kein Task</SelectItem>
                   {availableTasks.map(task => (
                     <SelectItem key={task.id} value={task.id}>
                       {task.name}

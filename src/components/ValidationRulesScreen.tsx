@@ -58,7 +58,7 @@ export function ValidationRulesScreen({ projects }: ValidationRulesScreenProps) 
       description: '',
       severity: 'soft',
       enabled: true,
-      projectId: '',
+      projectId: 'none',
       threshold: '',
       requiredFields: []
     })
@@ -73,7 +73,7 @@ export function ValidationRulesScreen({ projects }: ValidationRulesScreenProps) 
       description: rule.description,
       severity: rule.severity,
       enabled: rule.enabled,
-      projectId: rule.projectId || '',
+      projectId: rule.projectId || 'none',
       threshold: rule.threshold?.toString() || '',
       requiredFields: rule.requiredFields || []
     })
@@ -101,7 +101,7 @@ export function ValidationRulesScreen({ projects }: ValidationRulesScreenProps) 
                 description: formData.description,
                 severity: formData.severity,
                 enabled: formData.enabled,
-                projectId: formData.projectId || undefined,
+                projectId: formData.projectId && formData.projectId !== 'none' ? formData.projectId : undefined,
                 threshold: formData.threshold ? parseFloat(formData.threshold) : undefined,
                 requiredFields: formData.requiredFields.length > 0 ? formData.requiredFields : undefined,
                 audit
@@ -119,7 +119,7 @@ export function ValidationRulesScreen({ projects }: ValidationRulesScreenProps) 
         description: formData.description,
         severity: formData.severity,
         enabled: formData.enabled,
-        projectId: formData.projectId || undefined,
+        projectId: formData.projectId && formData.projectId !== 'none' ? formData.projectId : undefined,
         threshold: formData.threshold ? parseFloat(formData.threshold) : undefined,
         requiredFields: formData.requiredFields.length > 0 ? formData.requiredFields : undefined,
         audit
@@ -270,7 +270,7 @@ export function ValidationRulesScreen({ projects }: ValidationRulesScreenProps) 
                     <SelectValue placeholder="Global (alle Projekte)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Global (alle Projekte)</SelectItem>
+                    <SelectItem value="none">Global (alle Projekte)</SelectItem>
                     {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.name}
