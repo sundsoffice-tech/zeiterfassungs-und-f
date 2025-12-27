@@ -78,11 +78,13 @@ export function trapFocus(element: HTMLElement) {
 
 // Reduced Motion Check
 export function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined') return false;
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 // High Contrast Mode Check
 export function prefersHighContrast(): boolean {
+  if (typeof window === 'undefined') return false;
   return window.matchMedia('(prefers-contrast: more)').matches;
 }
 
