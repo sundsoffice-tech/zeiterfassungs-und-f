@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar, Brain } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
@@ -15,6 +15,7 @@ import { AutomationScreen } from '@/components/AutomationScreen'
 import { OfflineSyncScreen } from '@/components/OfflineSyncScreen'
 import { ProModuleScreen } from '@/components/ProModuleScreen'
 import { TrustLayerScreen } from '@/components/TrustLayerScreen'
+import { ExplainableAIScreen } from '@/components/ExplainableAIScreen'
 import { CommandPalette } from '@/components/CommandPalette'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 import { useAutomation } from '@/hooks/use-automation'
@@ -119,6 +120,10 @@ function App() {
             <TabsTrigger value="validation" className="gap-2">
               <ShieldCheck className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">KI-Validierung</span>
+            </TabsTrigger>
+            <TabsTrigger value="explainable" className="gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+              <Brain className="h-4 w-4" weight="duotone" />
+              <span className="hidden sm:inline">Erklärbare KI</span>
             </TabsTrigger>
             <TabsTrigger value="admin" className="gap-2">
               <UserCircleGear className="h-4 w-4" weight="duotone" />
@@ -239,6 +244,16 @@ function App() {
               phases={phases || []}
               timeEntries={timeEntries || []}
               absences={absences || []}
+            />
+          </TabsContent>
+
+          <TabsContent value="explainable" className="mt-6">
+            <ExplainableAIScreen
+              employees={employees || []}
+              projects={projects || []}
+              tasks={tasks || []}
+              phases={phases || []}
+              timeEntries={timeEntries || []}
             />
           </TabsContent>
 
