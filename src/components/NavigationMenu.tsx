@@ -144,7 +144,7 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           id: 'explainable',
           label: 'Erklärbare KI',
           icon: <Brain className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-purple-500/10 to-pink-500/10',
+          gradient: 'from-accent/10 to-primary/10',
         },
       ],
     },
