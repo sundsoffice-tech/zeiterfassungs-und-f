@@ -40,6 +40,13 @@ This application requires sophisticated features including active timer manageme
 - **Progression**: Define rate → Set scope (employee/project/task) → Specify valid date range → System auto-selects appropriate rate for time entries
 - **Success criteria**: Correct rate application based on hierarchy and date, historical accuracy, rate change auditing
 
+### Enhanced Time Picker Component
+- **Functionality**: Sophisticated time input with "Jetzt" (Now) button, ±15/±30 minute adjustment shortcuts, automatic timezone handling, and inline validation for start < end time constraints.
+- **Purpose**: Streamline time entry with quick shortcuts for common adjustments, prevent data entry errors with real-time validation, and provide seamless timezone-aware time input.
+- **Trigger**: Any form requiring time input (manual time entries, quick entry dialogs, time corrections, etc.)
+- **Progression**: User enters time manually OR clicks "Jetzt" for current time OR uses +15/+30/-15/-30 shortcuts → System validates time format (HH:MM) → If part of start/end pair, validates start < end constraint → Shows inline error message if invalid → Prevents submission until corrected
+- **Success criteria**: Monospace font for clarity, clock icon indicator, red error styling with warning icon for validation failures, smooth UX with button shortcuts reducing manual typing, timezone-aware time capture
+
 ### Approval Workflows
 - **Functionality**: Timesheet period submissions with approval chain: Draft → Submitted → Approved/Rejected. Managers can approve/reject with comments.
 - **Purpose**: Ensure time entry accuracy and provide formal authorization before payroll/billing processing

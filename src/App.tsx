@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar, Brain, CalendarCheck } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar, Brain, CalendarCheck, Article } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
@@ -17,6 +17,7 @@ import { ProModuleScreen } from '@/components/ProModuleScreen'
 import { TrustLayerScreen } from '@/components/TrustLayerScreen'
 import { ExplainableAIScreen } from '@/components/ExplainableAIScreen'
 import { CalendarIntegrationScreen } from '@/components/CalendarIntegrationScreen'
+import { TimePickerDemo } from '@/components/TimePickerDemo'
 import { CommandPalette } from '@/components/CommandPalette'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 import { useAutomation } from '@/hooks/use-automation'
@@ -24,7 +25,7 @@ import { useCalendarAutoSync } from '@/hooks/use-calendar-auto-sync'
 import { getDefaultAppSettings } from '@/lib/automation'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('today')
+  const [activeTab, setActiveTab] = useState('timepicker')
   const [employees, setEmployees] = useKV<Employee[]>('employees_v2', [])
   const [projects, setProjects] = useKV<Project[]>('projects_v2', [])
   const [tasks, setTasks] = useKV<Task[]>('tasks', [])
@@ -85,7 +86,11 @@ function App() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-13 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-14 lg:w-auto lg:inline-grid">
+            <TabsTrigger value="timepicker" className="gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+              <Article className="h-4 w-4" weight="duotone" />
+              <span className="hidden sm:inline">Time Picker</span>
+            </TabsTrigger>
             <TabsTrigger value="today" className="gap-2">
               <Clock className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Heute</span>
@@ -143,6 +148,10 @@ function App() {
               <span className="hidden sm:inline">Admin</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="timepicker" className="mt-6">
+            <TimePickerDemo />
+          </TabsContent>
 
           <TabsContent value="today" className="mt-6">
             <TodayScreen
