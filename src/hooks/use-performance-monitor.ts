@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { telemetry } from '@/lib/telemetry'
+import { performanceBudgets } from '@/lib/performance-budgets'
 
 export function usePerformanceMonitor(componentName: string, enabled = true) {
   const mountTimeRef = useRef<number>(0)
   const renderCountRef = useRef<number>(0)
+  const renderStartRef = useRef<number>(0)
 
   useEffect(() => {
     if (!enabled) return
@@ -18,12 +20,23 @@ export function usePerformanceMonitor(componentName: string, enabled = true) {
       telemetry.trackPerformance(`${componentName}_lifetime`, lifetimeDuration, {
         renderCount: renderCountRef.current
       })
+
+      performanceBudgets.trackLifetime(componentName, lifetimeDuration)
     }
   }, [componentName, enabled])
 
   useEffect(() => {
-    if (enabled) {
-      renderCountRef.current += 1
+    renderStartRef.current = performance.now()
+  })
+
+  useEffect(() => {
+    if (!enabled) return
+
+    const renderTime = performance.now() - renderStartRef.current
+    renderCountRef.current += 1
+
+    if (renderTime > 0) {
+      performanceBudgets.trackRenderTime(componentName, renderTime)
     }
   })
 

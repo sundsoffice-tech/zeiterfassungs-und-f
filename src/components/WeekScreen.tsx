@@ -19,6 +19,7 @@ import { NaturalLanguageInput } from '@/components/NaturalLanguageInput'
 import { AnomalyBanner } from '@/components/AnomalyBanner'
 import { useGapOvertimeDetection } from '@/hooks/use-gap-overtime-detection'
 import { EmptyWeekView, EmptyProjects } from '@/components/EmptyStates'
+import { usePerformanceMonitor } from '@/hooks/use-performance-monitor'
 
 interface WeekScreenProps {
   employees: Employee[]
@@ -39,6 +40,8 @@ export function WeekScreen({
   setTimeEntries,
   absences = []
 }: WeekScreenProps) {
+  usePerformanceMonitor('WeekScreen')
+  
   const [selectedEmployee, setSelectedEmployee] = useState<string>(employees[0]?.id || '')
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }))
   const [selectedEntry, setSelectedEntry] = useState<TimeEntry | null>(null)

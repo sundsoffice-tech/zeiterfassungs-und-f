@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar, Brain, CalendarCheck, Article } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar, Brain, CalendarCheck, Article, Gauge } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
@@ -19,6 +19,9 @@ import { CalendarIntegrationScreen } from '@/components/CalendarIntegrationScree
 import { TimePickerDemo } from '@/components/TimePickerDemo'
 import { CommandPalette } from '@/components/CommandPalette'
 import { ReminderNotificationDisplay } from '@/components/ReminderNotificationDisplay'
+import { PerformanceAlertProvider } from '@/components/PerformanceAlertProvider'
+import { PerformanceBudgetMonitor } from '@/components/PerformanceBudgetMonitor'
+import { PerformanceSeverity } from '@/lib/performance-budgets'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 import { useAutomation } from '@/hooks/use-automation'
 import { useCalendarAutoSync } from '@/hooks/use-calendar-auto-sync'
@@ -26,6 +29,7 @@ import { useReminderProcessor } from '@/hooks/use-reminder-processor'
 import { getDefaultAppSettings } from '@/lib/automation'
 import { EmailNotificationService } from '@/lib/email-notifications'
 import { EmailConfig } from '@/lib/email-service'
+import { usePerformanceMonitor } from '@/hooks/use-performance-monitor'
 import { skipLinkClasses } from '@/lib/accessibility'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
@@ -57,6 +61,8 @@ function ReportsLoadingSkeleton() {
 }
 
 function App() {
+  usePerformanceMonitor('App')
+  
   const [activeTab, setActiveTab] = useState('timepicker')
   const [employees, setEmployees] = useKV<Employee[]>('employees_v2', [])
   const [projects, setProjects] = useKV<Project[]>('projects_v2', [])
@@ -158,7 +164,7 @@ function App() {
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-14 lg:w-auto lg:inline-grid" role="tablist" aria-label="Hauptnavigation">
+          <TabsList className="grid w-full grid-cols-15 lg:w-auto lg:inline-grid" role="tablist" aria-label="Hauptnavigation">
             <TabsTrigger value="timepicker" className="gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10" aria-label="Time Picker Ansicht">
               <Article className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Time Picker</span>
@@ -202,6 +208,10 @@ function App() {
             <TabsTrigger value="pro" className="gap-2 bg-gradient-to-r from-accent/10 to-primary/10" aria-label="Pro Module">
               <Rocket className="h-4 w-4" weight="duotone" aria-hidden="true" />
               <span className="hidden sm:inline">Pro</span>
+            </TabsTrigger>
+            <TabsTrigger value="performance" className="gap-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10" aria-label="Performance Monitor">
+              <Gauge className="h-4 w-4" weight="duotone" aria-hidden="true" />
+              <span className="hidden sm:inline">Performance</span>
             </TabsTrigger>
             <TabsTrigger value="repair" className="gap-2" aria-label="Reparaturmodus">
               <Wrench className="h-4 w-4" weight="duotone" aria-hidden="true" />
@@ -331,6 +341,10 @@ function App() {
             />
           </TabsContent>
 
+          <TabsContent value="performance" className="mt-6">
+            <PerformanceBudgetMonitor />
+          </TabsContent>
+
           <TabsContent value="repair" className="mt-6">
             <RepairModeScreen
               employees={employees || []}
@@ -388,6 +402,8 @@ function App() {
         activeTimer={activeTimer || null}
         setActiveTimer={setActiveTimer}
       />
+
+      <PerformanceAlertProvider enabled={true} minSeverity={PerformanceSeverity.WARNING} />
 
       <Toaster />
     </div>

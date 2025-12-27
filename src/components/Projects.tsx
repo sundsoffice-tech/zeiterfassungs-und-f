@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
 import { EmptyProjects } from '@/components/EmptyStates'
+import { usePerformanceMonitor } from '@/hooks/use-performance-monitor'
 
 interface ProjectsProps {
   projects: Project[]
@@ -25,6 +26,8 @@ interface ProjectsProps {
 }
 
 export function Projects({ projects, setProjects, tasks, setTasks, phases, setPhases, timeEntries }: ProjectsProps) {
+  usePerformanceMonitor('Projects')
+  
   const [open, setOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [formData, setFormData] = useState({ name: '', description: '' })

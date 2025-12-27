@@ -27,6 +27,7 @@ import { EmptyDayView } from '@/components/EmptyStates'
 import { useGlobalShortcuts } from '@/hooks/use-keyboard-shortcuts'
 import { announceToScreenReader } from '@/lib/accessibility'
 import { telemetry } from '@/lib/telemetry'
+import { usePerformanceMonitor } from '@/hooks/use-performance-monitor'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -51,6 +52,8 @@ export function TodayScreen({
   setActiveTimer,
   absences = []
 }: TodayScreenProps) {
+  usePerformanceMonitor('TodayScreen')
+  
   const [selectedEmployee, setSelectedEmployee] = useState<string>('')
   const [selectedProject, setSelectedProject] = useState<string>('')
   const [selectedPhase, setSelectedPhase] = useState<string>('')

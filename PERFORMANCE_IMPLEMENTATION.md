@@ -430,8 +430,247 @@ telemetry.clearEvents()
 ## Future Enhancements
 
 1. **Telemetry Dashboard**: Add a screen to visualize telemetry data
-2. **Performance Budgets**: Alert when performance thresholds exceeded
+2. **Performance Budgets**: Alert when performance thresholds exceeded ✅ COMPLETED
 3. **A/B Testing**: Use telemetry to track feature adoption
 4. **User Segmentation**: Analyze behavior by user role
 5. **Crash Reporting**: Automatic error reporting to external service
 6. **Real User Monitoring**: Track performance on actual user devices
+
+## Performance Budgets (NEW)
+
+**Location**: `src/lib/performance-budgets.ts`
+
+A comprehensive system for tracking and alerting on component performance violations.
+
+### Features
+
+**Budget Configuration**:
+- Set maximum render time (ms) per component
+- Set maximum re-render count
+- Set maximum component lifetime (ms)
+- Enable/disable monitoring per component
+- Default budgets for all key components
+
+**Violation Detection**:
+- Automatic tracking when components exceed budgets
+- Severity levels: INFO, WARNING (1.5x), CRITICAL (2x+)
+- Stack trace capture for debugging
+- Violation history with timestamps
+
+**Real-time Alerts**:
+- Toast notifications for violations
+- Configurable minimum severity
+- Debounced alerts to prevent spam
+- Visual severity indicators
+
+**Performance Monitoring Dashboard**:
+- Overview of all violations
+- Stats by component, severity, and metric
+- Real-time budget configuration
+- Component performance statistics
+- P95 render times and averages
+- Progress bars showing budget utilization
+
+### Default Performance Budgets
+
+```typescript
+const DEFAULT_BUDGETS = {
+  'App': {
+    maxRenderTime: 100ms,
+    maxReRenders: 10,
+    maxLifetimeMs: 300000 (5 minutes)
+  },
+  'TodayScreen': {
+    maxRenderTime: 50ms,
+    maxReRenders: 20,
+    maxLifetimeMs: 600000 (10 minutes)
+  },
+  'WeekScreen': {
+    maxRenderTime: 80ms,
+    maxReRenders: 15,
+    maxLifetimeMs: 600000
+  },
+  'ReportsScreen': {
+    maxRenderTime: 150ms,
+    maxReRenders: 10,
+    maxLifetimeMs: 300000
+  },
+  'Projects': {
+    maxRenderTime: 60ms,
+    maxReRenders: 15,
+    maxLifetimeMs: 600000
+  },
+  'QuickTimeEntry': {
+    maxRenderTime: 30ms,
+    maxReRenders: 25,
+    maxLifetimeMs: 120000 (2 minutes)
+  }
+}
+```
+
+### Usage
+
+**Enable Performance Monitoring**:
+```tsx
+import { usePerformanceMonitor } from '@/hooks/use-performance-monitor'
+
+function MyComponent() {
+  usePerformanceMonitor('MyComponent')
+  
+  // Component automatically tracked for:
+  // - Render time
+  // - Re-render count
+  // - Component lifetime
+  
+  return <div>...</div>
+}
+```
+
+**Configure Custom Budget**:
+```tsx
+import { performanceBudgets } from '@/lib/performance-budgets'
+
+performanceBudgets.setBudget('MyComponent', {
+  component: 'MyComponent',
+  maxRenderTime: 50,
+  maxReRenders: 15,
+  maxLifetimeMs: 120000,
+  enabled: true
+})
+```
+
+**Access Violation Data**:
+```tsx
+import { performanceBudgets, PerformanceSeverity } from '@/lib/performance-budgets'
+
+// Get all violations
+const violations = performanceBudgets.getViolations()
+
+// Get critical violations only
+const critical = performanceBudgets.getViolations({
+  severity: PerformanceSeverity.CRITICAL
+})
+
+// Get violations for a specific component
+const componentViolations = performanceBudgets.getViolations({
+  component: 'TodayScreen'
+})
+
+// Get violations in the last hour
+const recent = performanceBudgets.getViolations({
+  since: Date.now() - 3600000
+})
+
+// Get summary
+const summary = performanceBudgets.getViolationSummary()
+console.log(summary)
+// {
+//   total: 42,
+//   byComponent: { TodayScreen: 15, WeekScreen: 10, ... },
+//   bySeverity: { critical: 5, warning: 20, info: 17 },
+//   byMetric: { renderTime: 25, reRenders: 12, lifetime: 5 }
+// }
+
+// Get component stats
+const stats = performanceBudgets.getComponentStats('TodayScreen')
+console.log(stats)
+// {
+//   renderCount: 42,
+//   avgRenderTime: 35.2,
+//   minRenderTime: 12.1,
+//   maxRenderTime: 89.5,
+//   p95RenderTime: 72.3,
+//   violations: 8
+// }
+```
+
+**Listen for Violations**:
+```tsx
+import { performanceBudgets } from '@/lib/performance-budgets'
+
+useEffect(() => {
+  const unsubscribe = performanceBudgets.onViolation((violation) => {
+    console.log('Performance violation:', violation)
+    // Custom handling (e.g., send to analytics, show custom UI)
+  })
+  
+  return unsubscribe
+}, [])
+```
+
+**Performance Alert Provider**:
+```tsx
+import { PerformanceAlertProvider } from '@/components/PerformanceAlertProvider'
+import { PerformanceSeverity } from '@/lib/performance-budgets'
+
+// In App.tsx
+<PerformanceAlertProvider 
+  enabled={true} 
+  minSeverity={PerformanceSeverity.WARNING}
+  debounceMs={5000}
+/>
+```
+
+**Performance Monitor Dashboard**:
+```tsx
+import { PerformanceBudgetMonitor } from '@/components/PerformanceBudgetMonitor'
+
+// Accessible via "Performance" tab in main navigation
+<PerformanceBudgetMonitor />
+```
+
+### Integration with Components
+
+The following components now have performance monitoring enabled:
+- `App` - Main application component
+- `TodayScreen` - Today's time tracking view
+- `WeekScreen` - Weekly time tracking view
+- `Projects` - Project management view
+- `ReportsScreen` - Reports and analytics (lazy loaded)
+
+### Console Output
+
+When a violation occurs in development mode, detailed information is logged:
+
+```
+⚠️ Performance Budget Violation
+  Component: TodayScreen
+  Metric: renderTime
+  Actual: 75.23ms
+  Budget: 50ms
+  Ratio: 1.50x (50.5% over budget)
+  Severity: warning
+  
+  [Stack trace showing where the violation occurred]
+```
+
+### Benefits
+
+1. **Early Detection**: Catch performance regressions before they affect users
+2. **Objective Metrics**: Quantifiable performance targets for each component
+3. **Developer Awareness**: Real-time feedback on performance impact
+4. **Debugging Support**: Stack traces help identify performance bottlenecks
+5. **Historical Data**: Track performance trends over time
+6. **Configurable Thresholds**: Adjust budgets based on component complexity
+
+### Best Practices
+
+**Setting Budgets**:
+- Start with generous budgets and tighten gradually
+- Critical user-facing components should have stricter budgets
+- Complex components (reports, dashboards) can have higher budgets
+- Consider user context (fast vs. slow devices)
+
+**Responding to Violations**:
+- INFO: Monitor, not urgent
+- WARNING: Investigate if persistent
+- CRITICAL: Immediate optimization needed
+
+**Common Optimizations**:
+- Memoize expensive calculations with `useMemo`
+- Memoize callbacks with `useCallback`
+- Use `React.memo` for expensive child components
+- Implement virtual scrolling for long lists
+- Defer non-critical rendering with `useTransition`
+- Code-split large components with `lazy()`
+
