@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
@@ -14,6 +14,7 @@ import { ForecastScreen } from '@/components/ForecastScreen'
 import { AutomationScreen } from '@/components/AutomationScreen'
 import { OfflineSyncScreen } from '@/components/OfflineSyncScreen'
 import { ProModuleScreen } from '@/components/ProModuleScreen'
+import { TrustLayerScreen } from '@/components/TrustLayerScreen'
 import { CommandPalette } from '@/components/CommandPalette'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 import { useAutomation } from '@/hooks/use-automation'
@@ -74,7 +75,7 @@ function App() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-12 lg:w-auto lg:inline-grid">
             <TabsTrigger value="today" className="gap-2">
               <Clock className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Heute</span>
@@ -90,6 +91,10 @@ function App() {
             <TabsTrigger value="reports" className="gap-2">
               <ChartBar className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Berichte</span>
+            </TabsTrigger>
+            <TabsTrigger value="trust" className="gap-2">
+              <ShieldStar className="h-4 w-4" weight="duotone" />
+              <span className="hidden sm:inline">Vertrauen</span>
             </TabsTrigger>
             <TabsTrigger value="forecast" className="gap-2">
               <TrendUp className="h-4 w-4" weight="duotone" />
@@ -165,6 +170,15 @@ function App() {
               mileageEntries={mileageEntries || []}
               tasks={tasks || []}
               absences={absences || []}
+            />
+          </TabsContent>
+
+          <TabsContent value="trust" className="mt-6">
+            <TrustLayerScreen
+              employees={employees || []}
+              projects={projects || []}
+              tasks={tasks || []}
+              timeEntries={timeEntries || []}
             />
           </TabsContent>
 

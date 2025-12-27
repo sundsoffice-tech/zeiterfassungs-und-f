@@ -148,6 +148,12 @@ export interface TimeEntry {
   audit: AuditMetadata
   changeLog: ChangeLogEntry[]
   isFavorite?: boolean
+  evidenceAnchors?: Array<{
+    type: 'calendar' | 'file' | 'location_hash' | 'approval' | 'system'
+    timestamp: string
+    value: string
+    verified: boolean
+  }>
 }
 
 export interface TimesheetPeriod {
