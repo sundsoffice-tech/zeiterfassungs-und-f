@@ -126,6 +126,56 @@ This application requires sophisticated features including active timer manageme
 - **Progression**: System detects issues → Categorizes by type and severity → Generates repair suggestions → Displays in prioritized inbox → User selects issue → Reviews suggested actions with confidence scores → Chooses action → Previews changes → Applies with one click → Issue marked resolved → Updated time entries saved → Toast confirmation
 - **Success criteria**: Issues detected accurately across all employees and dates, repair actions work correctly without data corruption, confidence scores correlate with success rate, quick-fix actions complete in <5 seconds, batch operations handle 20+ entries efficiently, auto-resolution prevents stale issues, dismissed issues don't reappear, audit trail maintained for all repairs
 
+### Forecast & Planning ("Datenbasierte Vorhersage & Kapazitätsplanung")
+- **Functionality**: Comprehensive forecasting system that predicts time effort per task/project based on historical patterns, calculates budget risk scores (0-100%) with severity levels (low/medium/high/critical), generates smart staffing recommendations with specific actions, and provides AI-enhanced insights for critical projects.
+- **Purpose**: Enable proactive project management by predicting overruns, identifying resource gaps, and recommending staffing adjustments before projects go off track. Supports data-driven decisions like "2 Leute morgen statt 1, sonst Verzug" to prevent delays.
+- **Time Estimation**:
+  - **Historical Analysis**: Analyzes past time entries for projects/tasks to calculate average duration, standard deviation, and confidence scores
+  - **Confidence Scoring**: 0-100% confidence based on number of historical data points (10+ entries = 100%)
+  - **Per-Task Estimates**: Individual estimates for each task based on task-specific history
+  - **Per-Project Estimates**: Aggregate estimates when no task-level data exists
+  - **Explanation**: Clear reasoning showing "Basierend auf X historischen Einträgen, Durchschnitt: Yh (±Zh)"
+- **Budget Risk Assessment**:
+  - **Risk Score**: 0-100% calculated from multiple factors (budget usage, burn rate, timeline pressure, completion rate)
+  - **Severity Levels**: Low (<30%), Medium (30-50%), High (50-70%), Critical (70%+)
+  - **Risk Factors**: Itemized breakdown showing each contributing factor (e.g., "Budget fast erschöpft +30%", "Hohe Burn-Rate +20%")
+  - **Metrics**: Budget hours, spent hours, estimated remaining, projected total, completion %, days remaining, burn rate (h/day)
+  - **Hard Rules**:
+    - Budget >90% consumed → +30% risk
+    - Projected hours >110% budget → +35% risk
+    - <7 days remaining with high daily hours needed → +25% risk
+    - High burn rate with projected overage → +20% risk
+    - <50% complete with <14 days left → +15% risk
+    - No activity with imminent deadline → +10% risk
+  - **Visual Indicators**: Color-coded cards (green/yellow/orange/red), progress bars, metric grids
+- **Staffing Recommendations**:
+  - **Analysis**: Compares required capacity (remaining hours / days available) vs current capacity (staff × 6h/day × days)
+  - **Actions**: reduce, maintain, increase_moderate, increase_urgent
+  - **Priority Levels**: Low, Medium, High, Critical based on timeline urgency
+  - **Current vs Recommended**: Visual comparison showing staff changes needed
+  - **Specific Actions**: Bullet-pointed list of concrete steps (e.g., "2 Personen SOFORT hinzufügen", "Überstunden einplanen")
+  - **Logic**:
+    - Capacity <80% of needs → Increase staff (urgent if <7 days, moderate if >7 days)
+    - Capacity >200% of needs → Reduce staff (free up for other projects)
+    - Capacity adequate → Maintain current staffing
+  - **Examples**: "Empfehlung: 3 Personen morgen statt 1, sonst Verzug" for critical projects
+- **AI Enhancement**:
+  - **GPT-4 Analysis**: Optional AI-powered analysis of top 3 critical/high-risk projects
+  - **Insights**: Short risk assessment (1 sentence), 2-3 immediate actions, realistic prognosis
+  - **JSON Mode**: Structured response with insights array for each project
+  - **Graceful Degradation**: Falls back to rule-based analysis if AI unavailable
+  - **Transparency**: AI insights clearly marked with 🤖 prefix
+- **User Interface**:
+  - **Three Tabs**: Personalempfehlungen (staffing), Budget-Risiken (risk), Zeitschätzungen (estimates)
+  - **Alert Banner**: Highlights critical risks and urgent recommendations requiring immediate attention
+  - **Generate Options**: Basic forecast (rule-based, instant) or AI-enhanced forecast (includes GPT analysis)
+  - **Auto-Refresh**: Automatically generates basic forecast on load if projects exist
+  - **Timestamp**: Shows when forecast was generated and whether AI-enhanced
+  - **Color Coding**: Consistent severity-based colors (red=critical, orange=high, yellow=medium, green=low)
+- **Trigger**: Navigate to "Forecast" tab, click "Prognose erstellen" or "KI-Prognose erstellen", or auto-generated on first load
+- **Progression**: User opens Forecast tab → System auto-generates basic forecast → Displays recommendations/risks/estimates in tabs → User optionally clicks "KI-Prognose" → AI analyzes top risks → Enhanced insights displayed → User reviews staffing needs → Takes action on urgent recommendations → Refreshes forecast to see updated predictions
+- **Success criteria**: Time estimates within 20% accuracy when confidence >60%, risk scores correlate with actual overruns, staffing recommendations are actionable and specific, AI insights add value beyond rule-based analysis, UI clearly communicates urgency levels, critical projects highlighted prominently, forecasts complete in <3 seconds (basic) or <10 seconds (AI-enhanced)
+
 ### Audit Trail & Versioning
 - **Functionality**: Every record tracks created_by, created_at, updated_by, updated_at, device. Full change log with before/after snapshots and reason.
 - **Purpose**: Maintain complete history for compliance, debugging, and accountability
@@ -306,6 +356,7 @@ Animations should enhance the sense of organization and efficiency through purpo
   - Car for mileage
   - Receipt for expenses
   - CalendarBlank for absences and planning
+  - TrendUp for forecast and planning
   - Plus for add actions
   - PencilSimple for edit actions
   - Lock/LockOpen for locked/unlocked status
@@ -319,6 +370,9 @@ Animations should enhance the sense of organization and efficiency through purpo
   - Play/Pause/Stop for timer controls
   - Lightning for quick actions and templates
   - ArrowsClockwise for plan vs actual comparison
+  - Warning for risk indicators
+  - Target for time estimates
+  - SparkleIcon for AI-enhanced features
   
 - **Spacing**: 
   - Page padding: p-6 for desktop, p-4 for mobile

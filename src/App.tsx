@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
@@ -10,6 +10,7 @@ import { ReportsScreen } from '@/components/ReportsScreen'
 import { AdminScreen } from '@/components/AdminScreen'
 import { ValidationTestScreen } from '@/components/ValidationTestScreen'
 import { RepairModeScreen } from '@/components/RepairModeScreen'
+import { ForecastScreen } from '@/components/ForecastScreen'
 import { CommandPalette } from '@/components/CommandPalette'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 
@@ -60,7 +61,7 @@ function App() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
             <TabsTrigger value="today" className="gap-2">
               <Clock className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Heute</span>
@@ -76,6 +77,10 @@ function App() {
             <TabsTrigger value="reports" className="gap-2">
               <ChartBar className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Berichte</span>
+            </TabsTrigger>
+            <TabsTrigger value="forecast" className="gap-2">
+              <TrendUp className="h-4 w-4" weight="duotone" />
+              <span className="hidden sm:inline">Forecast</span>
             </TabsTrigger>
             <TabsTrigger value="repair" className="gap-2">
               <Wrench className="h-4 w-4" weight="duotone" />
@@ -133,6 +138,15 @@ function App() {
               projects={projects || []}
               timeEntries={timeEntries || []}
               mileageEntries={mileageEntries || []}
+            />
+          </TabsContent>
+
+          <TabsContent value="forecast" className="mt-6">
+            <ForecastScreen
+              employees={employees || []}
+              projects={projects || []}
+              tasks={tasks || []}
+              timeEntries={timeEntries || []}
             />
           </TabsContent>
 
