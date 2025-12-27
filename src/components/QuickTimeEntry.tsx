@@ -126,6 +126,8 @@ export function QuickTimeEntry({
     open
   )
 
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]" aria-describedby="quick-entry-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -193,7 +195,7 @@ export function QuickTimeEntry({
                 <SelectContent>
                   <SelectItem value="none">Keine Phase</SelectItem>
                   {availablePhases.map(phase => (
-                  <SelectItem value="none">Keine Phase</SelectItem>
+                    <SelectItem key={phase.id} value={phase.id}>
                       {phase.name}
                     </SelectItem>
                   ))}
