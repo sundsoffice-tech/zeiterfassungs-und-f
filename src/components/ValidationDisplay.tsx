@@ -1,18 +1,22 @@
-import { ValidationResult, ValidationSeverity } from '@/lib/validation-rules'
+import { ValidationResult, ValidationSeverity, ValidationQuickFix } from '@/lib/validation-rules'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { ShieldWarning, ShieldCheck, Info, XCircle, Warning } from '@phosphor-icons/react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { ShieldWarning, ShieldCheck, Info, XCircle, Warning, Lightbulb, CaretDown, CheckCircle, Question } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
+import { useState } from 'react'
 
 interface ValidationDisplayProps {
   results: ValidationResult[]
   showSoftWarnings?: boolean
   compact?: boolean
+  onApplyFix?: (result: ValidationResult, fix: ValidationQuickFix) => void
 }
 
-export function ValidationDisplay({ results, showSoftWarnings = true, compact = false }: ValidationDisplayProps) {
+export function ValidationDisplay({ results, showSoftWarnings = true, compact = false, onApplyFix }: ValidationDisplayProps) {
   const hardErrors = results.filter(r => r.severity === ValidationSeverity.HARD && !r.valid)
   const softWarnings = results.filter(r => r.severity === ValidationSeverity.SOFT)
 
@@ -80,7 +84,7 @@ export function ValidationDisplay({ results, showSoftWarnings = true, compact = 
                 </span>
               </div>
               {hardErrors.map((error, idx) => (
-                <ValidationItem key={idx} result={error} />
+                <ValidationItem key={idx} result={error} onApplyFix={onApplyFix} />
               ))}
             </div>
             {softWarnings.length > 0 && <Separator />}
@@ -99,7 +103,7 @@ export function ValidationDisplay({ results, showSoftWarnings = true, compact = 
               </span>
             </div>
             {softWarnings.map((warning, idx) => (
-              <ValidationItem key={idx} result={warning} />
+              <ValidationItem key={idx} result={warning} onApplyFix={onApplyFix} />
             ))}
           </div>
         )}
@@ -108,13 +112,14 @@ export function ValidationDisplay({ results, showSoftWarnings = true, compact = 
   )
 }
 
-function ValidationItem({ result }: { result: ValidationResult }) {
+function ValidationItem({ result, onApplyFix }: { result: ValidationResult; onApplyFix?: (result: ValidationResult, fix: ValidationQuickFix) => void }) {
   const isError = result.severity === ValidationSeverity.HARD && !result.valid
+  const [showExplanation, setShowExplanation] = useState(false)
   
   return (
     <div className={cn(
-      'flex gap-3 p-3 rounded-md text-sm',
-      isError ? 'bg-destructive/5' : 'bg-accent/5'
+      'flex gap-3 p-3 rounded-md text-sm border',
+      isError ? 'bg-destructive/5 border-destructive/20' : 'bg-accent/5 border-accent/20'
     )}>
       <div className="flex-shrink-0 mt-0.5">
         {isError ? (
@@ -123,15 +128,59 @@ function ValidationItem({ result }: { result: ValidationResult }) {
           <Warning className="h-4 w-4 text-accent" weight="fill" />
         )}
       </div>
-      <div className="flex-1 space-y-1">
+      <div className="flex-1 space-y-2">
         <p className={cn(
           'font-medium',
           isError ? 'text-destructive' : 'text-foreground'
         )}>
           {result.message}
         </p>
+        
+        {result.explanation && (
+          <Collapsible open={showExplanation} onOpenChange={setShowExplanation}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-auto p-0 text-xs gap-1.5 text-muted-foreground hover:text-foreground">
+                <Question className="h-3 w-3" />
+                Warum wurde das markiert?
+                <CaretDown className={cn("h-3 w-3 transition-transform", showExplanation && "rotate-180")} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded border leading-relaxed">
+                <div className="flex items-start gap-2">
+                  <Lightbulb className="h-4 w-4 text-accent shrink-0 mt-0.5" weight="duotone" />
+                  <p>{result.explanation}</p>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
+        {result.quickFixes && result.quickFixes.length > 0 && onApplyFix && (
+          <div className="space-y-1.5 pt-1">
+            <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <CheckCircle className="h-3 w-3" />
+              1-Klick-Lösungen:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {result.quickFixes.map((fix) => (
+                <Button
+                  key={fix.id}
+                  variant="outline"
+                  size="sm"
+                  className="h-auto py-1.5 px-3 text-xs gap-1.5"
+                  onClick={() => onApplyFix(result, fix)}
+                >
+                  <CheckCircle className="h-3 w-3" />
+                  {fix.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+        
         {result.metadata && Object.keys(result.metadata).length > 0 && (
-          <div className="text-xs text-muted-foreground space-y-0.5">
+          <div className="text-xs text-muted-foreground space-y-0.5 pt-1">
             {result.metadata.conflictingProject && (
               <p>Konflikt mit Projekt: {result.metadata.conflictingProject}</p>
             )}

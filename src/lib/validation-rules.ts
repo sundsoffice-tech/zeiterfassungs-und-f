@@ -13,6 +13,21 @@ export interface ValidationResult {
   message: string
   field?: string
   metadata?: Record<string, any>
+  explanation?: string
+  quickFixes?: ValidationQuickFix[]
+}
+
+export interface ValidationQuickFix {
+  id: string
+  label: string
+  description: string
+  icon?: string
+  action: {
+    type: 'update_field' | 'split_entry' | 'move_entry' | 'delete_entry' | 'confirm' | 'fill_gap'
+    field?: string
+    value?: any
+    entries?: any[]
+  }
 }
 
 export interface ValidationContext {
@@ -89,16 +104,52 @@ export class TimeEntryValidator {
     })
 
     overlapping.forEach(overlappingEntry => {
+      const quickFixes: any[] = [
+        {
+          id: 'move-to-end',
+          label: 'Nach Ende verschieben',
+          description: `Startzeit auf ${overlappingEntry.endTime} setzen`,
+          action: {
+            type: 'update_field',
+            field: 'startTime',
+            value: overlappingEntry.endTime
+          }
+        },
+        {
+          id: 'adjust-end',
+          label: 'Ende anpassen',
+          description: `Endzeit auf ${overlappingEntry.startTime} setzen`,
+          action: {
+            type: 'update_field',
+            field: 'endTime',
+            value: overlappingEntry.startTime
+          }
+        },
+        {
+          id: 'delete-other',
+          label: 'Anderen Eintrag löschen',
+          description: 'Den überlappenden Eintrag entfernen',
+          action: {
+            type: 'delete_entry',
+            entries: [overlappingEntry.id]
+          }
+        }
+      ]
+
       results.push({
         valid: false,
         severity: ValidationSeverity.HARD,
         code: 'OVERLAP',
         message: `Überschneidung mit einem anderen Zeiteintrag (${overlappingEntry.startTime} - ${overlappingEntry.endTime})`,
         field: 'startTime',
+        explanation: `Dieser Eintrag überschneidet sich zeitlich mit einem bereits vorhandenen Eintrag. Zwei Zeiteinträge können nicht zur gleichen Zeit stattfinden. Die Überschneidung ist zwischen ${entry.startTime}-${entry.endTime} und ${overlappingEntry.startTime}-${overlappingEntry.endTime}.`,
         metadata: {
           conflictingEntryId: overlappingEntry.id,
-          conflictingProject: overlappingEntry.projectId
-        }
+          conflictingProject: overlappingEntry.projectId,
+          conflictingStartTime: overlappingEntry.startTime,
+          conflictingEndTime: overlappingEntry.endTime
+        },
+        quickFixes
       })
     })
 
@@ -113,12 +164,41 @@ export class TimeEntryValidator {
     const end = this.parseTime(entry.date, entry.endTime)
 
     if (end <= start) {
+      const nextDay = new Date(end)
+      nextDay.setDate(nextDay.getDate() + 1)
+      const nextDayTime = `${String(nextDay.getHours()).padStart(2, '0')}:${String(nextDay.getMinutes()).padStart(2, '0')}`
+
+      const quickFixes: any[] = [
+        {
+          id: 'swap-times',
+          label: 'Zeiten vertauschen',
+          description: 'Start- und Endzeit tauschen',
+          action: {
+            type: 'update_field',
+            field: 'times',
+            value: { startTime: entry.endTime, endTime: entry.startTime }
+          }
+        },
+        {
+          id: 'add-12-hours',
+          label: '+12 Stunden zur Endzeit',
+          description: 'Nachtschicht: Endzeit auf nächsten Tag setzen',
+          action: {
+            type: 'update_field',
+            field: 'endTime',
+            value: nextDayTime
+          }
+        }
+      ]
+
       results.push({
         valid: false,
         severity: ValidationSeverity.HARD,
         code: 'NEGATIVE_DURATION',
         message: 'Endzeit muss nach der Startzeit liegen',
-        field: 'endTime'
+        field: 'endTime',
+        explanation: `Die Endzeit (${entry.endTime}) liegt vor der Startzeit (${entry.startTime}). Dies führt zu einer negativen Dauer. Wenn Sie eine Nachtschicht erfassen möchten, die über Mitternacht geht, verwenden Sie die 1-Klick-Lösung "+12 Stunden" oder splitten Sie den Eintrag in zwei Tage.`,
+        quickFixes
       })
     }
 
@@ -277,25 +357,65 @@ export class TimeEntryValidator {
     const project = projects.find(p => p.id === entry.projectId)
     
     if (entry.billable && (!entry.notes || entry.notes.trim().length === 0)) {
+      const quickFixes: any[] = [
+        {
+          id: 'add-standard-note',
+          label: 'Standard-Notiz hinzufügen',
+          description: 'Generische Projektarbeit eintragen',
+          action: {
+            type: 'update_field',
+            field: 'notes',
+            value: `Projektarbeit ${project?.name || ''}`
+          }
+        },
+        {
+          id: 'mark-non-billable',
+          label: 'Als nicht abrechenbar markieren',
+          description: 'Wenn keine Details nötig sind',
+          action: {
+            type: 'update_field',
+            field: 'billable',
+            value: false
+          }
+        }
+      ]
+
       results.push({
         valid: true,
         severity: ValidationSeverity.SOFT,
         code: 'MISSING_NOTES',
         message: `Abrechenbare Zeit sollte eine Notiz enthalten`,
         field: 'notes',
+        explanation: `Abrechenbare Zeiten sollten eine Beschreibung der durchgeführten Tätigkeit enthalten, damit der Kunde nachvollziehen kann, wofür die Zeit aufgewendet wurde. Dies ist auch wichtig für die interne Dokumentation und Qualitätssicherung.`,
         metadata: {
           projectName: project?.name
-        }
+        },
+        quickFixes
       })
     }
 
     if (!entry.taskId && project?.name && (!entry.notes || entry.notes.trim().length === 0)) {
+      const quickFixes: any[] = [
+        {
+          id: 'add-placeholder-note',
+          label: 'Platzhalter eintragen',
+          description: 'Temporäre Notiz, später ergänzen',
+          action: {
+            type: 'update_field',
+            field: 'notes',
+            value: '[Details nachtragen]'
+          }
+        }
+      ]
+
       results.push({
         valid: true,
         severity: ValidationSeverity.SOFT,
         code: 'MISSING_TASK_OR_NOTES',
         message: 'Eintrag ohne Task sollte eine Notiz enthalten',
-        field: 'notes'
+        field: 'notes',
+        explanation: 'Wenn kein spezifischer Task ausgewählt ist, sollte eine Notiz die Tätigkeit beschreiben, um die Zuordnung und spätere Nachvollziehbarkeit zu gewährleisten.',
+        quickFixes
       })
     }
 

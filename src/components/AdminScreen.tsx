@@ -7,13 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon, Lock } from '@phosphor-icons/react'
+import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon, Lock, Sliders } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
 import { AdminDashboard } from '@/components/AdminDashboard'
 import { IntegrationsScreen } from '@/components/IntegrationsScreen'
 import { PrivacySecurityScreen } from '@/components/PrivacySecurityScreen'
+import { ValidationRulesScreen } from '@/components/ValidationRulesScreen'
 
 interface AdminScreenProps {
   employees: Employee[]
@@ -160,6 +161,10 @@ export function AdminScreen({
             <UserCircleGear className="h-4 w-4" weight="duotone" />
             Benutzerverwaltung
           </TabsTrigger>
+          <TabsTrigger value="validation" className="gap-2">
+            <Sliders className="h-4 w-4" weight="duotone" />
+            Validierungsregeln
+          </TabsTrigger>
           <TabsTrigger value="integrations" className="gap-2">
             <LinkIcon className="h-4 w-4" weight="duotone" />
             Integrationen
@@ -180,6 +185,10 @@ export function AdminScreen({
             activeTimer={activeTimer}
             absences={absences}
           />
+        </TabsContent>
+
+        <TabsContent value="validation">
+          <ValidationRulesScreen projects={projects} />
         </TabsContent>
 
         <TabsContent value="integrations">

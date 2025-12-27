@@ -294,6 +294,34 @@ export enum EncryptionLevel {
   END_TO_END = 'end_to_end'
 }
 
+export interface ValidationRule {
+  id: string
+  tenantId: string
+  projectId?: string
+  code: string
+  name: string
+  description: string
+  severity: 'hard' | 'soft'
+  enabled: boolean
+  threshold?: number
+  requiredFields?: string[]
+  settings?: Record<string, any>
+  audit: AuditMetadata
+}
+
+export interface ValidationQuickFix {
+  id: string
+  label: string
+  description: string
+  icon?: string
+  action: {
+    type: 'update_field' | 'split_entry' | 'move_entry' | 'delete_entry' | 'confirm'
+    field?: string
+    value?: any
+    entries?: any[]
+  }
+}
+
 export enum AuditEventType {
   USER_LOGIN = 'user_login',
   USER_LOGOUT = 'user_logout',
