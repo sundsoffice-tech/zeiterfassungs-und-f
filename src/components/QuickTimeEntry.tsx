@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Employee, Project, Task, Phase, TimeEntry, ApprovalStatus, ActivityMode, AuditMetadata } from '@/lib/types'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Employee, Project, Task, Phase, TimeEntry, ApprovalStatus, ActivityMode } from '@/lib/types'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
@@ -30,104 +30,98 @@ export function QuickTimeEntry({
   onSave
 }: QuickTimeEntryProps) {
   const [selectedEmployee, setSelectedEmployee] = useState<string>('')
+  const [selectedProject, setSelectedProject] = useState<string>('')
+  const [selectedPhase, setSelectedPhase] = useState<string>('')
   const [selectedTask, setSelectedTask] = useState<string>('')
+  const [duration, setDuration] = useState<string>('')
 
+  const availablePhases = phases.filter(p => p.projectId === selectedProject)
   const availableTasks = tasks.filter(t => 
     (!selectedPhase || t.phaseId === selectedPhase)
+  )
 
+  const handleSave = () => {
     if (!selectedEmployee) {
+      toast.error('Bitte wählen Sie einen Mitarbeiter aus')
       return
+    }
 
-      toast.error('Bitte wählen Sie ein Projekt aus
-   
-
+    if (!selectedProject) {
+      toast.error('Bitte wählen Sie ein Projekt aus')
       return
+    }
+
+    if (!duration || parseFloat(duration) <= 0) {
+      toast.error('Bitte geben Sie eine gültige Dauer ein')
+      return
+    }
 
     const now = new Date()
-    const en
-
-
-      id: `time-${Date.now(
+    const newEntry: TimeEntry = {
+      id: `time-${Date.now()}`,
       employeeId: selectedEmployee,
-      phaseI
-     
-
+      projectId: selectedProject,
+      phaseId: selectedPhase || undefined,
+      taskId: selectedTask || undefined,
+      date: format(now, 'yyyy-MM-dd'),
+      startTime: format(now, 'HH:mm'),
+      endTime: undefined,
+      durationHours: parseFloat(duration),
+      description: '',
+      activityMode: ActivityMode.ACTIVE,
       tags: [],
       approvalStatus: ApprovalStatus.DRAFT,
-      audit,
-     
-
+      audit: createAuditMetadata('default-user'),
+      validation: {
+        isValid: true,
+        validatedAt: now.toISOString(),
+        validatedBy: 'system',
+        issues: [],
+        aiScore: 1,
         verified: true
+      }
     }
+
     onSave(newEntry)
     
-    onOpenChange(false)
-
-    <Dialog open={open} onOpenChange={onOpenChange}>
-
-            <Clock className="h-5
-          </DialogTitle>
-            Schnelleintrag
-        </DialogHeader>
-        <div className="space-y-4
-            <Label htmlFor="employee">Mita
-              <SelectTrigger id="employe
-              </SelectTrigger>
-                
-              
-                ))}
-            </S
-
-            <Label htmlFor="project">Projek
-              value=
-            
-                setS
-            >
-                <Select
-              <SelectContent>
-                  <SelectItem ke
-                  </Se
-        
-     
-
-              <Label
-                value={selectedPhase} 
+    setSelectedEmployee('')
+    setSelectedProject('')
+    setSelectedPhase('')
+    setSelectedTask('')
+    setDuration('')
     
-                }}
-                <Select
-   
+    toast.success('Zeiteintrag erfolgreich gespeichert')
+    onOpenChange(false)
+  }
 
-          
-                    </SelectItem>
-                </SelectContent>
-            </div>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" weight="duotone" />
+            Schnelleintrag
+          </DialogTitle>
+        </DialogHeader>
 
-            <div className="space-y-2">
-              <Select val
-                  <Selec
-                <SelectConten
-                  {availableTasks.map(task => (
-                      {task.na
-                  ))}
-
-          )}
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Input
-              type="number"
-              min="0"
-              value={duration}
-            />
+            <Label htmlFor="employee">Mitarbeiter *</Label>
+            <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+              <SelectTrigger id="employee">
+                <SelectValue placeholder="Mitarbeiter wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                {employees.filter(e => e.active).map(emp => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <Button
-              variant="outline"
-              onClick={() => s
-              0.5h
-            <Button
-              variant="outline
-              onClick
-              1h
-
-              variant="outline"
+          <div className="space-y-2">
             <Label htmlFor="project">Projekt *</Label>
             <Select 
               value={selectedProject} 
@@ -227,35 +221,6 @@ export function QuickTimeEntry({
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              onClick={() => setDuration('2')}
-            >
-              2h
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setDuration('4')}
-            >
-              4h
-            </Button>
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Abbrechen
-          </Button>
-          <Button onClick={handleSave} className="gap-2">
-            <FloppyDisk className="h-4 w-4" weight="duotone" />
-            Speichern
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
               size="sm"
               onClick={() => setDuration('2')}
             >
