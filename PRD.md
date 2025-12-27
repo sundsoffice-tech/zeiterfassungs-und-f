@@ -48,8 +48,8 @@ This application requires sophisticated features including active timer manageme
 - **Success criteria**: Status tracking, email notifications (simulated), rejection reasons captured, resubmission flow
 
 ### AI-Assisted Time Logic (Validation & Suggestions)
-- **Functionality**: Comprehensive validation system with hard rules (blocking errors) and soft rules (warnings), plus AI-powered suggestions based on historical patterns
-- **Purpose**: Ensure data quality, prevent common errors, detect anomalies, and provide intelligent assistance while maintaining full transparency and user control
+- **Functionality**: Comprehensive validation system with hard rules (blocking errors) and soft rules (warnings), plus AI-powered suggestions based on historical patterns, and advanced AI-powered anomaly detection that identifies unusual behavior patterns
+- **Purpose**: Ensure data quality, prevent common errors, detect anomalies, provide intelligent assistance, and identify unusual patterns that deviate from personal habits, team averages, or project-typical behavior while maintaining full transparency and user control
 - **Hard Rules (Blocking)**:
   - Overlapping time entries for same employee
   - Negative duration (end time before start time)
@@ -66,9 +66,20 @@ This application requires sophisticated features including active timer manageme
   - Long shifts without documented pauses (>10h)
   - No pauses detected in 8+ hour days (less than 30 min gap)
 - **AI Suggestions**: Contextual recommendations based on employee's recent entries, project patterns, and typical workflows (project suggestions, task recommendations, duration estimates, note templates)
-- **Trigger**: Real-time validation on entry creation/edit, AI suggestions on demand via button click
-- **Progression**: Enter time data → System validates in real-time → Shows hard errors (blocks save) or soft warnings (can proceed) → User requests AI suggestions → AI analyzes patterns → Provides 2-4 actionable recommendations → User applies or dismisses
-- **Success criteria**: All validation rules function correctly, clear distinction between blocking errors and warnings, AI suggestions are contextually relevant, full transparency (error codes, field names, metadata displayed), user maintains full control
+- **Anomaly Detection (Pattern-Based)**: 
+  - **Time of Day Anomalies**: Detects when a project is booked at an unusual time (e.g., "Projekt A wird sonst morgens gebucht, heute nachts")
+  - **Duration Anomalies**: Identifies when a task takes significantly longer or shorter than typical (e.g., "Task X dauert im Schnitt 45 min, heute 4h")
+  - **Micro-Entries**: Flags excessive small entries suggesting inefficient usage (e.g., "Viele Mikro-Einträge → Hinweis auf falsche Nutzung")
+  - **Frequency Anomalies**: Detects unusual number of entries per day
+  - **Project Switching**: Identifies excessive context switching between projects
+  - **Team Deviation**: Compares individual behavior to team average
+  - **AI-Enhanced Detection**: GPT-4 powered analysis for complex pattern recognition
+  - Comparison baselines: Personal historical behavior (30 days), team average, project-specific patterns
+  - Confidence scoring (0-100%) and severity levels (Info, Warning, Critical)
+  - Evidence-based explanations with clear metrics (typical vs current values)
+- **Trigger**: Real-time validation on entry creation/edit, AI suggestions on demand via button click, anomaly detection via dedicated analysis tabs
+- **Progression**: Enter time data → System validates in real-time → Shows hard errors (blocks save) or soft warnings (can proceed) → User requests AI suggestions → AI analyzes patterns → Provides 2-4 actionable recommendations → User applies or dismisses → Navigate to Anomaly tabs → Click analyze → System compares to patterns → Shows detected anomalies with evidence → User reviews and takes action if needed
+- **Success criteria**: All validation rules function correctly, clear distinction between blocking errors and warnings, AI suggestions are contextually relevant, anomaly detection identifies meaningful patterns with high confidence (>60%), full transparency (error codes, field names, metadata, evidence displayed), user maintains full control, baseline metrics clearly shown (typical vs current)
 
 ### Audit Trail & Versioning
 - **Functionality**: Every record tracks created_by, created_at, updated_by, updated_at, device. Full change log with before/after snapshots and reason.

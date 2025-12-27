@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Employee, Project, TimeEntry, Task, Phase, ApprovalStatus, UserRole, Absence, AbsenceType } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,8 +13,10 @@ import { Badge } from '@/components/ui/badge'
 import { useTimeEntryValidation } from '@/hooks/use-validation'
 import { ValidationDisplay, ValidationSummaryBadge } from '@/components/ValidationDisplay'
 import { AISuggestions, AISuggestion } from '@/components/AISuggestions'
+import { AnomalyDisplay } from '@/components/AnomalyDisplay'
+import { AnomalyAnalysisContext } from '@/lib/anomaly-detection'
 import { ShieldCheck, Brain, TestTube, Play } from '@phosphor-icons/react'
-import { format } from 'date-fns'
+import { format, subDays } from 'date-fns'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
 import { toast } from 'sonner'
 
@@ -75,6 +77,33 @@ export function ValidationTestScreen({
     holidays: ['2024-12-25', '2024-12-26', '2025-01-01'],
     tenantSettings
   })
+
+  const anomalyContext = useMemo<AnomalyAnalysisContext>(() => {
+    const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd')
+    
+    const employeeHistory = timeEntries
+      .filter(e => e.employeeId === testEntry.employeeId && e.date >= thirtyDaysAgo && e.id !== testEntry.id)
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    const teamHistory = timeEntries
+      .filter(e => e.date >= thirtyDaysAgo)
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    const projectHistory = timeEntries
+      .filter(e => e.projectId === testEntry.projectId && e.date >= thirtyDaysAgo)
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    return {
+      currentEntry: testEntry,
+      employeeHistory,
+      teamHistory,
+      projectHistory,
+      employees,
+      projects,
+      tasks,
+      phases
+    }
+  }, [testEntry, timeEntries, employees, projects, tasks, phases])
 
   const handleFieldChange = (field: keyof TimeEntry, value: any) => {
     setTestEntry(prev => {
@@ -205,9 +234,26 @@ export function ValidationTestScreen({
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="space-y-6">
-          <Card>
+      <Tabs defaultValue="validation" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="validation" className="gap-2">
+            <ShieldCheck className="h-4 w-4" weight="duotone" />
+            <span className="hidden sm:inline">Regeln</span>
+          </TabsTrigger>
+          <TabsTrigger value="anomalies" className="gap-2">
+            <Brain className="h-4 w-4" weight="duotone" />
+            <span className="hidden sm:inline">Muster</span>
+          </TabsTrigger>
+          <TabsTrigger value="ai-anomalies" className="gap-2">
+            <Brain className="h-4 w-4" weight="fill" />
+            <span className="hidden sm:inline">KI-Analyse</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="validation" className="space-y-0">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-6">
+              <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Play className="h-4 w-4" weight="duotone" />
@@ -271,9 +317,9 @@ export function ValidationTestScreen({
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Zeiteintrag bearbeiten</CardTitle>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Zeiteintrag bearbeiten</CardTitle>
               <CardDescription className="text-xs">
                 Passe die Werte an, um die Validierung zu testen
               </CardDescription>
@@ -468,7 +514,291 @@ export function ValidationTestScreen({
             </CardContent>
           </Card>
         </div>
+
+        <div className="space-y-6">
+          <ValidationDisplay
+            results={validation.results}
+            showSoftWarnings={true}
+          />
+
+          <AISuggestions
+            timeEntries={timeEntries}
+            currentEntry={testEntry}
+            projects={projects}
+            tasks={tasks}
+            phases={phases}
+            employees={employees}
+            employeeId={testEntry.employeeId}
+            onApplySuggestion={handleApplySuggestion}
+          />
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Validierungs-Details</CardTitle>
+              <CardDescription className="text-xs">
+                Technische Informationen zur Validierung
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Hard Errors:</span>
+                  <Badge variant={validation.hasHardErrors ? 'destructive' : 'outline'}>
+                    {validation.hardErrors.length}
+                  </Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Soft Warnings:</span>
+                  <Badge variant={validation.hasSoftWarnings ? 'secondary' : 'outline'}>
+                    {validation.softWarnings.length}
+                  </Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Can Save:</span>
+                  <Badge variant={validation.canSave ? 'default' : 'destructive'}>
+                    {validation.canSave ? 'Ja' : 'Nein'}
+                  </Badge>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground">Aktive Regeln:</p>
+                <div className="flex flex-wrap gap-1">
+                  <Badge variant="outline" className="text-xs">Überlappung</Badge>
+                  <Badge variant="outline" className="text-xs">Negative Dauer</Badge>
+                  <Badge variant="outline" className="text-xs">Gesperrte Zeiten</Badge>
+                  <Badge variant="outline" className="text-xs">Projektstatus</Badge>
+                  <Badge variant="outline" className="text-xs">Abwesenheit</Badge>
+                  <Badge variant="outline" className="text-xs">Tagesstunden</Badge>
+                  <Badge variant="outline" className="text-xs">Notizen</Badge>
+                  <Badge variant="outline" className="text-xs">Rundungen</Badge>
+                  <Badge variant="outline" className="text-xs">Wochenende</Badge>
+                  <Badge variant="outline" className="text-xs">Feiertage</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+        </TabsContent>
+
+        <TabsContent value="anomalies" className="space-y-0">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Play className="h-4 w-4" weight="duotone" />
+                    Test-Szenarien
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Schnelltests für verschiedene Validierungsregeln
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => runTestScenario('overlap')}
+                      className="justify-start"
+                    >
+                      Überlappung
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => runTestScenario('negative')}
+                      className="justify-start"
+                    >
+                      Negative Dauer
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => runTestScenario('restricted')}
+                      className="justify-start"
+                    >
+                      Gesperrte Zeit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => runTestScenario('excessive')}
+                      className="justify-start"
+                    >
+                      Überstunden
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => runTestScenario('missing-notes')}
+                      className="justify-start"
+                    >
+                      Fehlende Notizen
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => runTestScenario('valid')}
+                      className="justify-start"
+                    >
+                      ✓ Gültig
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Statistiken</CardTitle>
+                  <CardDescription className="text-xs">
+                    Datengrundlage für Muster-Erkennung
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Historische Einträge (Mitarbeiter):</span>
+                      <Badge variant="outline">
+                        {anomalyContext.employeeHistory.length}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Team-Einträge (30 Tage):</span>
+                      <Badge variant="outline">
+                        {anomalyContext.teamHistory.length}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Projekt-Einträge:</span>
+                      <Badge variant="outline">
+                        {anomalyContext.projectHistory.length}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Erkennbare Anomalien:</p>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="outline" className="text-xs">Tageszeit</Badge>
+                      <Badge variant="outline" className="text-xs">Dauer</Badge>
+                      <Badge variant="outline" className="text-xs">Mikro-Einträge</Badge>
+                      <Badge variant="outline" className="text-xs">Häufigkeit</Badge>
+                      <Badge variant="outline" className="text-xs">Projektwechsel</Badge>
+                      <Badge variant="outline" className="text-xs">Team-Abweichung</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              <AnomalyDisplay context={anomalyContext} useAI={false} />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ai-anomalies" className="space-y-0">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Brain className="h-5 w-5 text-accent" weight="fill" />
+                    KI-gestützte Analyse
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Erweiterte Muster-Erkennung mit GPT-4
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Die KI-Analyse nutzt fortgeschrittene Modelle, um komplexe Muster zu erkennen, die über einfache Regeln hinausgehen:
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start gap-2">
+                      <span className="text-accent shrink-0 mt-0.5">•</span>
+                      <span>Vergleich mit <strong>persönlichen Gewohnheiten</strong> (letzte 30 Tage)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-accent shrink-0 mt-0.5">•</span>
+                      <span>Abweichung vom <strong>Team-Durchschnitt</strong></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-accent shrink-0 mt-0.5">•</span>
+                      <span><strong>Projekt-spezifische</strong> Muster und Anomalien</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-accent shrink-0 mt-0.5">•</span>
+                      <span>Kontextuelle Interpretation und <strong>versteckte Zusammenhänge</strong></span>
+                    </li>
+                  </ul>
+
+                  <Separator />
+
+                  <div className="p-3 rounded-lg bg-accent/10 border border-accent/30">
+                    <p className="text-xs text-muted-foreground">
+                      <strong>Beispiele:</strong><br/>
+                      "Projekt A wird sonst morgens gebucht, heute nachts"<br/>
+                      "Task X dauert im Schnitt 45 min, heute 4h"<br/>
+                      "Viele Mikro-Einträge → Hinweis auf falsche Nutzung"
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Statistiken</CardTitle>
+                  <CardDescription className="text-xs">
+                    Datengrundlage für KI-Analyse
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Historische Einträge (Mitarbeiter):</span>
+                      <Badge variant="outline">
+                        {anomalyContext.employeeHistory.length}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Team-Einträge (30 Tage):</span>
+                      <Badge variant="outline">
+                        {anomalyContext.teamHistory.length}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Projekt-Einträge:</span>
+                      <Badge variant="outline">
+                        {anomalyContext.projectHistory.length}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="p-3 rounded-lg bg-muted/50 border">
+                    <p className="text-xs text-muted-foreground">
+                      💡 Die KI-Analyse benötigt ausreichend historische Daten für aussagekräftige Ergebnisse. 
+                      Empfohlen: mindestens 10 Einträge.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              <AnomalyDisplay context={anomalyContext} useAI={true} />
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
