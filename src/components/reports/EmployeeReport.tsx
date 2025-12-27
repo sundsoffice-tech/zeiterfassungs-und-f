@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { User, Clock, Warning, CheckCircle, CalendarBlank, TrendUp } from '@phosphor-icons/react'
 import { format, parseISO, startOfWeek, endOfWeek, eachDayOfInterval, differenceInDays } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { TimeEntryTimeline } from '@/components/reports/TimeEntryTimeline'
 
 interface EmployeeReportProps {
   employees: Employee[]
@@ -223,6 +224,7 @@ export function EmployeeReport({ employees, projects, tasks, timeEntries, absenc
           <TabsList>
             <TabsTrigger value="weekly">Wochenübersicht</TabsTrigger>
             <TabsTrigger value="projects">Projekte</TabsTrigger>
+            <TabsTrigger value="entries">Alle Einträge</TabsTrigger>
             <TabsTrigger value="quality">Qualität</TabsTrigger>
           </TabsList>
 
@@ -318,6 +320,17 @@ export function EmployeeReport({ employees, projects, tasks, timeEntries, absenc
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="entries" className="space-y-4">
+            <TimeEntryTimeline
+              entries={timeEntries.filter(e => e.employeeId === analysis.employee.id)}
+              employees={employees}
+              projects={projects}
+              tasks={tasks}
+              title={`Alle Zeiteinträge von ${analysis.employee.name}`}
+              description="Vollständige Übersicht mit Timer-Details, Modus-Wechseln und Notizen"
+            />
           </TabsContent>
 
           <TabsContent value="quality" className="space-y-4">

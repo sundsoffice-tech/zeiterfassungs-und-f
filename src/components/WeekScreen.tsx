@@ -4,15 +4,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { CalendarBlank, CheckCircle, Plus, Copy } from '@phosphor-icons/react'
+import { CalendarBlank, CheckCircle, Plus, Copy, Eye } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { format, startOfWeek, addDays, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
 import { ValidationDisplay } from '@/components/ValidationDisplay'
 import { TimeEntryValidator, ValidationContext, ValidationResult, ValidationQuickFix } from '@/lib/validation-rules'
+import { TimeEntryDetailView } from '@/components/TimeEntryDetailView'
 
 interface WeekScreenProps {
   employees: Employee[]
@@ -35,6 +37,8 @@ export function WeekScreen({
 }: WeekScreenProps) {
   const [selectedEmployee, setSelectedEmployee] = useState<string>(employees[0]?.id || '')
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }))
+  const [selectedEntry, setSelectedEntry] = useState<TimeEntry | null>(null)
+  const [showDetailDialog, setShowDetailDialog] = useState(false)
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i))
   
@@ -261,6 +265,14 @@ export function WeekScreen({
     return (endTotalMinutes - startTotalMinutes) / 60
   }
 
+  const handleViewEntryDetails = (projectId: string, date: Date) => {
+    const entries = getEntriesForDay(projectId, date)
+    if (entries.length > 0) {
+      setSelectedEntry(entries[0])
+      setShowDetailDialog(true)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {validationResults.length > 0 && (
@@ -379,18 +391,31 @@ export function WeekScreen({
                     </TableCell>
                     {weekDays.map((day, i) => {
                       const total = getDayTotal(project.id, day)
+                      const hasEntries = getEntriesForDay(project.id, day).length > 0
                       return (
                         <TableCell key={i} className="p-1">
-                          <Input
-                            type="number"
-                            step="0.5"
-                            min="0"
-                            value={total > 0 ? total.toFixed(1) : ''}
-                            onChange={(e) => handleCellChange(project.id, day, e.target.value)}
-                            className="text-center h-9 font-mono"
-                            placeholder="-"
-                            disabled={weekStatus === 'submitted' || weekStatus === 'approved'}
-                          />
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="number"
+                              step="0.5"
+                              min="0"
+                              value={total > 0 ? total.toFixed(1) : ''}
+                              onChange={(e) => handleCellChange(project.id, day, e.target.value)}
+                              className="text-center h-9 font-mono"
+                              placeholder="-"
+                              disabled={weekStatus === 'submitted' || weekStatus === 'approved'}
+                            />
+                            {hasEntries && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-9 w-9 p-0"
+                                onClick={() => handleViewEntryDetails(project.id, day)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       )
                     })}
@@ -427,6 +452,24 @@ export function WeekScreen({
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Zeiterfassungs-Details</DialogTitle>
+          </DialogHeader>
+          {selectedEntry && (
+            <TimeEntryDetailView
+              entry={selectedEntry}
+              employee={employees.find(e => e.id === selectedEntry.employeeId)}
+              project={projects.find(p => p.id === selectedEntry.projectId)}
+              task={tasks.find(t => t.id === selectedEntry.taskId)}
+              phase={phases.find(ph => ph.id === selectedEntry.phaseId)}
+              showTimerHistory={true}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

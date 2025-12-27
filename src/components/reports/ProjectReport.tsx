@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ChartLine, Users, Clock, CurrencyCircleDollar, TrendUp, CaretDown, CaretRight } from '@phosphor-icons/react'
 import { format, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { TimeEntryTimeline } from '@/components/reports/TimeEntryTimeline'
 
 interface ProjectReportProps {
   projects: Project[]
@@ -237,6 +238,7 @@ export function ProjectReport({ projects, employees, tasks, timeEntries, onClose
           <TabsList>
             <TabsTrigger value="employees">Mitarbeiter</TabsTrigger>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            <TabsTrigger value="entries">Alle Einträge</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="financial">Finanzen</TabsTrigger>
           </TabsList>
@@ -390,6 +392,17 @@ export function ProjectReport({ projects, employees, tasks, timeEntries, onClose
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="entries" className="space-y-4">
+            <TimeEntryTimeline
+              entries={timeEntries.filter(e => e.projectId === analysis.project.id)}
+              employees={employees}
+              projects={projects}
+              tasks={tasks}
+              title={`Alle Zeiteinträge für ${analysis.project.name}`}
+              description="Vollständige Übersicht mit Timer-Details und Notizen"
+            />
           </TabsContent>
 
           <TabsContent value="timeline" className="space-y-4">
