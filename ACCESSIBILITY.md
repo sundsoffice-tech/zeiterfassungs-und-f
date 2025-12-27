@@ -17,10 +17,13 @@ Die Zeiterfassung-App wurde umfassend für Barrierefreiheit optimiert, um WCAG 2
 - **Enter**: Ausgewähltes Element aktivieren
 
 #### Fokus-Management
-- **Skip-Link**: "Zum Hauptinhalt springen" Link am Seitenanfang (sichtbar bei Fokus)
+- **Skip-Links**: Multiple Skip-Links am Seitenanfang (sichtbar bei Fokus)
+  - "Zum Hauptinhalt springen"
+  - "Zur Navigation springen"
 - **Fokus-Ringe**: Deutlich sichtbare Fokus-Indikatoren auf allen interaktiven Elementen
 - **Logische Tab-Reihenfolge**: Alle Formulare und Steuerelemente folgen einer natürlichen Lesereihenfolge
 - **Fokus-Wiederherstellung**: Nach Dialog-Schließung kehrt Fokus zum auslösenden Element zurück
+- **FocusManager Komponente**: Automatische Fokus-Verwaltung für Dialoge und Modals
 
 #### Implementierungsdetails
 ```typescript
@@ -33,6 +36,16 @@ useGlobalShortcuts(
 
 // Fokus-Ring Utility-Klassen
 focusRingClasses = 'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+
+// Focus Trap für Modals
+import { trapFocus } from '@/lib/accessibility'
+trapFocus(dialogElement)
+
+// FocusManager für automatische Fokus-Verwaltung
+import { FocusManager } from '@/components/FocusManager'
+<FocusManager autoFocus restoreFocus>
+  {/* Dialog content */}
+</FocusManager>
 ```
 
 ### 2. Screenreader-Unterstützung
@@ -86,6 +99,14 @@ announceToScreenReader(
   "Zeiteintrag erfolgreich gespeichert",
   'polite'  // oder 'assertive' für wichtige Nachrichten
 )
+
+// Live Region für State-Änderungen
+import { announceStateChange, createLiveRegion } from '@/lib/accessibility'
+announceStateChange("Timer wurde gestartet")
+
+// Manuelle Live Region erstellen
+const liveRegion = createLiveRegion('custom-announcer')
+liveRegion.textContent = "Neue Nachricht"
 ```
 
 ### 3. Farbkontrast & Visuelle Zugänglichkeit
@@ -253,17 +274,19 @@ meetsWCAGAAA(contrastRatio, isLargeText): boolean
 
 ## Testing-Checkliste
 
-- [ ] Alle Funktionen mit Tastatur bedienbar
-- [ ] Skip-Link funktioniert
-- [ ] Tastenkürzel (N, Strg+S) funktionieren
-- [ ] Screen Reader liest alle Inhalte vor
-- [ ] Formulare haben korrekte Labels
-- [ ] Pflichtfelder sind gekennzeichnet
-- [ ] Fehlermeldungen werden angekündigt
-- [ ] Farbkontraste erfüllen WCAG AA
-- [ ] Fokus-Indikatoren sichtbar
-- [ ] Dialoge trappen Fokus korrekt
-- [ ] Touch-Targets groß genug (Mobile)
+- [x] Alle Funktionen mit Tastatur bedienbar
+- [x] Skip-Links funktionieren (Hauptinhalt und Navigation)
+- [x] Tastenkürzel (N, Strg+S) funktionieren
+- [x] Screen Reader liest alle Inhalte vor
+- [x] Formulare haben korrekte Labels
+- [x] Pflichtfelder sind gekennzeichnet
+- [x] Fehlermeldungen werden angekündigt
+- [x] Farbkontraste erfüllen WCAG AA
+- [x] Fokus-Indikatoren sichtbar
+- [x] Dialoge trappen Fokus korrekt
+- [x] Touch-Targets groß genug (Mobile)
+- [x] Reduced Motion Support implementiert
+- [x] High Contrast Mode Support implementiert
 
 ## Tools & Ressourcen
 
@@ -284,9 +307,106 @@ meetsWCAGAAA(contrastRatio, isLargeText): boolean
 
 ## Zukünftige Verbesserungen
 
-- [ ] Hochkontrast-Modus Support
+- [x] Hochkontrast-Modus Support
+- [x] Preference für reduzierte Animationen (`prefers-reduced-motion`)
+- [x] Erweiterte Accessibility-Komponenten (AccessibleInput, AccessibleIcon)
+- [x] FocusManager für automatische Fokus-Verwaltung
 - [ ] Erweiterte Tastatur-Shortcuts mit Konfigurator
 - [ ] Voice-Control Integration
-- [ ] Preference für reduzierte Animationen (`prefers-reduced-motion`)
 - [ ] Zusätzliche Sprachen für Screen Reader
 - [ ] Accessibility Settings Panel für Benutzeranpassungen
+
+## Neue Accessibility Features (2024)
+
+### Erweiterte Accessibility Utilities
+
+#### Reduced Motion Detection
+```typescript
+import { prefersReducedMotion } from '@/lib/accessibility'
+
+if (prefersReducedMotion()) {
+  // Disable animations
+}
+```
+
+#### High Contrast Detection
+```typescript
+import { prefersHighContrast } from '@/lib/accessibility'
+
+if (prefersHighContrast()) {
+  // Increase contrast
+}
+```
+
+#### Focus Trap for Modals
+```typescript
+import { trapFocus } from '@/lib/accessibility'
+
+const modal = document.getElementById('dialog')
+trapFocus(modal) // Keeps focus within modal
+```
+
+### Neue Komponenten
+
+#### AccessibleInput
+Vollständig barrierefreies Input-Feld mit eingebauten ARIA-Attributen:
+```tsx
+import { AccessibleInput } from '@/components/ui/accessible-input'
+
+<AccessibleInput
+  label="Projekt Name"
+  required
+  requiredLabel="(required)" // Customizable for i18n
+  hint="Geben Sie einen eindeutigen Projektnamen ein"
+  error={errors.projectName}
+/>
+```
+
+Features:
+- Automatische ARIA-Attribute (aria-required, aria-invalid, aria-describedby)
+- Error-Handling mit role="alert"
+- Hint-Text mit korrekter Verknüpfung
+- Anpassbare Required-Labels für Internationalisierung
+
+#### AccessibleIcon
+Icon-Komponente mit korrektem ARIA-Labeling:
+```tsx
+import { AccessibleIcon } from '@/components/ui/accessible-icon'
+
+<AccessibleIcon
+  icon={PlayIcon}
+  label="Timer starten"
+  decorative={false} // Set true for purely decorative icons
+/>
+```
+
+#### FocusManager
+Automatische Fokus-Verwaltung für Dialoge:
+```tsx
+import { FocusManager } from '@/components/FocusManager'
+
+<Dialog>
+  <FocusManager autoFocus restoreFocus>
+    {/* Dialog content */}
+  </FocusManager>
+</Dialog>
+```
+
+Features:
+- Auto-Focus auf erstes fokussierbares Element
+- Fokus-Wiederherstellung beim Schließen
+- Kompatibel mit Reduced Motion
+
+### Design Tokens
+
+Standardisierte Design-Tokens für konsistente Barrierefreiheit:
+```typescript
+import { spacing, fontSize, borderRadius, shadows } from '@/lib/design-tokens'
+
+// Touch-Target Minimum: 44x44px
+minHeight: spacing['2xl'] // 48px
+minWidth: spacing['2xl']  // 48px
+
+// Readable font sizes
+fontSize: fontSize.base // 16px minimum for body text
+```
