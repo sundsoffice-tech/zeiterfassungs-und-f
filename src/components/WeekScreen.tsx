@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { ResponsiveTable } from '@/components/ui/responsive-table'
 import { CalendarBlank, CheckCircle, Plus, Copy, Eye } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -403,10 +404,11 @@ export function WeekScreen({
               </div>
             ) : (
               <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-48 bg-muted/50">Projekt</TableHead>
+                <ResponsiveTable>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-48 bg-muted/50">Projekt</TableHead>
                       {weekDays.map((day, i) => (
                         <TableHead key={i} className="text-center bg-muted/50">
                           <div className="flex flex-col">
@@ -477,6 +479,7 @@ export function WeekScreen({
                     </TableRow>
                   </TableBody>
                 </Table>
+                </ResponsiveTable>
                 
                 {getWeekGrandTotal() === 0 && (
                   <div className="p-4 border-t">
