@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { QuickTimeEntry } from '@/components/QuickTimeEntry'
 import { NaturalLanguageInput } from '@/components/NaturalLanguageInput'
+import { ContinueWorkTile } from '@/components/ContinueWorkTile'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -334,6 +335,42 @@ export function TodayScreen({
     return (endTotalMinutes - startTotalMinutes) / 60
   }
 
+  const handleResumeEntry = (entry: TimeEntry) => {
+    if (activeTimer) {
+      toast.error('Stoppen Sie zuerst den aktiven Timer')
+      return
+    }
+
+    setSelectedEmployee(entry.employeeId)
+    setSelectedProject(entry.projectId)
+    setSelectedPhase(entry.phaseId || '')
+    setSelectedTask(entry.taskId || '')
+    
+    handleStart()
+    
+    toast.success('Timer mit letzten Einstellungen gestartet', {
+      description: projects.find(p => p.id === entry.projectId)?.name || 'Projekt'
+    })
+  }
+
+  const handleStartFromFavorite = (projectId: string, phaseId?: string, taskId?: string) => {
+    if (activeTimer) {
+      toast.error('Stoppen Sie zuerst den aktiven Timer')
+      return
+    }
+
+    setSelectedProject(projectId)
+    setSelectedPhase(phaseId || '')
+    setSelectedTask(taskId || '')
+    
+    handleStart()
+    
+    const project = projects.find(p => p.id === projectId)
+    toast.success('Timer gestartet', {
+      description: project?.name || 'Projekt'
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 p-6 rounded-xl bg-gradient-to-r from-accent via-primary to-accent/80 shadow-xl">
@@ -361,6 +398,17 @@ export function TodayScreen({
         onSave={(entry) => {
           setTimeEntries((current = []) => [...current, entry])
         }}
+      />
+
+      <ContinueWorkTile
+        employees={employees}
+        projects={projects}
+        tasks={tasks}
+        phases={phases}
+        timeEntries={timeEntries}
+        activeTimer={activeTimer}
+        onResumeEntry={handleResumeEntry}
+        onStartFromFavorite={handleStartFromFavorite}
       />
 
       <Card className="border-2 shadow-lg">

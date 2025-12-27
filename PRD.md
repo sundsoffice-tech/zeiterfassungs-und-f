@@ -456,8 +456,8 @@ This application requires sophisticated features including active timer manageme
 - **Success criteria**: Projects persist, support optional phases/tasks, client assignment, accumulated hours, budget tracking
 
 ### Time Entry Tracking (Enhanced with Detailed Fields)
-- **Functionality**: Log work sessions with live timer (Start/Stop/Pause), manual time entry, project/phase/task hierarchy, templates, bulk editing, and approval workflow. Support both required and optional fields with full audit trails.
-- **Purpose**: Record billable and non-billable hours for payroll, invoicing, and productivity analysis with maximum flexibility, detailed categorization, and compliance-ready audit logging
+- **Functionality**: Log work sessions with live timer (Start/Stop/Pause), manual time entry, project/phase/task hierarchy, templates, bulk editing, and approval workflow. Support both required and optional fields with full audit trails. **"Weitermachen" tile provides quick access to resume last timer/task and shows recent actions as quick links.**
+- **Purpose**: Record billable and non-billable hours for payroll, invoicing, and productivity analysis with maximum flexibility, detailed categorization, and compliance-ready audit logging. Enable users to continue their work effortlessly with one-click resume functionality.
 - **Required Fields**: Project, Date, Duration (or Start/End times), Tenant ID, Employee ID
 - **Optional Fields**: Phase, Task, Tag(s), Location, Notes, Cost Center, Billable yes/no
 - **Audit Fields**: Created by/at, Updated by/at, Device, Change Log
@@ -465,10 +465,12 @@ This application requires sophisticated features including active timer manageme
 - **Progression**: 
   - Live Timer: Click start → Select employee/project/phase/task → Add optional details → Timer runs → Pause/resume → Switch project without stopping → Click stop → Entry saved with audit data → Calculates applicable rate
   - Manual Entry: Click add → Select employee/project (required) → Optional phase/task → Choose date (required) → Enter start/end times or duration (required) → Add optional fields → Save → Entry marked as draft → Submit for approval
+  - **Quick Resume (Weitermachen)**: View "Weitermachen" tile → See last active timer/task with project details → Click "Starten" button → Timer starts with same project/phase/task configuration → Toast confirmation shown
+  - **Quick Links (Recent Actions)**: View recent entries from last 7 days in scrollable list → Click on any entry → Timer starts with that project/phase/task → Favorites section shows starred entries for instant access → One-click start from any recent or favorite entry
   - Quick Actions: Use favorites, recent projects, or templates → Bulk select entries for mass edits (tags, billable status, etc.) → Export filtered entries
   - Auto-pause: Timer detects idle time → Prompts to discard or keep idle period → Optional auto-resume
   - Approval: Submit timesheet period → Manager reviews all entries → Approves or rejects → Approved entries lock → Only corrections allowed
-- **Success criteria**: Active timer persists with device info, project/phase/task hierarchy navigation, rate auto-calculation, approval status tracking, locked entries prevent edits, correction entry workflow, complete change log, device tracking, bulk operations, compliance reporting
+- **Success criteria**: Active timer persists with device info, project/phase/task hierarchy navigation, rate auto-calculation, approval status tracking, locked entries prevent edits, correction entry workflow, complete change log, device tracking, bulk operations, compliance reporting, **"Weitermachen" tile displays most recent entry with full details, quick links show up to 5 unique recent project combinations, favorites section shows starred entries, all resume/start actions work instantly with proper state initialization, empty states guide users when no history exists**
 
 ### Mileage & Expense Logbook
 - **Functionality**: Record vehicle trips and expenses with employee, project, date, locations, distance, purpose, rates, amounts, receipts, and approval workflow
