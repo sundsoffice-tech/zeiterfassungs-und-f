@@ -53,7 +53,7 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
       id: 'zeiterfassung',
       label: 'Zeiterfassung',
       icon: <Clock className="h-4 w-4" weight="duotone" />,
-      gradient: 'from-blue-500/10 to-purple-500/10',
+      gradient: 'from-primary/10 to-accent/10',
       items: [
         {
           id: 'today',
@@ -69,7 +69,7 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           id: 'timepicker',
           label: 'Time Picker',
           icon: <Article className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-blue-500/10 to-purple-500/10',
+          gradient: 'from-primary/10 to-accent/10',
         },
       ],
     },
@@ -87,7 +87,7 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           id: 'calendar',
           label: 'Kalender',
           icon: <CalendarCheck className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-blue-500/10 to-cyan-500/10',
+          gradient: 'from-primary/10 to-accent/10',
         },
         {
           id: 'admin',
@@ -144,7 +144,7 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           id: 'explainable',
           label: 'Erklärbare KI',
           icon: <Brain className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-purple-500/10 to-pink-500/10',
+          gradient: 'from-accent/10 to-primary/10',
         },
       ],
     },
