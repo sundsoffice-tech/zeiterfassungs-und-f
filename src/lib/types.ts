@@ -329,6 +329,93 @@ export interface KPI {
   description: string
 }
 
+export interface RecurringEntry {
+  id: string
+  tenantId: string
+  employeeId: string
+  projectId: string
+  phaseId?: string
+  taskId?: string
+  name: string
+  duration?: number
+  tags?: string[]
+  location?: string
+  notes?: string
+  costCenter?: string
+  billable: boolean
+  schedule: {
+    frequency: 'daily' | 'weekly' | 'monthly'
+    daysOfWeek?: number[]
+    dayOfMonth?: number
+    time?: string
+  }
+  active: boolean
+  lastCreated?: string
+  audit: AuditMetadata
+}
+
+export interface AutomationRule {
+  id: string
+  tenantId: string
+  name: string
+  type: 'auto_start_timer' | 'auto_tag' | 'auto_categorize'
+  active: boolean
+  conditions: {
+    appOpened?: boolean
+    locationChange?: { minDistance: number }
+    timeOfDay?: { start: string; end: string }
+    dayOfWeek?: number[]
+  }
+  actions: {
+    startTimer?: { projectId: string; phaseId?: string; taskId?: string }
+    addTag?: string
+    setLocation?: string
+  }
+  priority: number
+  audit: AuditMetadata
+}
+
+export interface Reminder {
+  id: string
+  tenantId: string
+  employeeId?: string
+  type: 'missing_time' | 'break_warning' | 'weekly_submission' | 'custom'
+  title: string
+  message: string
+  schedule: {
+    type: 'daily' | 'weekly' | 'after_hours' | 'before_deadline'
+    time?: string
+    dayOfWeek?: number
+    hoursWorked?: number
+  }
+  active: boolean
+  dismissed?: boolean
+  dismissedAt?: string
+  triggeredAt?: string
+  audit: AuditMetadata
+}
+
+export interface AppSettings {
+  tenantId: string
+  autoStartTimer: boolean
+  autoStartProjectId?: string
+  autoTaggingEnabled: boolean
+  autoTagRules: {
+    distanceThreshold: number
+    travelTag: string
+  }
+  reminders: {
+    missingTimeEnabled: boolean
+    missingTimeTime: string
+    breakWarningEnabled: boolean
+    breakWarningHours: number
+    weeklySubmissionEnabled: boolean
+    weeklySubmissionDay: number
+    weeklySubmissionTime: string
+  }
+  audit: AuditMetadata
+}
+
 export type LegacyEmployee = Omit<Employee, 'tenantId' | 'role' | 'hourlyRate' | 'active' | 'audit'>
 export type LegacyProject = Omit<Project, 'tenantId' | 'clientId' | 'code' | 'startDate' | 'endDate' | 'budget' | 'active' | 'audit'>
 export type LegacyTimeEntry = Omit<TimeEntry, 'tenantId' | 'phaseId' | 'taskId' | 'duration' | 'approvalStatus' | 'approvedBy' | 'approvedAt' | 'locked' | 'rate' | 'audit' | 'changeLog'>

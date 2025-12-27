@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
@@ -11,8 +11,11 @@ import { AdminScreen } from '@/components/AdminScreen'
 import { ValidationTestScreen } from '@/components/ValidationTestScreen'
 import { RepairModeScreen } from '@/components/RepairModeScreen'
 import { ForecastScreen } from '@/components/ForecastScreen'
+import { AutomationScreen } from '@/components/AutomationScreen'
 import { CommandPalette } from '@/components/CommandPalette'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
+import { useAutomation } from '@/hooks/use-automation'
+import { getDefaultAppSettings } from '@/lib/automation'
 
 function App() {
   const [activeTab, setActiveTab] = useState('today')
@@ -25,6 +28,14 @@ function App() {
   const [absences, setAbsences] = useKV<Absence[]>('absences', [])
   const [activeTimer, setActiveTimer] = useKV<ActiveTimer | null>('activeTimer', null)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+
+  const automation = useAutomation(
+    employees || [],
+    timeEntries || [],
+    setTimeEntries,
+    activeTimer || null,
+    setActiveTimer
+  )
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -61,7 +72,7 @@ function App() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:inline-grid">
             <TabsTrigger value="today" className="gap-2">
               <Clock className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Heute</span>
@@ -81,6 +92,10 @@ function App() {
             <TabsTrigger value="forecast" className="gap-2">
               <TrendUp className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Forecast</span>
+            </TabsTrigger>
+            <TabsTrigger value="automation" className="gap-2">
+              <Lightning className="h-4 w-4" weight="duotone" />
+              <span className="hidden sm:inline">Automation</span>
             </TabsTrigger>
             <TabsTrigger value="repair" className="gap-2">
               <Wrench className="h-4 w-4" weight="duotone" />
@@ -149,6 +164,21 @@ function App() {
               projects={projects || []}
               tasks={tasks || []}
               timeEntries={timeEntries || []}
+            />
+          </TabsContent>
+
+          <TabsContent value="automation" className="mt-6">
+            <AutomationScreen
+              recurringEntries={automation.recurringEntries || []}
+              setRecurringEntries={automation.setRecurringEntries}
+              automationRules={automation.automationRules || []}
+              setAutomationRules={automation.setAutomationRules}
+              reminders={automation.reminders || []}
+              setReminders={automation.setReminders}
+              appSettings={automation.appSettings || getDefaultAppSettings('default-tenant')}
+              setAppSettings={automation.setAppSettings}
+              employees={employees || []}
+              projects={projects || []}
             />
           </TabsContent>
 

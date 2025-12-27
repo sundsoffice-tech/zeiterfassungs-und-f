@@ -1,14 +1,14 @@
 # Planning Guide
 
-A comprehensive, enterprise-grade time tracking application with intuitive UI/UX featuring a minimalist navigation (Heute/Today, Woche/Week, Projekte/Projects, Berichte/Reports, Admin with Dashboard & User Management), weltklasse timer interface, keyboard shortcuts, command palette (Ctrl+K), powerful admin dashboard with live status tracking, KPIs, warnings, and role-based access control for efficient time management and administrative oversight.
+A comprehensive, enterprise-grade time tracking application with intuitive UI/UX featuring a minimalist navigation (Heute/Today, Woche/Week, Projekte/Projects, Berichte/Reports, Forecast, Automation, Admin), weltklasse timer interface, keyboard shortcuts, command palette (Ctrl+K), powerful automation capabilities including recurring entries and intelligent reminders, AI-powered forecasting, and comprehensive admin dashboard for efficient time management that runs itself.
 
 **Experience Qualities**: 
-1. **Intuitiv** - World-class interface that feels natural and requires zero training with large timer, smart project selection, and instant feedback
-2. **Schnell** - Lightning-fast interactions with keyboard shortcuts, command palette (Ctrl+K), and one-click actions that never delay the user
-3. **Übersichtlich** - Crystal-clear visual hierarchy with today's overview, weekly timesheet grid, and at-a-glance summaries that prevent information overload
+1. **Intuitiv** - World-class interface that feels natural and requires zero training with large timer, smart project selection, instant feedback, and automation that works in the background
+2. **Schnell** - Lightning-fast interactions with keyboard shortcuts, command palette (Ctrl+K), one-click actions, and automated processes that never delay the user
+3. **Automatisch** - Self-running system with recurring entries, intelligent reminders, auto-start timers, and automated tagging that minimizes manual data entry
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This application requires sophisticated features including active timer management, weekly timesheet with copy/paste/drag-drop, global search with filter chips, command palette for keyboard-driven workflows, multi-tenant architecture, role-based access control, approval workflows, and comprehensive reporting - warranting a sophisticated multi-view architecture optimized for speed and usability.
+This application requires sophisticated features including active timer management, automation engine with recurring entries and rules, AI-powered reminders and forecasting, weekly timesheet with copy/paste/drag-drop, global search with filter chips, command palette for keyboard-driven workflows, multi-tenant architecture, role-based access control, approval workflows, and comprehensive reporting - warranting a sophisticated multi-view architecture optimized for speed, automation, and usability.
 
 ## Essential Features
 
@@ -205,6 +205,59 @@ This application requires sophisticated features including active timer manageme
 - **Trigger**: Navigate to "Forecast" tab, click "Prognose erstellen" or "KI-Prognose erstellen", or auto-generated on first load
 - **Progression**: User opens Forecast tab → System auto-generates basic forecast → Displays recommendations/risks/estimates in tabs → User optionally clicks "KI-Prognose" → AI analyzes top risks → Enhanced insights displayed → User reviews staffing needs → Takes action on urgent recommendations → Refreshes forecast to see updated predictions
 - **Success criteria**: Time estimates within 20% accuracy when confidence >60%, risk scores correlate with actual overruns, staffing recommendations are actionable and specific, AI insights add value beyond rule-based analysis, UI clearly communicates urgency levels, critical projects highlighted prominently, forecasts complete in <3 seconds (basic) or <10 seconds (AI-enhanced)
+
+### Automation ("Damit es von alleine läuft")
+- **Functionality**: Comprehensive automation system with three pillars: recurring entries, intelligent rules, and smart reminders. Automatically creates time entries, starts timers based on context, adds tags based on behavior, and sends proactive reminders to maintain compliance and data quality. Background processes run continuously without user intervention.
+- **Purpose**: Minimize manual data entry, reduce forgotten time tracking, ensure compliance with labor laws (break reminders), maintain data quality (missing time alerts), and automate routine tasks so the system "runs itself" requiring minimal user attention.
+- **Recurring Entries (Wiederkehrende Einträge)**:
+  - **Functionality**: Automatically create time entries for regular activities (e.g., Daily Standup, Weekly Team Meeting)
+  - **Schedule Options**: Daily, Weekly (with day selection Mo-Fr), Monthly (with day of month)
+  - **Configuration**: Name, project/phase/task, start time, duration, notes, billable status, tags, location
+  - **Creation Logic**: System checks every minute if recurring entry should be created today, prevents duplicates on same day
+  - **Last Created Tracking**: Records when entry was last automatically created to prevent duplication
+  - **Management UI**: Three-tab interface (Wiederkehrend, Regeln, Erinnerungen) with add/edit/delete/toggle active
+  - **Display**: Shows name, project, frequency, time, duration, last created date, active/inactive badge
+  - **Examples**: "Daily Standup" every weekday at 09:00 for 15 min, "Weekly Planning" every Monday at 10:00 for 60 min
+- **Automation Rules (Intelligente Regeln)**:
+  - **Auto-Start Timer**: Automatically start timer when app opens, with optional conditions (time of day 08:00-18:00, weekdays only)
+  - **Auto-Tagging**: Automatically add tags based on context (e.g., "Fahrt" tag when GPS movement >X km detected)
+  - **Conditions**: App opened, time of day range, day of week, location change (distance threshold)
+  - **Actions**: Start timer (with project/phase/task), add tag, set location
+  - **Priority System**: Rules have priority order (1=highest) for conflict resolution
+  - **Configuration**: Name, type (auto_start_timer | auto_tag | auto_categorize), active status, conditions, actions, priority
+  - **Management UI**: Toggle switches for built-in rules, custom rule creation dialog
+  - **Examples**: "Start work timer weekday mornings", "Tag travel when moving >5km", "Categorize based on calendar events"
+- **Reminders (Erinnerungen)**:
+  - **Missing Time (Tagesende)**: Alert at end of day (default 17:00) if no time entries recorded yet
+  - **Break Warning (Arbeitsrecht)**: Alert after X hours worked (default 6h) reminding of legally required breaks per German labor law
+  - **Weekly Submission (Wocheneinreichung)**: Alert on Friday at 16:00 to submit weekly timesheet for approval
+  - **Customization**: Each reminder can be enabled/disabled, time adjusted, threshold modified
+  - **Delivery**: Toast notifications with title, message, dismiss action, 10-second duration
+  - **Dismissal Tracking**: User can mark reminder as understood, preventing repeated notifications for same day/event
+  - **Background Checking**: System checks every minute if reminder conditions met, tracks last check time to prevent spam
+  - **Context Awareness**: Reminders consider current state (hours worked today, entries exist, timesheet submitted)
+  - **Examples**: "Zeiten fehlen - Du hast heute noch keine Zeiten erfasst", "Pause erforderlich - Nach 6h Arbeit ist 30min Pause nötig", "Wocheneinreichung - Bitte reiche Zeiten bis Freitag 16:00 ein"
+- **App Settings Integration**:
+  - **Global Toggles**: Enable/disable auto-start timer, auto-tagging, each reminder type
+  - **Thresholds**: Distance for travel tagging (default 5km), hours for break warning (default 6h)
+  - **Times**: Missing time reminder time (default 17:00), weekly submission day/time (default Fri 16:00)
+  - **Persistence**: All settings stored in spark.kv with useKV hook for automatic persistence
+  - **Defaults**: System provides sensible defaults on first use, customizable thereafter
+- **Background Processing**:
+  - **Interval Checks**: useEffect with 60-second interval for recurring entries and reminders
+  - **On Mount**: Auto-start timer check runs once when app loads (if enabled)
+  - **State Management**: useKV ensures automation state (recurring entries, rules, reminders, settings) persists across sessions
+  - **Toast Feedback**: Success messages when recurring entry created, timer auto-started, or actions taken
+- **User Interface**:
+  - **Tab Navigation**: Automation tab in main navigation with Lightning icon
+  - **Three Sub-Tabs**: Wiederkehrend (recurring entries), Regeln (rules), Erinnerungen (reminders)
+  - **Card-Based Layout**: Each automation item displayed in card with toggle switch, metadata, action buttons
+  - **Dialogs**: Add/edit forms for recurring entries with all configuration options
+  - **Inline Settings**: Reminder times/thresholds editable directly in cards without opening dialogs
+  - **Status Badges**: Active/Inactive visual indicators for each automation item
+- **Trigger**: Background processes run automatically every minute, user can configure via Automation tab
+- **Progression**: System loads → Initializes automation hook → Checks recurring entries (creates if needed) → Checks reminders (sends if triggered) → Checks auto-start rules (starts timer if matched) → User configures automation settings → Adds recurring entries → Enables/disables rules → Customizes reminders → System continues background processing → User receives automated entries and alerts → Minimal manual intervention required
+- **Success criteria**: Recurring entries created at correct times without duplicates, auto-start timer works on app open (when enabled), reminders trigger at specified times with correct context, dismissals prevent repeated notifications, settings persist across sessions, background processing runs efficiently without performance impact, toast notifications clear and actionable, automation UI intuitive with inline editing, all automation can be disabled per user preference
 
 ### Audit Trail & Versioning
 - **Functionality**: Every record tracks created_by, created_at, updated_by, updated_at, device. Full change log with before/after snapshots and reason.
