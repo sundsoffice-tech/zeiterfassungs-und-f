@@ -202,7 +202,6 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
               variant={isSectionActive(section) ? "default" : "outline"}
               className={`gap-2 ${section.gradient ? `bg-gradient-to-r ${section.gradient}` : ''} ${isSectionActive(section) ? 'ring-2 ring-primary ring-offset-2' : ''}`}
               aria-label={`${section.label} Menü`}
-              aria-expanded="false"
             >
               {section.icon}
               <span className="hidden sm:inline">{section.label}</span>
