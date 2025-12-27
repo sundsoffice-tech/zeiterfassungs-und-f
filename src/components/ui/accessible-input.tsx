@@ -8,10 +8,11 @@ interface AccessibleInputProps extends React.InputHTMLAttributes<HTMLInputElemen
   error?: string;
   hint?: string;
   required?: boolean;
+  requiredLabel?: string; // Allow customization
 }
 
 export const AccessibleInput = forwardRef<HTMLInputElement, AccessibleInputProps>(
-  ({ label, error, hint, required, className, id: providedId, ...props }, ref) => {
+  ({ label, error, hint, required, requiredLabel = '(required)', className, id: providedId, ...props }, ref) => {
     const generatedId = useId();
     const id = providedId || generatedId;
     const errorId = `${id}-error`;
@@ -25,7 +26,7 @@ export const AccessibleInput = forwardRef<HTMLInputElement, AccessibleInputProps
         >
           {label}
           {required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
-          {required && <span className="sr-only">(Pflichtfeld)</span>}
+          {required && <span className="sr-only">{requiredLabel}</span>}
         </Label>
         
         {hint && (
