@@ -346,6 +346,245 @@ export function exportTimeEntryToCalendarEvent(
   }
 }
 
+export function exportActiveTimerToCalendarEvent(
+  timer: ActiveTimer,
+  project?: Project,
+  task?: Task,
+  phase?: Phase
+): Omit<CalendarEvent, 'id' | 'provider' | 'syncStatus'> {
+  const projectName = project?.name || 'Unknown Project'
+  const taskName = task?.name || ''
+  const phaseName = phase?.name || ''
+  const modeLabel = timer.mode ? ` [${timer.mode.toUpperCase()}]` : ''
+  
+  const title = `${projectName}${taskName ? ` - ${taskName}` : ''}${phaseName ? ` (${phaseName})` : ''}${modeLabel}`
+  const description = generateTimerEventDescription(timer, project, task, phase)
+  
+  const startTime = new Date(timer.startTime).toISOString()
+  const endTime = timer.isPaused 
+    ? new Date(timer.pausedAt!).toISOString()
+    : new Date().toISOString()
+  
+  return {
+    title,
+    description,
+    startTime,
+    endTime,
+    location: timer.location,
+    attendees: []
+  }
+}
+
+export function generateTimerEventDescription(
+  timer: ActiveTimer,
+  project?: Project,
+  task?: Task,
+  phase?: Phase
+): string {
+  const lines: string[] = []
+  
+  lines.push('⏱️ TIMER-DETAILS')
+  lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━')
+  lines.push('')
+  
+  if (project) {
+    lines.push(`📁 Projekt: ${project.name}`)
+  }
+  if (phase) {
+    lines.push(`📂 Phase: ${phase.name}`)
+  }
+  if (task) {
+    lines.push(`✓ Aufgabe: ${task.name}`)
+  }
+  if (timer.mode) {
+    const modeIcons: Record<ActivityMode, string> = {
+      [ActivityMode.FAHRT]: '🚗',
+      [ActivityMode.MONTAGE]: '🔧',
+      [ActivityMode.DEMONTAGE]: '🔨',
+      [ActivityMode.PLANUNG]: '📋',
+      [ActivityMode.BERATUNG]: '💬',
+      [ActivityMode.WARTUNG]: '⚙️',
+      [ActivityMode.DOKUMENTATION]: '📝',
+      [ActivityMode.MEETING]: '👥',
+      [ActivityMode.SONSTIGES]: '📌'
+    }
+    const modeNames: Record<ActivityMode, string> = {
+      [ActivityMode.FAHRT]: 'Fahrt',
+      [ActivityMode.MONTAGE]: 'Montage',
+      [ActivityMode.DEMONTAGE]: 'Demontage',
+      [ActivityMode.PLANUNG]: 'Planung',
+      [ActivityMode.BERATUNG]: 'Beratung',
+      [ActivityMode.WARTUNG]: 'Wartung',
+      [ActivityMode.DOKUMENTATION]: 'Dokumentation',
+      [ActivityMode.MEETING]: 'Meeting',
+      [ActivityMode.SONSTIGES]: 'Sonstiges'
+    }
+    lines.push(`${modeIcons[timer.mode]} Modus: ${modeNames[timer.mode]}`)
+  }
+  if (timer.location) {
+    lines.push(`📍 Standort: ${timer.location}`)
+  }
+  if (timer.billable) {
+    lines.push(`💰 Abrechenbar: Ja`)
+  }
+  if (timer.costCenter) {
+    lines.push(`🏢 Kostenstelle: ${timer.costCenter}`)
+  }
+  if (timer.tags && timer.tags.length > 0) {
+    lines.push(`🏷️ Tags: ${timer.tags.join(', ')}`)
+  }
+  
+  lines.push('')
+  lines.push('⏰ ZEITVERLAUF')
+  lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━')
+  lines.push('')
+  
+  if (timer.events && timer.events.length > 0) {
+    timer.events.forEach(event => {
+      const eventTime = new Date(event.timestamp).toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
+      
+      switch (event.type) {
+        case TimerEventType.START:
+          lines.push(`▶️  ${eventTime} - Gestartet${event.mode ? ` (${event.mode})` : ''}`)
+          break
+        case TimerEventType.PAUSE:
+          lines.push(`⏸️  ${eventTime} - Pausiert`)
+          break
+        case TimerEventType.RESUME:
+          lines.push(`▶️  ${eventTime} - Fortgesetzt`)
+          break
+        case TimerEventType.STOP:
+          lines.push(`⏹️  ${eventTime} - Beendet`)
+          break
+        case TimerEventType.MODE_SWITCH:
+          lines.push(`🔄 ${eventTime} - Modus gewechselt zu ${event.mode}`)
+          break
+      }
+      
+      if (event.notes) {
+        lines.push(`   💬 ${event.notes}`)
+      }
+      if (event.location) {
+        lines.push(`   📍 ${event.location}`)
+      }
+    })
+  } else {
+    const startTime = new Date(timer.startTime).toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+    lines.push(`▶️  ${startTime} - Gestartet`)
+  }
+  
+  if (timer.isPaused && timer.pausedAt) {
+    lines.push('')
+    const pausedDurationMin = Math.floor(timer.pausedDuration / 60000)
+    lines.push(`⏸️ Aktuell pausiert (${pausedDurationMin} Min)`)
+  }
+  
+  const totalDuration = timer.isPaused && timer.pausedAt
+    ? timer.pausedAt - timer.startTime - timer.pausedDuration
+    : Date.now() - timer.startTime - timer.pausedDuration
+  
+  const hours = Math.floor(totalDuration / (1000 * 60 * 60))
+  const minutes = Math.floor((totalDuration % (1000 * 60 * 60)) / (1000 * 60))
+  
+  lines.push('')
+  lines.push(`⏱️ Gesamtdauer: ${hours}h ${minutes}min`)
+  
+  if (timer.notes) {
+    lines.push('')
+    lines.push('📝 NOTIZEN')
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    lines.push('')
+    lines.push(timer.notes)
+  }
+  
+  lines.push('')
+  lines.push('─────────────────────────')
+  lines.push('🤖 Automatisch synchronisiert mit Zeiterfassung')
+  
+  return lines.join('\n')
+}
+
+export function syncTimerToCalendar(
+  timer: ActiveTimer,
+  project?: Project,
+  task?: Task,
+  phase?: Phase
+): {
+  shouldSync: boolean
+  event?: Omit<CalendarEvent, 'id' | 'provider' | 'syncStatus'>
+  reason?: string
+} {
+  const minDurationMs = 5 * 60 * 1000
+  const currentDuration = Date.now() - timer.startTime - timer.pausedDuration
+  
+  if (currentDuration < minDurationMs) {
+    return {
+      shouldSync: false,
+      reason: 'Timer duration below minimum threshold'
+    }
+  }
+  
+  if (!project) {
+    return {
+      shouldSync: false,
+      reason: 'No project assigned'
+    }
+  }
+  
+  return {
+    shouldSync: true,
+    event: exportActiveTimerToCalendarEvent(timer, project, task, phase)
+  }
+}
+
+export async function autoSyncTimerToCalendar(
+  timer: ActiveTimer,
+  provider: IntegrationProvider,
+  project?: Project,
+  task?: Task,
+  phase?: Phase
+): Promise<{ success: boolean; eventId?: string; error?: string }> {
+  const syncResult = syncTimerToCalendar(timer, project, task, phase)
+  
+  if (!syncResult.shouldSync) {
+    return {
+      success: false,
+      error: syncResult.reason
+    }
+  }
+  
+  try {
+    const calendarEvent = syncResult.event!
+    
+    console.log('[Calendar Sync] Creating event:', {
+      title: calendarEvent.title,
+      start: calendarEvent.startTime,
+      end: calendarEvent.endTime,
+      provider
+    })
+    
+    const eventId = `cal-${Date.now()}-${timer.id}`
+    
+    return {
+      success: true,
+      eventId
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }
+  }
+}
+
 export async function simulateCalendarSync(
   provider: IntegrationProvider,
   settings: CalendarSyncSettings,

@@ -20,6 +20,7 @@ import { CalendarIntegrationScreen } from '@/components/CalendarIntegrationScree
 import { CommandPalette } from '@/components/CommandPalette'
 import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 import { useAutomation } from '@/hooks/use-automation'
+import { useCalendarAutoSync } from '@/hooks/use-calendar-auto-sync'
 import { getDefaultAppSettings } from '@/lib/automation'
 
 function App() {
@@ -40,6 +41,13 @@ function App() {
     setTimeEntries,
     activeTimer || null,
     setActiveTimer
+  )
+
+  const calendarAutoSync = useCalendarAutoSync(
+    activeTimer || null,
+    projects || [],
+    tasks || [],
+    phases || []
   )
 
   useEffect(() => {

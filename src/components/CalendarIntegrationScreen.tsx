@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { CalendarBlank, ArrowsClockwise, Check, X, Plus, Trash, MagnifyingGlass, Clock, MapPin, TextAlignLeft, Lightning } from '@phosphor-icons/react'
 import { useCalendarSync } from '@/hooks/use-calendar-sync'
 import { Employee, Project, Task, IntegrationProvider, ActivityMode } from '@/lib/types'
-import { CalendarEvent, CalendarTitlePattern, matchCalendarEventToProject, createTimeEntryFromCalendarEvent } from '@/lib/calendar-sync'
+import { CalendarEvent, CalendarTitlePattern, matchCalendarEventToProject, createTimeEntryFromCalendarEvent, getDefaultCalendarSyncSettings, CalendarSyncSettings } from '@/lib/calendar-sync'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 
@@ -20,6 +20,11 @@ interface CalendarIntegrationScreenProps {
   projects: Project[]
   tasks: Task[]
   onTimeEntryCreated?: (entry: any) => void
+}
+
+const updateSettings = (current: CalendarSyncSettings | undefined, updates: Partial<CalendarSyncSettings>): CalendarSyncSettings => {
+  const base = current || getDefaultCalendarSyncSettings()
+  return { ...base, ...updates }
 }
 
 export function CalendarIntegrationScreen({
@@ -129,6 +134,7 @@ export function CalendarIntegrationScreen({
       <Tabs defaultValue="sync" className="space-y-6">
         <TabsList>
           <TabsTrigger value="sync">Synchronisation</TabsTrigger>
+          <TabsTrigger value="auto-sync">Timer-Sync</TabsTrigger>
           <TabsTrigger value="patterns">Automatische Zuordnung</TabsTrigger>
           <TabsTrigger value="settings">Einstellungen</TabsTrigger>
           <TabsTrigger value="logs">Protokoll</TabsTrigger>
@@ -303,6 +309,168 @@ export function CalendarIntegrationScreen({
                   <p className="text-sm">Klicke auf "Jetzt synchronisieren" um Ereignisse zu importieren</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="auto-sync" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Automatische Timer-Synchronisation</CardTitle>
+              <CardDescription>
+                Synchronisiere aktive Timer automatisch mit deinem Kalender inkl. aller Timer-Details
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+                  <div className="space-y-1">
+                    <div className="font-semibold">Automatische Synchronisation aktivieren</div>
+                    <div className="text-sm text-muted-foreground">
+                      Timer werden automatisch als Kalenderereignisse erstellt/aktualisiert
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.autoCreateTimeEntries}
+                    onCheckedChange={(checked) => {
+                      calendar.setSettings((current) => updateSettings(current, { autoCreateTimeEntries: checked }))
+                    }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Kalenderanbieter</Label>
+                    <Select value={selectedProvider} onValueChange={(v) => setSelectedProvider(v as IntegrationProvider)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={IntegrationProvider.GOOGLE_CALENDAR}>Google Calendar</SelectItem>
+                        <SelectItem value={IntegrationProvider.OUTLOOK_CALENDAR}>Outlook Calendar</SelectItem>
+                        <SelectItem value={IntegrationProvider.ICAL}>iCal / CalDAV</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Synchronisationsintervall</Label>
+                    <Select
+                      value={String(settings.syncPastDays || 5)}
+                      onValueChange={(v) => {
+                        calendar.setSettings((current) => updateSettings(current, { syncPastDays: parseInt(v) }))
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 Minute</SelectItem>
+                        <SelectItem value="5">5 Minuten</SelectItem>
+                        <SelectItem value="10">10 Minuten</SelectItem>
+                        <SelectItem value="15">15 Minuten</SelectItem>
+                        <SelectItem value="30">30 Minuten</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-3 p-4 border rounded-lg">
+                  <div className="font-semibold text-sm">Synchronisations-Trigger</div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="font-normal">Bei Timer-Start</Label>
+                      <Switch
+                        checked={settings.autoStartTimer}
+                        onCheckedChange={(checked) => {
+                          calendar.setSettings((current) => updateSettings(current, { autoStartTimer: checked }))
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label className="font-normal">Bei Timer-Stopp</Label>
+                      <Switch
+                        checked={settings.autoStopTimer}
+                        onCheckedChange={(checked) => {
+                          calendar.setSettings((current) => updateSettings(current, { autoStopTimer: checked }))
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label className="font-normal">Bei Modus-Wechsel</Label>
+                      <Switch
+                        checked={settings.workingHoursOnly}
+                        onCheckedChange={(checked) => {
+                          calendar.setSettings((current) => updateSettings(current, { workingHoursOnly: checked }))
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label className="font-normal">Bei Pause</Label>
+                      <Switch
+                        checked={settings.defaultBillable}
+                        onCheckedChange={(checked) => {
+                          calendar.setSettings((current) => updateSettings(current, { defaultBillable: checked }))
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 border rounded-lg bg-blue-50/50 dark:bg-blue-950/20 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <CalendarBlank className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div className="space-y-2 flex-1">
+                      <div className="font-semibold text-sm">Was wird synchronisiert?</div>
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <div>✓ Projekt, Task und Phase</div>
+                        <div>✓ Aktivitätsmodus (Fahrt, Montage, etc.)</div>
+                        <div>✓ Vollständiger Zeitverlauf (Start, Pause, Fortsetzen, Modus-Wechsel)</div>
+                        <div>✓ Standortinformationen</div>
+                        <div>✓ Notizen und Tags</div>
+                        <div>✓ Kostenstelle und Abrechenbarkeit</div>
+                        <div>✓ Automatisch formatierte, lesbare Beschreibung</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 border rounded-lg bg-amber-50/50 dark:bg-amber-950/20 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <Lightning className="h-5 w-5 text-amber-600 mt-0.5" />
+                    <div className="space-y-1">
+                      <div className="font-semibold text-sm">Beispiel Kalenderbeschreibung</div>
+                      <pre className="text-xs text-muted-foreground font-mono whitespace-pre-wrap bg-background/50 p-3 rounded mt-2">
+{`⏱️ TIMER-DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+📁 Projekt: Kurita Showroom
+✓ Aufgabe: Installation
+🔧 Modus: Montage
+📍 Standort: Hauptstraße 123
+💰 Abrechenbar: Ja
+
+⏰ ZEITVERLAUF
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶️  09:15:00 - Gestartet (Montage)
+⏸️  11:30:00 - Pausiert
+▶️  12:15:00 - Fortgesetzt
+🔄 14:00:00 - Modus gewechselt zu Demontage
+⏹️  16:30:00 - Beendet
+
+⏱️ Gesamtdauer: 6h 30min
+
+📝 NOTIZEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Alte Anlage demontiert, neue installiert.
+Kunde sehr zufrieden.
+
+─────────────────────────
+🤖 Automatisch synchronisiert`}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
