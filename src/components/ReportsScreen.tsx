@@ -1,39 +1,48 @@
 import { useState } from 'react'
-import { Employee, Project, TimeEntry, MileageEntry } from '@/lib/types'
+import { Employee, Project, TimeEntry, MileageEntry, Task, Absence } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChartBar, FunnelSimple, Download, MagnifyingGlass } from '@phosphor-icons/react'
+import { ChartBar, FunnelSimple, Download, MagnifyingGlass, FolderOpen, User, ShieldCheck, Brain, Tag } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
-import { format, parseISO, startOfMonth, endOfMonth } from 'date-fns'
-import { de } from 'date-fns/locale'
+import { format } from 'date-fns'
+import { ProjectReport } from '@/components/reports/ProjectReport'
+import { EmployeeReport } from '@/components/reports/EmployeeReport'
+import { AuditReport } from '@/components/reports/AuditReport'
+import { AIInsightsReport } from '@/components/reports/AIInsightsReport'
+import { exportTimeEntries, exportMileageEntries, EXPORT_FORMATS } from '@/lib/advanced-export'
+import { toast } from 'sonner'
 
 interface ReportsScreenProps {
   employees: Employee[]
   projects: Project[]
   timeEntries: TimeEntry[]
   mileageEntries: MileageEntry[]
+  tasks?: Task[]
+  absences?: Absence[]
 }
 
 export function ReportsScreen({
   employees,
   projects,
   timeEntries,
-  mileageEntries
+  mileageEntries,
+  tasks = [],
+  absences = []
 }: ReportsScreenProps) {
+  const [activeReport, setActiveReport] = useState<'overview' | 'project' | 'employee' | 'audit' | 'ai'>('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [filterEmployee, setFilterEmployee] = useState<string>('all')
   const [filterProject, setFilterProject] = useState<string>('all')
   const [filterBillable, setFilterBillable] = useState<string>('all')
-  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [exportFormat, setExportFormat] = useState('standard_csv')
 
   const filteredEntries = timeEntries.filter(entry => {
     if (filterEmployee !== 'all' && entry.employeeId !== filterEmployee) return false
     if (filterProject !== 'all' && entry.projectId !== filterProject) return false
     if (filterBillable === 'billable' && !entry.billable) return false
     if (filterBillable === 'non-billable' && entry.billable) return false
-    if (filterStatus !== 'all' && entry.approvalStatus !== filterStatus) return false
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
@@ -54,50 +63,74 @@ export function ReportsScreen({
   const billableHours = filteredEntries.filter(e => e.billable).reduce((sum, e) => sum + e.duration, 0)
   const nonBillableHours = totalHours - billableHours
 
-  const projectStats = projects.map(project => {
-    const projectEntries = filteredEntries.filter(e => e.projectId === project.id)
-    const hours = projectEntries.reduce((sum, e) => sum + e.duration, 0)
-    return {
-      project,
-      hours,
-      entries: projectEntries.length
+  const handleExportTimeEntries = () => {
+    try {
+      exportTimeEntries(exportFormat, filteredEntries, employees, projects, tasks)
+      toast.success('Export erfolgreich', {
+        description: `${filteredEntries.length} Einträge exportiert als ${EXPORT_FORMATS.find(f => f.id === exportFormat)?.name}`
+      })
+    } catch (error) {
+      toast.error('Export fehlgeschlagen')
     }
-  }).filter(s => s.hours > 0).sort((a, b) => b.hours - a.hours)
+  }
 
-  const employeeStats = employees.map(employee => {
-    const empEntries = filteredEntries.filter(e => e.employeeId === employee.id)
-    const hours = empEntries.reduce((sum, e) => sum + e.duration, 0)
-    return {
-      employee,
-      hours,
-      entries: empEntries.length
+  const handleExportMileage = () => {
+    try {
+      exportMileageEntries(mileageEntries, employees, projects)
+      toast.success('Fahrtkosten exportiert', {
+        description: `${mileageEntries.length} Einträge exportiert`
+      })
+    } catch (error) {
+      toast.error('Export fehlgeschlagen')
     }
-  }).filter(s => s.hours > 0).sort((a, b) => b.hours - a.hours)
+  }
 
-  const handleExport = () => {
-    const csvHeaders = ['Datum', 'Mitarbeiter', 'Projekt', 'Start', 'Ende', 'Dauer (h)', 'Abrechenbar', 'Status', 'Notizen']
-    const csvRows = filteredEntries.map(entry => {
-      const employee = employees.find(e => e.id === entry.employeeId)
-      const project = projects.find(p => p.id === entry.projectId)
-      return [
-        entry.date,
-        employee?.name || '',
-        project?.name || '',
-        entry.startTime,
-        entry.endTime,
-        entry.duration.toFixed(2),
-        entry.billable ? 'Ja' : 'Nein',
-        entry.approvalStatus,
-        entry.notes || ''
-      ].map(v => `"${v}"`).join(',')
-    })
+  if (activeReport === 'project') {
+    return (
+      <ProjectReport
+        projects={projects}
+        employees={employees}
+        tasks={tasks}
+        timeEntries={filteredEntries}
+        onClose={() => setActiveReport('overview')}
+      />
+    )
+  }
 
-    const csv = [csvHeaders.join(','), ...csvRows].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = `zeiterfassung-report-${format(new Date(), 'yyyy-MM-dd')}.csv`
-    link.click()
+  if (activeReport === 'employee') {
+    return (
+      <EmployeeReport
+        employees={employees}
+        projects={projects}
+        tasks={tasks}
+        timeEntries={filteredEntries}
+        absences={absences}
+        onClose={() => setActiveReport('overview')}
+      />
+    )
+  }
+
+  if (activeReport === 'audit') {
+    return (
+      <AuditReport
+        employees={employees}
+        projects={projects}
+        timeEntries={filteredEntries}
+        onClose={() => setActiveReport('overview')}
+      />
+    )
+  }
+
+  if (activeReport === 'ai') {
+    return (
+      <AIInsightsReport
+        employees={employees}
+        projects={projects}
+        tasks={tasks}
+        timeEntries={filteredEntries}
+        onClose={() => setActiveReport('overview')}
+      />
+    )
   }
 
   return (
@@ -108,11 +141,11 @@ export function ReportsScreen({
             <ChartBar className="h-5 w-5" weight="duotone" />
             Berichte & Analysen
           </CardTitle>
-          <CardDescription>Durchsuchen und filtern Sie Ihre Zeiteinträge</CardDescription>
+          <CardDescription>Umfassende Reports „bis ins letzte Detail"</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="relative flex-1 min-w-[300px]">
               <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Suche nach Projekt, Mitarbeiter, Tag oder Notiz..."
@@ -121,10 +154,6 @@ export function ReportsScreen({
                 className="pl-10"
               />
             </div>
-            <Button onClick={handleExport} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              CSV Export
-            </Button>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -164,20 +193,7 @@ export function ReportsScreen({
               </SelectContent>
             </Select>
 
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle Status</SelectItem>
-                <SelectItem value="draft">Entwurf</SelectItem>
-                <SelectItem value="submitted">Eingereicht</SelectItem>
-                <SelectItem value="approved">Genehmigt</SelectItem>
-                <SelectItem value="rejected">Abgelehnt</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {(filterEmployee !== 'all' || filterProject !== 'all' || filterBillable !== 'all' || filterStatus !== 'all' || searchQuery) && (
+            {(filterEmployee !== 'all' || filterProject !== 'all' || filterBillable !== 'all' || searchQuery) && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -185,11 +201,37 @@ export function ReportsScreen({
                   setFilterEmployee('all')
                   setFilterProject('all')
                   setFilterBillable('all')
-                  setFilterStatus('all')
                   setSearchQuery('')
                 }}
               >
                 Filter zurücksetzen
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap border-t pt-4">
+            <Select value={exportFormat} onValueChange={setExportFormat}>
+              <SelectTrigger className="w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {EXPORT_FORMATS.map(fmt => (
+                  <SelectItem key={fmt.id} value={fmt.id}>
+                    {fmt.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button onClick={handleExportTimeEntries} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Zeiteinträge Export
+            </Button>
+
+            {mileageEntries.length > 0 && (
+              <Button onClick={handleExportMileage} variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Fahrtkosten Export
               </Button>
             )}
           </div>
@@ -232,61 +274,95 @@ export function ReportsScreen({
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Top Projekte</CardTitle>
-            <CardDescription>Nach Stunden sortiert</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {projectStats.length === 0 && (
-                <p className="text-sm text-muted-foreground">Keine Projekte gefunden</p>
-              )}
-              {projectStats.slice(0, 10).map(stat => (
-                <div key={stat.project.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 flex-1">
-                    <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span className="text-sm font-medium truncate">{stat.project.name}</span>
+      <Card>
+        <CardHeader>
+          <CardTitle>Standardreports mit Drill-down</CardTitle>
+          <CardDescription>Detaillierte Berichte für verschiedene Perspektiven</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors border-2" onClick={() => setActiveReport('project')}>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <FolderOpen className="h-6 w-6 text-primary" weight="duotone" />
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono font-bold">{stat.hours.toFixed(1)}h</div>
-                    <div className="text-xs text-muted-foreground">{stat.entries} Einträge</div>
+                  <div>
+                    <h3 className="font-bold text-lg">Projektbericht</h3>
+                    <p className="text-xs text-muted-foreground">{projects.length} Projekte</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <ul className="text-xs space-y-1 text-muted-foreground">
+                  <li>• Ist-Stunden nach Mitarbeiter/Task/Tag</li>
+                  <li>• Budget & Prognose</li>
+                  <li>• Burn-up/Burn-down Timeline</li>
+                  <li>• Abrechenbar vs. nicht abrechenbar</li>
+                </ul>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Top Mitarbeiter</CardTitle>
-            <CardDescription>Nach Stunden sortiert</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {employeeStats.length === 0 && (
-                <p className="text-sm text-muted-foreground">Keine Mitarbeiter gefunden</p>
-              )}
-              {employeeStats.slice(0, 10).map(stat => (
-                <div key={stat.employee.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 flex-1">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold">
-                      {stat.employee.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                    </div>
-                    <span className="text-sm font-medium">{stat.employee.name}</span>
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors border-2" onClick={() => setActiveReport('employee')}>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-12 w-12 rounded-lg bg-green-500/10 flex items-center justify-center">
+                    <User className="h-6 w-6 text-green-600" weight="duotone" />
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono font-bold">{stat.hours.toFixed(1)}h</div>
-                    <div className="text-xs text-muted-foreground">{stat.entries} Einträge</div>
+                  <div>
+                    <h3 className="font-bold text-lg">Mitarbeiterbericht</h3>
+                    <p className="text-xs text-muted-foreground">{employees.length} Mitarbeiter</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <ul className="text-xs space-y-1 text-muted-foreground">
+                  <li>• Wochenübersicht & Auslastung</li>
+                  <li>• Billable Ratio</li>
+                  <li>• Überstunden & Abwesenheit</li>
+                  <li>• Qualitätsindikatoren</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors border-2" onClick={() => setActiveReport('audit')}>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-12 w-12 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                    <ShieldCheck className="h-6 w-6 text-orange-600" weight="duotone" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Audit & Compliance</h3>
+                    <p className="text-xs text-muted-foreground">Prüfbar</p>
+                  </div>
+                </div>
+                <ul className="text-xs space-y-1 text-muted-foreground">
+                  <li>• Alle Änderungen (Wer/Was/Wann)</li>
+                  <li>• Einträge außerhalb Normalzeit</li>
+                  <li>• Nachträgliche Einträge &gt;X Tage</li>
+                  <li>• Exportfähig als PDF</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors border-2 border-primary" onClick={() => setActiveReport('ai')}>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <Brain className="h-6 w-6 text-primary" weight="duotone" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">KI-Insights</h3>
+                    <p className="text-xs text-muted-foreground">Admin Only</p>
+                  </div>
+                </div>
+                <ul className="text-xs space-y-1 text-muted-foreground">
+                  <li>• Top 10 Anomalien + Begründung</li>
+                  <li>• Häufigste Fehlerquellen</li>
+                  <li>• Projekte mit Risiko-Score</li>
+                  <li>• Empfohlene Maßnahmen</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

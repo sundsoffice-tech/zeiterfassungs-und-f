@@ -138,6 +138,8 @@ function App() {
               projects={projects || []}
               timeEntries={timeEntries || []}
               mileageEntries={mileageEntries || []}
+              tasks={tasks || []}
+              absences={absences || []}
             />
           </TabsContent>
 
