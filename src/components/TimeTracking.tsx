@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Clock, Trash, Download, Play, Pause, Stop, Star, ArrowsClockwise, CheckSquare, PencilSimple, Lightning } from '@phosphor-icons/react'
+import { Plus, Clock, Trash, Download, Play, Pause, Stop, Star, ArrowsClockwise, CheckSquare, PencilSimple, Lightning, Tag, MapPin, Bank, CurrencyDollar, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
@@ -22,6 +22,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
 
 interface TimeTrackingProps {
   timeEntries: TimeEntry[]
@@ -55,7 +56,14 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
     startTime: '09:00',
     endTime: '17:00',
     duration: '',
+    task: '',
+    subtask: '',
+    tags: [] as string[],
+    tagInput: '',
+    location: '',
     notes: '',
+    costCenter: '',
+    billable: true,
     useDuration: false
   })
 
@@ -70,7 +78,14 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
     employeeId: '',
     projectId: '',
     duration: '',
-    notes: ''
+    task: '',
+    subtask: '',
+    tags: [] as string[],
+    tagInput: '',
+    location: '',
+    notes: '',
+    costCenter: '',
+    billable: true
   })
 
   useEffect(() => {
@@ -90,7 +105,7 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
     }
   }, [isIdle, activeTimers])
 
-  const startTimer = useCallback((employeeId: string, projectId: string, notes?: string) => {
+  const startTimer = useCallback((employeeId: string, projectId: string, templateData?: Partial<TimeTemplate>) => {
     if (!allowMultipleTimers && activeTimers && activeTimers.length > 0) {
       toast.error('Stop the current timer before starting a new one')
       return
@@ -102,8 +117,14 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
       projectId,
       startTime: Date.now(),
       pausedDuration: 0,
-      notes: notes || '',
-      isPaused: false
+      isPaused: false,
+      task: templateData?.task,
+      subtask: templateData?.subtask,
+      tags: templateData?.tags,
+      location: templateData?.location,
+      notes: templateData?.notes,
+      costCenter: templateData?.costCenter,
+      billable: templateData?.billable
     }
 
     setActiveTimers((prev) => [...(prev || []), newTimer])
@@ -254,7 +275,13 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
       date: formData.date,
       startTime: startTime,
       endTime: endTime,
-      notes: formData.notes,
+      task: formData.task || undefined,
+      subtask: formData.subtask || undefined,
+      tags: formData.tags.length > 0 ? formData.tags : undefined,
+      location: formData.location || undefined,
+      notes: formData.notes || undefined,
+      costCenter: formData.costCenter || undefined,
+      billable: formData.billable,
       createdAt: new Date().toISOString()
     }
 
@@ -268,7 +295,14 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
       startTime: '09:00',
       endTime: '17:00',
       duration: '',
+      task: '',
+      subtask: '',
+      tags: [],
+      tagInput: '',
+      location: '',
       notes: '',
+      costCenter: '',
+      billable: true,
       useDuration: false
     })
     setOpen(false)
@@ -328,7 +362,13 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
       employeeId: templateData.employeeId,
       projectId: templateData.projectId,
       duration: templateData.duration ? parseInt(templateData.duration) : undefined,
-      notes: templateData.notes,
+      task: templateData.task || undefined,
+      subtask: templateData.subtask || undefined,
+      tags: templateData.tags.length > 0 ? templateData.tags : undefined,
+      location: templateData.location || undefined,
+      notes: templateData.notes || undefined,
+      costCenter: templateData.costCenter || undefined,
+      billable: templateData.billable,
       isFavorite: false,
       lastUsed: new Date().toISOString()
     }
@@ -336,11 +376,11 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
     setTemplates((prev) => [...(prev || []), newTemplate])
     toast.success('Template saved')
     setTemplateDialogOpen(false)
-    setTemplateData({ name: '', employeeId: '', projectId: '', duration: '', notes: '' })
+    setTemplateData({ name: '', employeeId: '', projectId: '', duration: '', task: '', subtask: '', tags: [], tagInput: '', location: '', notes: '', costCenter: '', billable: true })
   }
 
   const startFromTemplate = (template: TimeTemplate) => {
-    startTimer(template.employeeId, template.projectId, template.notes)
+    startTimer(template.employeeId, template.projectId, template)
     setTemplates((prev) =>
       (prev || []).map(t =>
         t.id === template.id ? { ...t, lastUsed: new Date().toISOString() } : t
@@ -536,7 +576,7 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                           New Template
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Create Template</DialogTitle>
                         </DialogHeader>
@@ -550,41 +590,43 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                               placeholder="e.g., Daily Standup"
                             />
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="template-employee">Employee *</Label>
-                            <Select
-                              value={templateData.employeeId}
-                              onValueChange={(value) => setTemplateData({ ...templateData, employeeId: value })}
-                            >
-                              <SelectTrigger id="template-employee">
-                                <SelectValue placeholder="Select employee" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {employees.map((emp) => (
-                                  <SelectItem key={emp.id} value={emp.id}>
-                                    {emp.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="template-project">Project *</Label>
-                            <Select
-                              value={templateData.projectId}
-                              onValueChange={(value) => setTemplateData({ ...templateData, projectId: value })}
-                            >
-                              <SelectTrigger id="template-project">
-                                <SelectValue placeholder="Select project" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {projects.map((proj) => (
-                                  <SelectItem key={proj.id} value={proj.id}>
-                                    {proj.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="template-employee">Employee *</Label>
+                              <Select
+                                value={templateData.employeeId}
+                                onValueChange={(value) => setTemplateData({ ...templateData, employeeId: value })}
+                              >
+                                <SelectTrigger id="template-employee">
+                                  <SelectValue placeholder="Select employee" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {employees.map((emp) => (
+                                    <SelectItem key={emp.id} value={emp.id}>
+                                      {emp.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="template-project">Project *</Label>
+                              <Select
+                                value={templateData.projectId}
+                                onValueChange={(value) => setTemplateData({ ...templateData, projectId: value })}
+                              >
+                                <SelectTrigger id="template-project">
+                                  <SelectValue placeholder="Select project" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {projects.map((proj) => (
+                                    <SelectItem key={proj.id} value={proj.id}>
+                                      {proj.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="template-duration">Default Duration (minutes)</Label>
@@ -596,14 +638,143 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                               placeholder="Optional"
                             />
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="template-notes">Default Notes</Label>
-                            <Textarea
-                              id="template-notes"
-                              value={templateData.notes}
-                              onChange={(e) => setTemplateData({ ...templateData, notes: e.target.value })}
-                              placeholder="Optional"
-                            />
+
+                          <Separator />
+
+                          <div className="space-y-4">
+                            <h4 className="text-sm font-medium text-muted-foreground">Optional Defaults</h4>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="template-task">Task</Label>
+                                <Input
+                                  id="template-task"
+                                  value={templateData.task}
+                                  onChange={(e) => setTemplateData({ ...templateData, task: e.target.value })}
+                                  placeholder="e.g., Development"
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label htmlFor="template-subtask">Subtask</Label>
+                                <Input
+                                  id="template-subtask"
+                                  value={templateData.subtask}
+                                  onChange={(e) => setTemplateData({ ...templateData, subtask: e.target.value })}
+                                  placeholder="e.g., Bug fix"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="template-tags">Tags</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  id="template-tags"
+                                  value={templateData.tagInput}
+                                  onChange={(e) => setTemplateData({ ...templateData, tagInput: e.target.value })}
+                                  placeholder="Add tag and press Enter"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault()
+                                      if (templateData.tagInput.trim()) {
+                                        setTemplateData({
+                                          ...templateData,
+                                          tags: [...templateData.tags, templateData.tagInput.trim()],
+                                          tagInput: ''
+                                        })
+                                      }
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="outline"
+                                  onClick={() => {
+                                    if (templateData.tagInput.trim()) {
+                                      setTemplateData({
+                                        ...templateData,
+                                        tags: [...templateData.tags, templateData.tagInput.trim()],
+                                        tagInput: ''
+                                      })
+                                    }
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              {templateData.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {templateData.tags.map((tag, idx) => (
+                                    <Badge key={idx} variant="secondary" className="gap-1">
+                                      <Tag className="h-3 w-3" />
+                                      {tag}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setTemplateData({
+                                            ...templateData,
+                                            tags: templateData.tags.filter((_, i) => i !== idx)
+                                          })
+                                        }}
+                                        className="ml-1 hover:text-destructive"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </button>
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="template-location">Location</Label>
+                                <Input
+                                  id="template-location"
+                                  value={templateData.location}
+                                  onChange={(e) => setTemplateData({ ...templateData, location: e.target.value })}
+                                  placeholder="e.g., Home Office"
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label htmlFor="template-costCenter">Cost Center</Label>
+                                <Input
+                                  id="template-costCenter"
+                                  value={templateData.costCenter}
+                                  onChange={(e) => setTemplateData({ ...templateData, costCenter: e.target.value })}
+                                  placeholder="e.g., CC-001"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between p-3 rounded-lg border">
+                              <div className="flex items-center gap-2">
+                                <CurrencyDollar className="h-5 w-5 text-muted-foreground" />
+                                <div>
+                                  <Label htmlFor="template-billable" className="cursor-pointer">Billable</Label>
+                                  <p className="text-xs text-muted-foreground">Default billable setting</p>
+                                </div>
+                              </div>
+                              <Switch
+                                id="template-billable"
+                                checked={templateData.billable}
+                                onCheckedChange={(checked) => setTemplateData({ ...templateData, billable: checked })}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="template-notes">Default Notes</Label>
+                              <Textarea
+                                id="template-notes"
+                                value={templateData.notes}
+                                onChange={(e) => setTemplateData({ ...templateData, notes: e.target.value })}
+                                placeholder="Optional"
+                                rows={3}
+                              />
+                            </div>
                           </div>
                         </div>
                         <DialogFooter>
@@ -672,48 +843,50 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                 Add Time Entry
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add Time Entry</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="employee">Employee *</Label>
-                    <Select
-                      value={formData.employeeId}
-                      onValueChange={(value) => setFormData({ ...formData, employeeId: value })}
-                    >
-                      <SelectTrigger id="employee">
-                        <SelectValue placeholder="Select employee" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {employees.map((emp) => (
-                          <SelectItem key={emp.id} value={emp.id}>
-                            {emp.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="employee">Employee *</Label>
+                      <Select
+                        value={formData.employeeId}
+                        onValueChange={(value) => setFormData({ ...formData, employeeId: value })}
+                      >
+                        <SelectTrigger id="employee">
+                          <SelectValue placeholder="Select employee" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {employees.map((emp) => (
+                            <SelectItem key={emp.id} value={emp.id}>
+                              {emp.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="project">Project *</Label>
-                    <Select
-                      value={formData.projectId}
-                      onValueChange={(value) => setFormData({ ...formData, projectId: value })}
-                    >
-                      <SelectTrigger id="project">
-                        <SelectValue placeholder="Select project" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {projects.map((proj) => (
-                          <SelectItem key={proj.id} value={proj.id}>
-                            {proj.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-2">
+                      <Label htmlFor="project">Project *</Label>
+                      <Select
+                        value={formData.projectId}
+                        onValueChange={(value) => setFormData({ ...formData, projectId: value })}
+                      >
+                        <SelectTrigger id="project">
+                          <SelectValue placeholder="Select project" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {projects.map((proj) => (
+                            <SelectItem key={proj.id} value={proj.id}>
+                              {proj.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -777,15 +950,148 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">Notes</Label>
-                    <Textarea
-                      id="notes"
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder="Optional notes about this time entry..."
-                      rows={3}
-                    />
+                  <Separator />
+
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-muted-foreground">Optional Details</h4>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="task">Task</Label>
+                        <Input
+                          id="task"
+                          value={formData.task}
+                          onChange={(e) => setFormData({ ...formData, task: e.target.value })}
+                          placeholder="e.g., Development"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="subtask">Subtask</Label>
+                        <Input
+                          id="subtask"
+                          value={formData.subtask}
+                          onChange={(e) => setFormData({ ...formData, subtask: e.target.value })}
+                          placeholder="e.g., Bug fix"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="tags">Tags</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="tags"
+                          value={formData.tagInput}
+                          onChange={(e) => setFormData({ ...formData, tagInput: e.target.value })}
+                          placeholder="Add tag and press Enter"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              if (formData.tagInput.trim()) {
+                                setFormData({
+                                  ...formData,
+                                  tags: [...formData.tags, formData.tagInput.trim()],
+                                  tagInput: ''
+                                })
+                              }
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="outline"
+                          onClick={() => {
+                            if (formData.tagInput.trim()) {
+                              setFormData({
+                                ...formData,
+                                tags: [...formData.tags, formData.tagInput.trim()],
+                                tagInput: ''
+                              })
+                            }
+                          }}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      {formData.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {formData.tags.map((tag, idx) => (
+                            <Badge key={idx} variant="secondary" className="gap-1">
+                              <Tag className="h-3 w-3" />
+                              {tag}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({
+                                    ...formData,
+                                    tags: formData.tags.filter((_, i) => i !== idx)
+                                  })
+                                }}
+                                className="ml-1 hover:text-destructive"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="location" className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          Location
+                        </Label>
+                        <Input
+                          id="location"
+                          value={formData.location}
+                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                          placeholder="e.g., Home Office"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="costCenter" className="flex items-center gap-2">
+                          <Bank className="h-4 w-4" />
+                          Cost Center
+                        </Label>
+                        <Input
+                          id="costCenter"
+                          value={formData.costCenter}
+                          onChange={(e) => setFormData({ ...formData, costCenter: e.target.value })}
+                          placeholder="e.g., CC-001"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-2">
+                        <CurrencyDollar className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <Label htmlFor="billable" className="cursor-pointer">Billable</Label>
+                          <p className="text-xs text-muted-foreground">Can this time be billed to a client?</p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="billable"
+                        checked={formData.billable}
+                        onCheckedChange={(checked) => setFormData({ ...formData, billable: checked })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="notes">Notes</Label>
+                      <Textarea
+                        id="notes"
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                        placeholder="Additional details about this time entry..."
+                        rows={3}
+                      />
+                    </div>
                   </div>
                 </div>
                 <DialogFooter>
@@ -822,7 +1128,7 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <Badge variant="secondary">
                               {getEmployeeName(employees, timer.employeeId)}
                             </Badge>
@@ -831,12 +1137,50 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                                 Paused
                               </Badge>
                             )}
+                            {timer.billable && (
+                              <Badge variant="outline" className="text-green-600 border-green-600">
+                                <CurrencyDollar className="h-3 w-3 mr-1" />
+                                Billable
+                              </Badge>
+                            )}
                           </div>
                           <h3 className="font-semibold text-lg">
                             {getProjectName(projects, timer.projectId)}
                           </h3>
+                          {timer.task && (
+                            <p className="text-sm font-medium mt-1">
+                              {timer.task}
+                              {timer.subtask && <span className="text-muted-foreground"> • {timer.subtask}</span>}
+                            </p>
+                          )}
+                          {timer.tags && timer.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {timer.tags.map((tag, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  <Tag className="h-3 w-3 mr-1" />
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                          {(timer.location || timer.costCenter) && (
+                            <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
+                              {timer.location && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {timer.location}
+                                </span>
+                              )}
+                              {timer.costCenter && (
+                                <span className="flex items-center gap-1">
+                                  <Bank className="h-3 w-3" />
+                                  {timer.costCenter}
+                                </span>
+                              )}
+                            </div>
+                          )}
                           {timer.notes && (
-                            <p className="text-sm text-muted-foreground mt-1">{timer.notes}</p>
+                            <p className="text-sm text-muted-foreground mt-2">{timer.notes}</p>
                           )}
                         </div>
                         <div className="text-right">
@@ -1032,9 +1376,10 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                       <TableHead>Date</TableHead>
                       <TableHead>Employee</TableHead>
                       <TableHead>Project</TableHead>
+                      <TableHead>Task</TableHead>
                       <TableHead>Time</TableHead>
                       <TableHead>Duration</TableHead>
-                      <TableHead>Notes</TableHead>
+                      <TableHead>Details</TableHead>
                       <TableHead className="w-[100px]"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1060,16 +1405,58 @@ export function TimeTracking({ timeEntries, setTimeEntries, employees, projects 
                           <TableCell>
                             {new Date(entry.date).toLocaleDateString('de-DE')}
                           </TableCell>
-                          <TableCell>{getEmployeeName(employees, entry.employeeId)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {getEmployeeName(employees, entry.employeeId)}
+                              {entry.billable && (
+                                <CurrencyDollar className="h-4 w-4 text-green-600" weight="bold" />
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell>{getProjectName(projects, entry.projectId)}</TableCell>
+                          <TableCell className="text-sm">
+                            {entry.task || '-'}
+                            {entry.subtask && (
+                              <div className="text-xs text-muted-foreground">{entry.subtask}</div>
+                            )}
+                          </TableCell>
                           <TableCell className="font-mono text-sm">
                             {entry.startTime} - {entry.endTime}
                           </TableCell>
                           <TableCell className="font-mono font-medium text-primary">
                             {formatDuration(duration)}
                           </TableCell>
-                          <TableCell className="max-w-[200px] truncate text-muted-foreground text-sm">
-                            {entry.notes || '-'}
+                          <TableCell className="max-w-[250px]">
+                            <div className="space-y-1">
+                              {entry.tags && entry.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {entry.tags.map((tag, idx) => (
+                                    <Badge key={idx} variant="outline" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                              {(entry.location || entry.costCenter) && (
+                                <div className="flex gap-2 text-xs text-muted-foreground">
+                                  {entry.location && (
+                                    <span className="flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" />
+                                      {entry.location}
+                                    </span>
+                                  )}
+                                  {entry.costCenter && (
+                                    <span className="flex items-center gap-1">
+                                      <Bank className="h-3 w-3" />
+                                      {entry.costCenter}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                              {entry.notes && (
+                                <p className="text-xs text-muted-foreground truncate">{entry.notes}</p>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -26,16 +26,18 @@ This application requires multiple interconnected features including employee ma
 - **Progression**: Click add button → Enter project details in dialog → Save → Project appears in list and time entry dropdowns
 - **Success criteria**: Projects persist, can be assigned to multiple time entries, and show accumulated hours
 
-### Time Entry Tracking (Enhanced)
-- **Functionality**: Log work sessions with live timer (Start/Stop/Pause), manual time entry, project switching, templates, and bulk editing capabilities
-- **Purpose**: Record billable and non-billable hours for payroll, invoicing, and productivity analysis with maximum flexibility
+### Time Entry Tracking (Enhanced with Detailed Fields)
+- **Functionality**: Log work sessions with live timer (Start/Stop/Pause), manual time entry, project switching, templates, and bulk editing capabilities. Support both required and optional fields for comprehensive time tracking.
+- **Purpose**: Record billable and non-billable hours for payroll, invoicing, and productivity analysis with maximum flexibility and detailed categorization
+- **Required Fields**: Project, Date, Duration (or Start/End times)
+- **Optional Fields**: Task, Subtask, Tag(s), Location, Notes, Cost Center, Billable yes/no
 - **Trigger**: Click "Start Timer" for active tracking or "Add Time Entry" for manual entry
 - **Progression**: 
-  - Live Timer: Click start → Select employee/project → Timer runs → Pause/resume as needed → Switch project without stopping → Click stop → Entry saved
-  - Manual Entry: Click add → Select employee/project → Choose date → Enter start/end times or duration → Add notes → Save → Entry appears in timeline
-  - Quick Actions: Use favorites, recent projects, or templates for instant timer start → Bulk select entries for mass edits
+  - Live Timer: Click start → Select employee/project → Add optional details (task, tags, location, etc.) → Timer runs → Pause/resume as needed → Switch project without stopping → Click stop → Entry saved with all details
+  - Manual Entry: Click add → Select employee/project (required) → Choose date (required) → Enter start/end times or duration (required) → Optionally add task, subtask, tags, location, cost center, billable flag, notes → Save → Entry appears in timeline with all metadata
+  - Quick Actions: Use favorites, recent projects, or templates (which can include default optional fields) for instant timer start → Bulk select entries for mass edits
   - Auto-pause: Timer detects idle time → Prompts to discard or keep idle period → Optionally auto-resume on return
-- **Success criteria**: Active timer persists between sessions, can switch projects without stopping, supports multiple simultaneous timers (optional), manual entries validate time ranges, favorites speed up entry, bulk edit modifies multiple entries at once, idle detection prevents false time logging
+- **Success criteria**: Active timer persists between sessions with all optional fields, can switch projects without stopping, supports multiple simultaneous timers (optional), manual entries validate time ranges, optional fields are clearly marked as non-required, favorites speed up entry, bulk edit modifies multiple entries at once, idle detection prevents false time logging, tags can be added/removed dynamically, billable status is visually indicated
 
 ### Mileage Logbook
 - **Functionality**: Record vehicle trips with employee, date, start/end locations, distance, and purpose
@@ -65,6 +67,9 @@ This application requires multiple interconnected features including employee ma
 - **Duplicate Entries**: Allow multiple time entries for the same employee/project/day to accommodate split shifts
 - **Negative Mileage**: Validate that distance values are positive numbers with appropriate error feedback
 - **Date Selection**: Default to current date but allow historical entry backdating
+- **Optional Field Validation**: All optional fields (Task, Subtask, Tags, Location, Notes, Cost Center) can be empty without preventing save
+- **Tag Management**: Prevent duplicate tags in the same entry, allow easy removal of tags with clear UI feedback
+- **Billable Toggle**: Default billable status to true but allow users to explicitly mark entries as non-billable
 
 ## Design Direction
 The design should evoke professionalism, trustworthiness, and efficiency - like a well-organized office workspace. It should feel modern and corporate without being sterile, with a balanced color palette that conveys both authority and approachability. The interface should prioritize clarity and speed of data entry.
@@ -135,6 +140,12 @@ Animations should enhance the sense of organization and efficiency through purpo
   - BarChart for dashboard metrics
   - Download for CSV exports
   - FileText for reports section
+  - Tag for entry tags
+  - MapPin for location fields
+  - Bank for cost center
+  - CurrencyDollar for billable indicator
+  - Play/Pause/Stop for timer controls
+  - Lightning for quick actions
   
 - **Spacing**: 
   - Page padding: p-6 for desktop, p-4 for mobile

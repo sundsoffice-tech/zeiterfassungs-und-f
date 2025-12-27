@@ -20,7 +20,13 @@ export interface TimeEntry {
   date: string
   startTime: string
   endTime: string
+  task?: string
+  subtask?: string
+  tags?: string[]
+  location?: string
   notes?: string
+  costCenter?: string
+  billable?: boolean
   createdAt: string
   isFavorite?: boolean
 }
@@ -32,7 +38,13 @@ export interface ActiveTimer {
   startTime: number
   pausedAt?: number
   pausedDuration: number
+  task?: string
+  subtask?: string
+  tags?: string[]
+  location?: string
   notes?: string
+  costCenter?: string
+  billable?: boolean
   isPaused: boolean
 }
 
@@ -42,7 +54,13 @@ export interface TimeTemplate {
   employeeId: string
   projectId: string
   duration?: number
+  task?: string
+  subtask?: string
+  tags?: string[]
+  location?: string
   notes?: string
+  costCenter?: string
+  billable?: boolean
   isFavorite: boolean
   lastUsed: string
 }

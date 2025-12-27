@@ -34,7 +34,13 @@ export function convertTimerToTimeEntry(
     date: startDate.toISOString().split('T')[0],
     startTime: formatTime(startDate),
     endTime: formatTime(endDate),
-    notes: timer.notes || ''
+    task: timer.task,
+    subtask: timer.subtask,
+    tags: timer.tags,
+    location: timer.location,
+    notes: timer.notes,
+    costCenter: timer.costCenter,
+    billable: timer.billable
   }
 }
 
