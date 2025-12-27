@@ -236,6 +236,39 @@ export interface MileageEntry {
   changeLog: ChangeLogEntry[]
 }
 
+export enum ActivityMode {
+  FAHRT = 'fahrt',
+  MONTAGE = 'montage',
+  DEMONTAGE = 'demontage',
+  PLANUNG = 'planung',
+  BERATUNG = 'beratung',
+  WARTUNG = 'wartung',
+  DOKUMENTATION = 'dokumentation',
+  MEETING = 'meeting',
+  SONSTIGES = 'sonstiges'
+}
+
+export enum TimerEventType {
+  START = 'start',
+  PAUSE = 'pause',
+  RESUME = 'resume',
+  STOP = 'stop',
+  MODE_SWITCH = 'mode_switch'
+}
+
+export interface TimerEvent {
+  id: string
+  type: TimerEventType
+  timestamp: number
+  timestampFormatted: string
+  mode?: ActivityMode
+  projectId?: string
+  phaseId?: string
+  taskId?: string
+  location?: string
+  notes?: string
+}
+
 export interface ActiveTimer {
   id: string
   employeeId: string
@@ -251,6 +284,9 @@ export interface ActiveTimer {
   costCenter?: string
   billable: boolean
   isPaused: boolean
+  mode?: ActivityMode
+  events: TimerEvent[]
+  calendarEventId?: string
 }
 
 export enum IntegrationType {

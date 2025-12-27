@@ -110,7 +110,8 @@ export function useAutomation(
         startTime: Date.now(),
         pausedDuration: 0,
         billable: true,
-        isPaused: false
+        isPaused: false,
+        events: []
       }
 
       setActiveTimer(newTimer)
