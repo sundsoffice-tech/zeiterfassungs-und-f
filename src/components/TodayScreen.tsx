@@ -10,6 +10,8 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
+import { SmartCategorization } from '@/components/SmartCategorization'
+import { CategorizationSuggestion } from '@/lib/ai-categorization'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -420,6 +422,22 @@ export function TodayScreen({
           </CardContent>
         </Card>
       </div>
+
+      <SmartCategorization
+        employeeId={selectedEmployee}
+        projects={projects}
+        tasks={tasks}
+        timeEntries={timeEntries}
+        onApplySuggestion={(suggestion: CategorizationSuggestion) => {
+          if (suggestion.projectId) {
+            setSelectedProject(suggestion.projectId)
+          }
+          if (suggestion.taskId) {
+            setSelectedTask(suggestion.taskId)
+          }
+          toast.success('Vorschlag angewendet')
+        }}
+      />
 
       <Card>
         <CardHeader>

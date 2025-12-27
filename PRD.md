@@ -48,8 +48,8 @@ This application requires sophisticated features including active timer manageme
 - **Success criteria**: Status tracking, email notifications (simulated), rejection reasons captured, resubmission flow
 
 ### AI-Assisted Time Logic (Validation & Suggestions)
-- **Functionality**: Comprehensive validation system with hard rules (blocking errors) and soft rules (warnings), plus AI-powered suggestions based on historical patterns, and advanced AI-powered anomaly detection that identifies unusual behavior patterns
-- **Purpose**: Ensure data quality, prevent common errors, detect anomalies, provide intelligent assistance, and identify unusual patterns that deviate from personal habits, team averages, or project-typical behavior while maintaining full transparency and user control
+- **Functionality**: Comprehensive validation system with hard rules (blocking errors) and soft rules (warnings), plus AI-powered suggestions based on historical patterns, advanced AI-powered anomaly detection that identifies unusual behavior patterns, and smart auto-categorization that suggests projects/tasks based on multiple context signals
+- **Purpose**: Ensure data quality, prevent common errors, detect anomalies, provide intelligent assistance, identify unusual patterns that deviate from personal habits, and reduce manual categorization effort by intelligently suggesting projects/tasks based on rich context signals while maintaining full transparency and user control
 - **Hard Rules (Blocking)**:
   - Overlapping time entries for same employee
   - Negative duration (end time before start time)
@@ -77,9 +77,19 @@ This application requires sophisticated features including active timer manageme
   - Comparison baselines: Personal historical behavior (30 days), team average, project-specific patterns
   - Confidence scoring (0-100%) and severity levels (Info, Warning, Critical)
   - Evidence-based explanations with clear metrics (typical vs current values)
-- **Trigger**: Real-time validation on entry creation/edit, AI suggestions on demand via button click, anomaly detection via dedicated analysis tabs
-- **Progression**: Enter time data → System validates in real-time → Shows hard errors (blocks save) or soft warnings (can proceed) → User requests AI suggestions → AI analyzes patterns → Provides 2-4 actionable recommendations → User applies or dismisses → Navigate to Anomaly tabs → Click analyze → System compares to patterns → Shows detected anomalies with evidence → User reviews and takes action if needed
-- **Success criteria**: All validation rules function correctly, clear distinction between blocking errors and warnings, AI suggestions are contextually relevant, anomaly detection identifies meaningful patterns with high confidence (>60%), full transparency (error codes, field names, metadata, evidence displayed), user maintains full control, baseline metrics clearly shown (typical vs current)
+- **Smart Auto-Categorization (Context-Based Suggestions)**:
+  - **Title/Notes Analysis**: Parses text for project keywords and client names (e.g., "Besprechung Produktdesign" → Design project)
+  - **Calendar Event Integration**: Analyzes meeting titles, times, locations, and attendees to suggest projects (e.g., "Du warst 10:00–11:30 im Termin 'Kurita Showroom' → als Projekt Kurita buchen?")
+  - **Location-Based Suggestions** (optional, privacy-sensitive): Uses GPS/manual location to suggest projects based on historical patterns (e.g., "Kurita Showroom" → Kurita project)
+  - **App/Website Tracking** (optional, privacy-sensitive): Analyzes used applications and websites to suggest task types (e.g., "Figma" → Design tasks, "GitHub" → Development tasks)
+  - **Time Pattern Recognition**: Considers time of day and day of week patterns (e.g., employee typically works on Project A in mornings)
+  - **Multi-Signal Analysis**: Combines multiple context signals for high-confidence suggestions with explicit reasoning
+  - **Privacy Controls**: Location, app, and website tracking are opt-in with clear privacy badges and user consent toggles
+  - **Confidence Scoring**: Each suggestion includes confidence percentage (0-100%) and signal sources used (history, calendar, location, apps, title, time-pattern)
+  - **One-Click Apply**: Users can apply suggestions with single click or dismiss them
+- **Trigger**: Real-time validation on entry creation/edit, AI suggestions on demand via button click, anomaly detection via dedicated analysis tabs, smart categorization accessible from Today screen with context signal input
+- **Progression**: Enter time data → System validates in real-time → Shows hard errors (blocks save) or soft warnings (can proceed) → User requests AI suggestions → AI analyzes patterns → Provides 2-4 actionable recommendations → User applies or dismisses → Navigate to Anomaly tabs → Click analyze → System compares to patterns → Shows detected anomalies with evidence → User reviews and takes action if needed → User opens Smart Categorization → Enters context signals (title, calendar event, location, apps) → Enables desired privacy-sensitive signals → Clicks generate → AI analyzes multi-signal context → Shows project/task suggestions with confidence and reasoning → User applies or modifies suggestions
+- **Success criteria**: All validation rules function correctly, clear distinction between blocking errors and warnings, AI suggestions are contextually relevant, anomaly detection identifies meaningful patterns with high confidence (>60%), smart categorization provides accurate suggestions based on context signals with clear reasoning, privacy controls are evident and functional, full transparency (error codes, field names, metadata, evidence, signal sources displayed), user maintains full control, baseline metrics clearly shown (typical vs current)
 
 ### Audit Trail & Versioning
 - **Functionality**: Every record tracks created_by, created_at, updated_by, updated_at, device. Full change log with before/after snapshots and reason.
