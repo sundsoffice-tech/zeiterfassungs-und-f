@@ -1,4 +1,4 @@
-import { Clock, FolderOpen, ChartBar, Lightning, DotsThreeOutline } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, Lightning, DotsThreeOutline, CalendarBlank, Article, ShieldStar, TrendUp, CloudArrowUp, Rocket, Brain, UserCircleGear, ShieldCheck, Wrench, Gauge, Lighthouse } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -23,19 +23,19 @@ const mainNavItems = [
 ]
 
 const moreNavItems = [
-  { id: 'week', label: 'Woche', icon: Clock },
-  { id: 'timepicker', label: 'Time Picker', icon: Clock },
-  { id: 'calendar', label: 'Kalender', icon: Clock },
-  { id: 'trust', label: 'Vertrauen', icon: Clock },
-  { id: 'forecast', label: 'Prognose', icon: Clock },
-  { id: 'offline', label: 'Offline/Sync', icon: Clock },
-  { id: 'pro', label: 'Pro Module', icon: Clock },
-  { id: 'explainable', label: 'Erklärbare KI', icon: Clock },
-  { id: 'admin', label: 'Admin', icon: Clock },
-  { id: 'validation', label: 'KI-Validierung', icon: Clock },
-  { id: 'repair', label: 'Reparatur', icon: Clock },
-  { id: 'performance', label: 'Performance', icon: Clock },
-  { id: 'lighthouse', label: 'Lighthouse', icon: Clock },
+  { id: 'week', label: 'Woche', icon: CalendarBlank },
+  { id: 'timepicker', label: 'Time Picker', icon: Article },
+  { id: 'calendar', label: 'Kalender', icon: CalendarBlank },
+  { id: 'trust', label: 'Vertrauen', icon: ShieldStar },
+  { id: 'forecast', label: 'Prognose', icon: TrendUp },
+  { id: 'offline', label: 'Offline/Sync', icon: CloudArrowUp },
+  { id: 'pro', label: 'Pro Module', icon: Rocket },
+  { id: 'explainable', label: 'Erklärbare KI', icon: Brain },
+  { id: 'admin', label: 'Admin', icon: UserCircleGear },
+  { id: 'validation', label: 'KI-Validierung', icon: ShieldCheck },
+  { id: 'repair', label: 'Reparatur', icon: Wrench },
+  { id: 'performance', label: 'Performance', icon: Gauge },
+  { id: 'lighthouse', label: 'Lighthouse', icon: Lighthouse },
 ]
 
 export function MobileBottomNav({ activeTab, onNavigate }: MobileBottomNavProps) {

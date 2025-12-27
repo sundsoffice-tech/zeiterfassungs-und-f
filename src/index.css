@@ -104,7 +104,7 @@
   --radius-full: 9999px;
 }
 
-/* Safe Area für iPhone */
+/* Safe Area for iPhone */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -114,7 +114,7 @@
   height: calc(64px + env(safe-area-inset-bottom, 0px));
 }
 
-/* Bessere Touch-Scrolling */
+/* Better Touch Scrolling */
 .touch-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
