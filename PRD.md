@@ -87,9 +87,44 @@ This application requires sophisticated features including active timer manageme
   - **Privacy Controls**: Location, app, and website tracking are opt-in with clear privacy badges and user consent toggles
   - **Confidence Scoring**: Each suggestion includes confidence percentage (0-100%) and signal sources used (history, calendar, location, apps, title, time-pattern)
   - **One-Click Apply**: Users can apply suggestions with single click or dismiss them
-- **Trigger**: Real-time validation on entry creation/edit, AI suggestions on demand via button click, anomaly detection via dedicated analysis tabs, smart categorization accessible from Today screen with context signal input
-- **Progression**: Enter time data → System validates in real-time → Shows hard errors (blocks save) or soft warnings (can proceed) → User requests AI suggestions → AI analyzes patterns → Provides 2-4 actionable recommendations → User applies or dismisses → Navigate to Anomaly tabs → Click analyze → System compares to patterns → Shows detected anomalies with evidence → User reviews and takes action if needed → User opens Smart Categorization → Enters context signals (title, calendar event, location, apps) → Enables desired privacy-sensitive signals → Clicks generate → AI analyzes multi-signal context → Shows project/task suggestions with confidence and reasoning → User applies or modifies suggestions
-- **Success criteria**: All validation rules function correctly, clear distinction between blocking errors and warnings, AI suggestions are contextually relevant, anomaly detection identifies meaningful patterns with high confidence (>60%), smart categorization provides accurate suggestions based on context signals with clear reasoning, privacy controls are evident and functional, full transparency (error codes, field names, metadata, evidence, signal sources displayed), user maintains full control, baseline metrics clearly shown (typical vs current)
+- **Trigger**: Real-time validation on entry creation/edit, AI suggestions on demand via button click, anomaly detection via dedicated analysis tabs, smart categorization accessible from Today screen with context signal input, repair mode accessible from dedicated Reparatur tab
+- **Progression**: Enter time data → System validates in real-time → Shows hard errors (blocks save) or soft warnings (can proceed) → User requests AI suggestions → AI analyzes patterns → Provides 2-4 actionable recommendations → User applies or dismisses → Navigate to Anomaly tabs → Click analyze → System compares to patterns → Shows detected anomalies with evidence → User reviews and takes action if needed → User opens Smart Categorization → Enters context signals (title, calendar event, location, apps) → Enables desired privacy-sensitive signals → Clicks generate → AI analyzes multi-signal context → Shows project/task suggestions with confidence and reasoning → User applies or modifies suggestions → Navigate to Repair Mode → View inbox of issues → Select issue → Choose suggested fix → Apply in one click → Issue resolved
+- **Success criteria**: All validation rules function correctly, clear distinction between blocking errors and warnings, AI suggestions are contextually relevant, anomaly detection identifies meaningful patterns with high confidence (>60%), smart categorization provides accurate suggestions based on context signals with clear reasoning, privacy controls are evident and functional, full transparency (error codes, field names, metadata, evidence, signal sources displayed), user maintains full control, baseline metrics clearly shown (typical vs current), repair mode detects gaps/overlaps and provides actionable fixes
+
+### AI Repair Mode ("Fehler in 30 Sekunden fixen")
+- **Functionality**: Intelligent inbox system that automatically detects time entry issues (gaps, overlaps, missing data, validation errors) and provides one-click repair actions with preview and confidence scoring. Includes daily/weekly inbox filters, batch correction capabilities, and smart action suggestions.
+- **Purpose**: Dramatically reduce time spent fixing data quality issues by providing instant, AI-powered repair suggestions that can be applied in seconds, making data cleanup effortless and error-free.
+- **Issue Detection**:
+  - **Time Gaps**: Detects gaps between entries (15 min to 3h) and suggests filling, extending previous, or advancing next entry
+  - **Overlaps**: Identifies overlapping time entries and offers splitting, trimming, or deletion options
+  - **Missing Data**: Flags entries without notes/tasks that should have them based on billability or project requirements
+  - **Validation Errors**: Surfaces hard and soft validation rule violations from the validation engine
+  - **Anomalies**: Integrates with anomaly detection to surface pattern-based issues
+- **Repair Actions**:
+  - **Fill Gap**: Create new time entry for gap period with project/task selection
+  - **Extend Entry**: Lengthen previous or next entry to cover gap
+  - **Split Entry**: Divide overlapping entry into two parts at overlap boundary
+  - **Trim Entry**: Shorten entry to remove overlap (adjust start or end time)
+  - **Delete Entry**: Remove duplicate or erroneous entry entirely
+  - **Update Field**: Modify specific fields (notes, task, billable status)
+  - **Batch Update**: Apply same correction to multiple entries at once
+- **Inbox System**:
+  - **Daily Inbox**: Today's issues requiring attention with priority sorting (Critical → Warning → Info)
+  - **Weekly Inbox**: All issues from current week for batch review
+  - **Filter Options**: All/Today/Week/Daily/Weekly views with real-time issue count badges
+  - **Status Tracking**: Pending → In Review → Resolved → Dismissed with timestamps
+  - **Auto-Resolution**: Issues automatically marked resolved when underlying data changes
+- **User Experience**:
+  - **Quick-Fix Badge**: Issues with auto-applicable actions (confidence >70%) get special "Quick-Fix" badge
+  - **Action Preview**: Shows before/after state for all repair actions before applying
+  - **Confidence Scoring**: Each action displays confidence percentage based on historical patterns
+  - **One-Click Apply**: Primary actions can be applied instantly without additional dialogs
+  - **Dismiss Option**: Users can mark issues as irrelevant with optional reason
+  - **Statistics Dashboard**: Shows total issues, breakdown by severity, and quick-fixable count
+  - **Auto-Analysis**: Continuously monitors time entries and updates issue list in background
+- **Trigger**: Navigate to "Reparatur" tab, automatic background analysis on data changes, manual "Neu analysieren" button
+- **Progression**: System detects issues → Categorizes by type and severity → Generates repair suggestions → Displays in prioritized inbox → User selects issue → Reviews suggested actions with confidence scores → Chooses action → Previews changes → Applies with one click → Issue marked resolved → Updated time entries saved → Toast confirmation
+- **Success criteria**: Issues detected accurately across all employees and dates, repair actions work correctly without data corruption, confidence scores correlate with success rate, quick-fix actions complete in <5 seconds, batch operations handle 20+ entries efficiently, auto-resolution prevents stale issues, dismissed issues don't reappear, audit trail maintained for all repairs
 
 ### Audit Trail & Versioning
 - **Functionality**: Every record tracks created_by, created_at, updated_by, updated_at, device. Full change log with before/after snapshots and reason.
