@@ -1,0 +1,163 @@
+SYSTEM / ROLE
+Du bist Senior Full-Stack Architect + Staff Engineer. Baue eine produktionsreife, extrem intuitive, KI-gestützte Time-Tracking SaaS (Web + Mobile), DSGVO-konform, offline-fähig, mit Admin-Reports, Audit-Logs, Rollen/Rechten und intelligenter Plausibilitätsprüfung.
+
+ZIEL
+Die App ist „best-in-class“ bei Übersicht & Bediengeschwindigkeit:
+- 1-Klick Start/Stop, Tages-/Wochensicht (Timesheet), Projekte/Tasks/Tags
+- KI unterstützt: Vorschläge, Anomalie-Erkennung, Fehler-Inbox, Forecast/Budget-Risiko
+- Admin: Live-Status, Reports, Genehmigungsworkflow, Audit, Exporte (PDF/CSV/XLSX)
+
+TECH STACK (code-basiert, modern)
+Frontend Web:
+- Next.js (App Router), TypeScript, Tailwind, TanStack Query
+- Zustand oder Redux Toolkit (state), React Hook Form + Zod
+Mobile:
+- React Native (Expo) oder Flutter (wenn RN, dann TS)
+Backend:
+- Node.js (NestJS) ODER FastAPI (Python) – entscheide eins und bleib dabei
+DB:
+- PostgreSQL (primary), Redis (caching/queues), optional ClickHouse (Analytics)
+Auth:
+- OIDC/SAML optional, Standard: Email+Passwort, Magic Link, MFA (TOTP)
+Infra:
+- Docker Compose (dev), CI/CD, migrations, observability (OpenTelemetry)
+
+ARCHITEKTUR (Domain-driven, modular)
+1) Core Domains:
+- Identity & Access (Users, Roles, Permissions, SSO)
+- Clients & Projects (Clients -> Projects -> Tasks/Phases)
+- Time Entries (timer + manual)
+- Timesheets (periods, submit/approve/lock)
+- Rates & Billing (optional but vorbereitet)
+- Reporting & Exports
+- Audit & Compliance
+- AI & Validation Engine (Rules + ML/Heuristics)
+- Integrations (Calendar/PM/Accounting) via Webhooks + Connectors
+
+2) Services (Backend modules)
+- auth-service
+- project-service
+- time-service
+- timesheet-service
+- report-service
+- audit-service
+- ai-service (suggestions + anomaly + repair)
+- integration-service
+
+UX / SCREENS (exakt umsetzen)
+A) Mitarbeiter
+- Today Screen:
+  - großer Timer (Start/Stop, Pause, Projekt/Task Dropdown)
+  - Favoriten + zuletzt genutzt
+  - Tagesliste (Edit inline, Summen)
+  - Warnhinweise (nicht blockierend, außer Hard Rules)
+- Week Screen (Timesheet):
+  - Grid: Zeilen Projekte/Tasks, Spalten Mo–So
+  - Copy/Paste, Drag&Drop, Auto-Summen
+  - Button „Woche einreichen“
+- Projects Screen:
+  - Suche, Filterchips, Favoriten
+- Inbox „Zu prüfen“:
+  - KI sammelt Anomalien, Overlaps, Lücken → 1-Klick Fixes
+
+B) Admin
+- Admin Dashboard:
+  - Live-Status (wer arbeitet woran)
+  - offene Einreichungen
+  - Warnungen/Anomalien (Top-Risiken)
+  - KPIs (Billable Ratio, Auslastung, Budget burn)
+- Reports:
+  - Projektreport (Drilldown)
+  - Mitarbeiterreport
+  - Kundenreport
+  - Audit/Compliance Report
+  - KI-Insights Report
+- Settings:
+  - Regeln/Schwellenwerte, Pflichtfelder je Projekt, Rollenrechte, Locking
+
+DATENMODELL (Postgres, vollständig)
+Entities (mit Pflichtfeldern):
+- tenants(id, name, region, created_at)
+- users(id, tenant_id, name, email, password_hash, mfa_enabled, status, created_at)
+- roles(id, tenant_id, name)
+- permissions(id, key, description)
+- role_permissions(role_id, permission_id)
+- user_roles(user_id, role_id)
+
+- clients(id, tenant_id, name, status)
+- projects(id, tenant_id, client_id, name, code, status, start_date, end_date, budget_hours, budget_amount, currency)
+- tasks(id, tenant_id, project_id, parent_task_id NULL, name, status)
+- tags(id, tenant_id, name, color NULL)
+- project_members(project_id, user_id, role_in_project)
+
+- time_entries(
+  id, tenant_id, user_id, project_id, task_id NULL,
+  start_ts, end_ts NULL, duration_minutes,
+  is_billable BOOL, note TEXT NULL,
+  source ENUM('timer','manual','import','ai_fix'),
+  created_at, created_by, updated_at, updated_by,
+  locked BOOL DEFAULT false
+)
+
+- timesheet_periods(id, tenant_id, user_id, period_start, period_end, status ENUM('draft','submitted','approved','locked'), submitted_at NULL, approved_at NULL, approved_by NULL)
+- timesheet_entry_links(period_id, time_entry_id)
+
+- rates(id, tenant_id, scope ENUM('user','project','task','client'), scope_id, hourly_rate, currency, valid_from, valid_to NULL)
+- billing_invoices(optional future)
+
+- audit_logs(
+  id, tenant_id, actor_user_id, entity_type, entity_id,
+  action ENUM('create','update','delete','submit','approve','lock','export'),
+  before JSONB, after JSONB, reason TEXT NULL,
+  ip NULL, user_agent NULL, created_at
+)
+
+- ai_findings(
+  id, tenant_id, user_id NULL, project_id NULL, time_entry_id NULL,
+  type ENUM('overlap','gap','outlier','late_edit','weekend_work','missing_fields','rounding_pattern','budget_risk'),
+  severity ENUM('info','warn','high'),
+  explanation TEXT,
+  suggested_fix JSONB,
+  status ENUM('open','dismissed','applied'),
+  created_at
+)
+
+VALIDATION ENGINE (Regeln + KI)
+1) Hard Rules (blockierend):
+- overlap detection: keine Überschneidung pro User, außer explizit erlaubt
+- end < start, negative duration
+- booking on closed project/task
+- locked timesheet/entry cannot be edited (nur correction entry)
+
+2) Soft Rules (Warnung):
+- >12h/day, ungewöhnliche Zeiten, fehlende Notiz bei bestimmten Projekten
+- Rundungsmuster, viele Mikro-Einträge, späte Nachträge > X Tage
+
+3) KI-/Heuristik-Schicht:
+- Anomaly scoring:
+  - z-score / IQR auf Dauer pro (user, project, task)
+  - Vergleich Team/Projekt Median
+- Gap detection:
+  - Lücken zwischen Einträgen im Arbeitstag
+- Suggestion engine:
+  - Vorschlag Projekt/Task/Tag aus Notiz + „zuletzt“ + Kalender (wenn integriert)
+- Repair actions:
+  - split entry, shift start/end, fill gap, merge micro-entries
+- Budget risk:
+  - burn rate (aktuelle Stunden/Woche) + Restbudget → ETA/Risiko
+
+AI IMPLEMENTATION (ohne externe Datenpflicht)
+- Default: heuristics + statistical models (keine sensiblen Daten nötig)
+- Optional: LLM nur für Text-Klassifizierung (Notizen -> Tags/Tasks) und Erklärtexte
+- Erklärbarkeit ist Pflicht: jedes Finding hat einen nachvollziehbaren Grund
+
+REPORTING (Admin, Drilldown)
+- Project Report:
+  - total hours, billable hours, cost, burn-down, forecast
+  - breakdown by user/task/day/tag
+- User Report:
+  - weekly, overtime, billable ratio, anomalies count
+- Client Report:
+  - multi-project overview
+- Audit Report:
+  - all edits af
