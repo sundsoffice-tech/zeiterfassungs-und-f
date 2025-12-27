@@ -26,6 +26,7 @@ import { InlineEditableTimeEntry } from '@/components/InlineEditableTimeEntry'
 import { EmptyDayView } from '@/components/EmptyStates'
 import { useGlobalShortcuts } from '@/hooks/use-keyboard-shortcuts'
 import { announceToScreenReader } from '@/lib/accessibility'
+import { telemetry } from '@/lib/telemetry'
 
 interface TodayScreenProps {
   employees: Employee[]
@@ -134,6 +135,14 @@ export function TodayScreen({
     }
 
     setActiveTimer(newTimer)
+    
+    telemetry.trackTimerAction('start', {
+      projectId: selectedProject,
+      mode: selectedMode,
+      hasPhase: !!selectedPhase,
+      hasTask: !!selectedTask
+    })
+    
     toast.success(`Timer gestartet (${formatMode(selectedMode)})`, {
       description: format(new Date(), 'HH:mm:ss')
     })
@@ -153,6 +162,12 @@ export function TodayScreen({
         pausedAt: undefined,
         events: [...activeTimer.events, resumeEvent]
       })
+      
+      telemetry.trackTimerAction('resume', {
+        timerId: activeTimer.id,
+        pauseDuration
+      })
+      
       toast.success('Timer fortgesetzt', {
         description: format(new Date(), 'HH:mm:ss')
       })
@@ -165,6 +180,12 @@ export function TodayScreen({
         pausedAt: Date.now(),
         events: [...activeTimer.events, pauseEvent]
       })
+      
+      telemetry.trackTimerAction('pause', {
+        timerId: activeTimer.id,
+        elapsedTime
+      })
+      
       toast.success('Timer pausiert', {
         description: format(new Date(), 'HH:mm:ss')
       })
@@ -220,6 +241,13 @@ export function TodayScreen({
     setTimeEntries((current = []) => [...current, newEntry])
     setActiveTimer(null)
     setElapsedTime(0)
+    
+    telemetry.trackTimerAction('stop', {
+      timerId: activeTimer.id,
+      duration: parseFloat(duration.toFixed(2)),
+      totalEvents: allEvents.length,
+      pausedDuration: activeTimer.pausedDuration
+    })
     
     const summary = getTimerSummary({ ...activeTimer, events: allEvents })
     toast.success(`${duration.toFixed(2)} Stunden gespeichert`, {

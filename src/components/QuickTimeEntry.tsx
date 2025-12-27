@@ -11,6 +11,7 @@ import { Employee, Project, Task, Phase, TimeEntry, ApprovalStatus } from '@/lib
 import { Clock, FloppyDisk } from '@phosphor-icons/react'
 import { useGlobalShortcuts } from '@/hooks/use-keyboard-shortcuts'
 import { announceToScreenReader } from '@/lib/accessibility'
+import { useFormTelemetry } from '@/hooks/use-form-telemetry'
 
 interface QuickTimeEntryProps {
   open: boolean
@@ -37,27 +38,35 @@ export function QuickTimeEntry({
   const [selectedTask, setSelectedTask] = useState<string>('')
   const [duration, setDuration] = useState<string>('')
 
+  const { trackValidationError, trackSaveSuccess } = useFormTelemetry({
+    formName: 'QuickTimeEntry'
+  })
+
   const availablePhases = phases.filter(p => p.projectId === selectedProject)
   const availableTasks = tasks.filter(t => 
     (!selectedPhase || t.phaseId === selectedPhase)
   )
 
   const handleSave = () => {
+    const errors: Record<string, string> = {}
+
     if (!selectedEmployee) {
-      toast.error('Bitte wählen Sie einen Mitarbeiter aus')
-      announceToScreenReader('Fehler: Mitarbeiter muss ausgewählt werden', 'assertive')
-      return
+      errors.employee = 'Mitarbeiter ist erforderlich'
     }
 
     if (!selectedProject) {
-      toast.error('Bitte wählen Sie ein Projekt aus')
-      announceToScreenReader('Fehler: Projekt muss ausgewählt werden', 'assertive')
-      return
+      errors.project = 'Projekt ist erforderlich'
     }
 
     if (!duration || parseFloat(duration) <= 0) {
-      toast.error('Bitte geben Sie eine gültige Dauer ein')
-      announceToScreenReader('Fehler: Gültige Dauer erforderlich', 'assertive')
+      errors.duration = 'Gültige Dauer ist erforderlich'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      trackValidationError(errors)
+      const firstError = Object.values(errors)[0]
+      toast.error(firstError)
+      announceToScreenReader(`Fehler: ${firstError}`, 'assertive')
       return
     }
 
@@ -92,6 +101,13 @@ export function QuickTimeEntry({
     }
 
     onSave(newEntry)
+    
+    trackSaveSuccess({
+      duration: durationHours,
+      projectId: selectedProject,
+      hasPhase: !!selectedPhase,
+      hasTask: !!selectedTask
+    })
     
     setSelectedEmployee('')
     setSelectedProject('')

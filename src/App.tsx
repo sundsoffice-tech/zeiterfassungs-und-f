@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck, Wrench, TrendUp, Lightning, CloudArrowUp, Rocket, ShieldStar, Brain, CalendarCheck, Article } from '@phosphor-icons/react'
@@ -6,7 +6,6 @@ import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
 import { Projects } from '@/components/Projects'
-import { ReportsScreen } from '@/components/ReportsScreen'
 import { AdminScreen } from '@/components/AdminScreen'
 import { ValidationTestScreen } from '@/components/ValidationTestScreen'
 import { RepairModeScreen } from '@/components/RepairModeScreen'
@@ -28,6 +27,34 @@ import { getDefaultAppSettings } from '@/lib/automation'
 import { EmailNotificationService } from '@/lib/email-notifications'
 import { EmailConfig } from '@/lib/email-service'
 import { skipLinkClasses } from '@/lib/accessibility'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent } from '@/components/ui/card'
+
+const ReportsScreen = lazy(() => import('@/components/ReportsScreen').then(m => ({ default: m.ReportsScreen })))
+
+function ReportsLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-48" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Skeleton className="h-24" />
+              <Skeleton className="h-24" />
+              <Skeleton className="h-24" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-6">
+          <Skeleton className="h-96" />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState('timepicker')
@@ -235,14 +262,16 @@ function App() {
           </TabsContent>
 
           <TabsContent value="reports" className="mt-6">
-            <ReportsScreen
-              employees={employees || []}
-              projects={projects || []}
-              timeEntries={timeEntries || []}
-              mileageEntries={mileageEntries || []}
-              tasks={tasks || []}
-              absences={absences || []}
-            />
+            <Suspense fallback={<ReportsLoadingSkeleton />}>
+              <ReportsScreen
+                employees={employees || []}
+                projects={projects || []}
+                timeEntries={timeEntries || []}
+                mileageEntries={mileageEntries || []}
+                tasks={tasks || []}
+                absences={absences || []}
+              />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="calendar" className="mt-6">

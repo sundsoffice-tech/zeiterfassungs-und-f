@@ -13,6 +13,8 @@ import { AuditReport } from '@/components/reports/AuditReport'
 import { AIInsightsReport } from '@/components/reports/AIInsightsReport'
 import { exportTimeEntries, exportMileageEntries, EXPORT_FORMATS } from '@/lib/advanced-export'
 import { toast } from 'sonner'
+import { safeAsync, ErrorCode, createError } from '@/lib/error-handler'
+import { telemetry } from '@/lib/telemetry'
 
 interface ReportsScreenProps {
   employees: Employee[]
@@ -63,25 +65,78 @@ export function ReportsScreen({
   const billableHours = filteredEntries.filter(e => e.billable).reduce((sum, e) => sum + e.duration, 0)
   const nonBillableHours = totalHours - billableHours
 
-  const handleExportTimeEntries = () => {
-    try {
-      exportTimeEntries(exportFormat, filteredEntries, employees, projects, tasks)
+  const handleExportTimeEntries = async () => {
+    telemetry.trackExport('start', exportFormat, filteredEntries.length)
+
+    const result = await safeAsync(
+      async () => {
+        exportTimeEntries(exportFormat, filteredEntries, employees, projects, tasks)
+        return true
+      },
+      {
+        showToast: true,
+        toastTitle: 'Export fehlgeschlagen',
+        toastDescription: 'Der Export konnte nicht abgeschlossen werden.',
+        trackTelemetry: true,
+        retry: true,
+        retryOptions: {
+          maxAttempts: 2,
+          delayMs: 1000,
+          onRetry: (attempt) => {
+            toast.info('Erneuter Versuch...', {
+              description: `Versuch ${attempt} von 2`
+            })
+          }
+        },
+        context: {
+          exportFormat,
+          recordCount: filteredEntries.length
+        }
+      }
+    )
+
+    if (result) {
+      telemetry.trackExport('success', exportFormat, filteredEntries.length)
       toast.success('Export erfolgreich', {
         description: `${filteredEntries.length} Einträge exportiert als ${EXPORT_FORMATS.find(f => f.id === exportFormat)?.name}`
       })
-    } catch (error) {
-      toast.error('Export fehlgeschlagen')
+    } else {
+      telemetry.trackExport('error', exportFormat, filteredEntries.length)
     }
   }
 
-  const handleExportMileage = () => {
-    try {
-      exportMileageEntries(mileageEntries, employees, projects)
+  const handleExportMileage = async () => {
+    telemetry.trackExport('start', 'mileage_csv', mileageEntries.length)
+
+    const result = await safeAsync(
+      async () => {
+        exportMileageEntries(mileageEntries, employees, projects)
+        return true
+      },
+      {
+        showToast: true,
+        toastTitle: 'Export fehlgeschlagen',
+        toastDescription: 'Der Fahrtkosten-Export konnte nicht abgeschlossen werden.',
+        trackTelemetry: true,
+        retry: true,
+        retryOptions: {
+          maxAttempts: 2,
+          delayMs: 1000
+        },
+        context: {
+          exportFormat: 'mileage_csv',
+          recordCount: mileageEntries.length
+        }
+      }
+    )
+
+    if (result) {
+      telemetry.trackExport('success', 'mileage_csv', mileageEntries.length)
       toast.success('Fahrtkosten exportiert', {
         description: `${mileageEntries.length} Einträge exportiert`
       })
-    } catch (error) {
-      toast.error('Export fehlgeschlagen')
+    } else {
+      telemetry.trackExport('error', 'mileage_csv', mileageEntries.length)
     }
   }
 

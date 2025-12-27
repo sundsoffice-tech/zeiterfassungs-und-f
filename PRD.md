@@ -645,3 +645,41 @@ Animations should enhance the sense of organization and efficiency through purpo
   - Audit trail accessible via dedicated button instead of hover
   - Two-column layouts become single column
   - Metric cards go from multi-column grid to single column stack
+
+## Performance & Code Hygiene
+
+### Lazy Loading
+- **Functionality**: Reports screen and other heavy components lazy-loaded with React.lazy() and Suspense
+- **Purpose**: Reduce initial bundle size, improve load times, better perceived performance
+- **Trigger**: Component route/tab selection
+- **Progression**: User navigates to screen → Loading skeleton displayed → Component loads asynchronously → Content rendered
+- **Success criteria**: <3s initial load, skeleton provides loading feedback, no flash of unstyled content
+
+### Strict Type System
+- **Functionality**: Comprehensive Zod schemas for all data types with validation, type guards for runtime checking, no `any` types in codebase
+- **Purpose**: Catch errors at compile time, prevent runtime type errors, ensure data integrity
+- **Trigger**: All data parsing, API boundaries, unknown data sources
+- **Progression**: Receive unknown data → Parse with Zod schema → Validate against rules → Type-safe usage OR error handling
+- **Success criteria**: 100% type coverage, validation errors caught early, clear error messages for invalid data
+
+### Error Handling & Retry
+- **Functionality**: Centralized error handling with automatic retry for network/timeout errors, toast notifications with retry actions, exponential backoff
+- **Purpose**: Improve reliability, handle transient failures gracefully, provide user feedback
+- **Trigger**: Network requests, data parsing, file operations
+- **Progression**: Operation fails → Check if retryable → Show error toast with retry button → User retries OR automatic retry with backoff → Success OR permanent failure
+- **Success criteria**: <5% permanent failures, user can always retry, clear error messages, no silent failures
+
+### Telemetry System
+- **Functionality**: Comprehensive event tracking for forms (start/validation/save/cancel), timer actions (start/stop/pause/resume), exports (start/success/error), performance metrics
+- **Purpose**: Understand user behavior, identify bottlenecks, measure feature adoption, track error rates
+- **Trigger**: All user interactions, form lifecycle events, timer actions, exports, errors
+- **Progression**: Event occurs → Track with metadata → Store in session → Aggregate for analytics → Identify patterns
+- **Success criteria**: <50ms tracking overhead, accurate event capture, actionable insights, privacy-compliant
+
+### Performance Monitoring
+- **Functionality**: Component render time tracking, action performance measurement (sync/async), component lifetime tracking
+- **Purpose**: Identify slow components, optimize render performance, track performance regressions
+- **Trigger**: Component mount/render/unmount, user actions
+- **Progression**: Component renders → Track timing → Compare to baseline → Alert if degraded → Optimize
+- **Success criteria**: <100ms render time for most components, <1s for complex screens, performance budgets enforced
+
