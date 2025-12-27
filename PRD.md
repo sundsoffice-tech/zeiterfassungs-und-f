@@ -47,6 +47,29 @@ This application requires sophisticated features including active timer manageme
 - **Progression**: Employee fills timesheet → Submits period → Manager reviews → Approves or rejects with reason → Locked if approved
 - **Success criteria**: Status tracking, email notifications (simulated), rejection reasons captured, resubmission flow
 
+### AI-Assisted Time Logic (Validation & Suggestions)
+- **Functionality**: Comprehensive validation system with hard rules (blocking errors) and soft rules (warnings), plus AI-powered suggestions based on historical patterns
+- **Purpose**: Ensure data quality, prevent common errors, detect anomalies, and provide intelligent assistance while maintaining full transparency and user control
+- **Hard Rules (Blocking)**:
+  - Overlapping time entries for same employee
+  - Negative duration (end time before start time)
+  - Restricted hours (e.g., 03:00-05:00) requiring approval
+  - Project closed/inactive
+  - Absence conflicts (vacation, sick, holiday, blocked dates)
+  - Project ended (booking after project end date)
+- **Soft Rules (Warnings)**:
+  - Daily hours exceeding limit (default 12h)
+  - Missing notes for billable entries or entries without tasks
+  - Unusual rounding patterns (always exact hours like 8:00, 4:00)
+  - Weekend work without approval
+  - Holiday work
+  - Long shifts without documented pauses (>10h)
+  - No pauses detected in 8+ hour days (less than 30 min gap)
+- **AI Suggestions**: Contextual recommendations based on employee's recent entries, project patterns, and typical workflows (project suggestions, task recommendations, duration estimates, note templates)
+- **Trigger**: Real-time validation on entry creation/edit, AI suggestions on demand via button click
+- **Progression**: Enter time data → System validates in real-time → Shows hard errors (blocks save) or soft warnings (can proceed) → User requests AI suggestions → AI analyzes patterns → Provides 2-4 actionable recommendations → User applies or dismisses
+- **Success criteria**: All validation rules function correctly, clear distinction between blocking errors and warnings, AI suggestions are contextually relevant, full transparency (error codes, field names, metadata displayed), user maintains full control
+
 ### Audit Trail & Versioning
 - **Functionality**: Every record tracks created_by, created_at, updated_by, updated_at, device. Full change log with before/after snapshots and reason.
 - **Purpose**: Maintain complete history for compliance, debugging, and accountability

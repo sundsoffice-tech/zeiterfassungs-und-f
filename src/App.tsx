@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, ShieldCheck } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { TodayScreen } from '@/components/TodayScreen'
 import { WeekScreen } from '@/components/WeekScreen'
 import { Projects } from '@/components/Projects'
 import { ReportsScreen } from '@/components/ReportsScreen'
 import { AdminScreen } from '@/components/AdminScreen'
+import { ValidationTestScreen } from '@/components/ValidationTestScreen'
 import { CommandPalette } from '@/components/CommandPalette'
-import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer } from '@/lib/types'
+import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, Absence } from '@/lib/types'
 
 function App() {
   const [activeTab, setActiveTab] = useState('today')
@@ -19,6 +20,7 @@ function App() {
   const [phases, setPhases] = useKV<Phase[]>('phases', [])
   const [timeEntries, setTimeEntries] = useKV<TimeEntry[]>('timeEntries_v2', [])
   const [mileageEntries, setMileageEntries] = useKV<MileageEntry[]>('mileageEntries_v2', [])
+  const [absences, setAbsences] = useKV<Absence[]>('absences', [])
   const [activeTimer, setActiveTimer] = useKV<ActiveTimer | null>('activeTimer', null)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
 
@@ -57,7 +59,7 @@ function App() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="today" className="gap-2">
               <Clock className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Heute</span>
@@ -73,6 +75,10 @@ function App() {
             <TabsTrigger value="reports" className="gap-2">
               <ChartBar className="h-4 w-4" weight="duotone" />
               <span className="hidden sm:inline">Berichte</span>
+            </TabsTrigger>
+            <TabsTrigger value="validation" className="gap-2">
+              <ShieldCheck className="h-4 w-4" weight="duotone" />
+              <span className="hidden sm:inline">KI-Validierung</span>
             </TabsTrigger>
             <TabsTrigger value="admin" className="gap-2">
               <UserCircleGear className="h-4 w-4" weight="duotone" />
@@ -122,6 +128,17 @@ function App() {
               projects={projects || []}
               timeEntries={timeEntries || []}
               mileageEntries={mileageEntries || []}
+            />
+          </TabsContent>
+
+          <TabsContent value="validation" className="mt-6">
+            <ValidationTestScreen
+              employees={employees || []}
+              projects={projects || []}
+              tasks={tasks || []}
+              phases={phases || []}
+              timeEntries={timeEntries || []}
+              absences={absences || []}
             />
           </TabsContent>
 
