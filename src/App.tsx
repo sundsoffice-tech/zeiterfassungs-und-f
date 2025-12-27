@@ -23,6 +23,8 @@ import { Employee, Project, TimeEntry, MileageEntry, Task, Phase, ActiveTimer, A
 import { useAutomation } from '@/hooks/use-automation'
 import { useCalendarAutoSync } from '@/hooks/use-calendar-auto-sync'
 import { getDefaultAppSettings } from '@/lib/automation'
+import { EmailNotificationService } from '@/lib/email-notifications'
+import { EmailConfig } from '@/lib/email-service'
 
 function App() {
   const [activeTab, setActiveTab] = useState('timepicker')
@@ -35,6 +37,17 @@ function App() {
   const [absences, setAbsences] = useKV<Absence[]>('absences', [])
   const [activeTimer, setActiveTimer] = useKV<ActiveTimer | null>('activeTimer', null)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [emailConfig] = useKV<EmailConfig>('email-config', {
+    provider: 'none',
+    fromEmail: 'noreply@zeiterfassung.app',
+    fromName: 'Zeiterfassung'
+  })
+
+  useEffect(() => {
+    if (emailConfig) {
+      EmailNotificationService.initializeEmailService(emailConfig)
+    }
+  }, [emailConfig])
 
   const automation = useAutomation(
     employees || [],

@@ -2,6 +2,7 @@ import { Employee } from './types'
 import { GapOvertimeAnalysis, GapOvertimeIssue, GapOvertimeType, Severity } from './gap-overtime-detection'
 import { format, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { EmailService, EmailConfig } from './email-service'
 
 export enum NotificationFrequency {
   IMMEDIATE = 'immediate',
@@ -55,6 +56,23 @@ export interface NotificationLog {
 }
 
 export class EmailNotificationService {
+  private static emailService: EmailService | null = null
+
+  static initializeEmailService(config: EmailConfig) {
+    this.emailService = new EmailService(config)
+  }
+
+  static getEmailService(): EmailService {
+    if (!this.emailService) {
+      this.emailService = new EmailService({
+        provider: 'none',
+        fromEmail: 'noreply@zeiterfassung.app',
+        fromName: 'Zeiterfassung'
+      })
+    }
+    return this.emailService
+  }
+
   static getDefaultPreferences(employeeId: string): NotificationPreferences {
     return {
       employeeId,
@@ -307,15 +325,19 @@ export class EmailNotificationService {
     }
   }
 
-  static async simulateSendEmail(notification: EmailNotification): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 500))
+  static async sendEmail(notification: EmailNotification): Promise<void> {
+    const emailService = this.getEmailService()
     
-    console.log('📧 EMAIL SENT')
-    console.log('─────────────')
-    console.log('To:', notification.to)
-    console.log('Subject:', notification.subject)
-    console.log('\nBody:\n', notification.body)
-    console.log('─────────────')
+    const result = await emailService.send({
+      to: notification.to,
+      subject: notification.subject,
+      textContent: notification.body,
+      htmlContent: notification.htmlBody
+    })
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to send email')
+    }
   }
 
   static createNotification(
@@ -354,7 +376,7 @@ export class EmailNotificationService {
     const notification = this.createNotification(employee, analysis, appUrl)
     
     try {
-      await this.simulateSendEmail(notification)
+      await this.sendEmail(notification)
       notification.status = 'sent'
       notification.sentAt = new Date().toISOString()
     } catch (error) {

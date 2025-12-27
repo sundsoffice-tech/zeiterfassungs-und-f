@@ -4,15 +4,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { EnvelopeSimple, PaperPlaneTilt, CheckCircle, XCircle, Clock, Users } from '@phosphor-icons/react'
+import { EnvelopeSimple, PaperPlaneTilt, CheckCircle, XCircle, Clock, Users, Gear } from '@phosphor-icons/react'
 import { Employee, TimeEntry, Absence } from '@/lib/types'
 import { GapOvertimeDetector } from '@/lib/gap-overtime-detection'
 import { EmailNotificationService, EmailNotification, NotificationPreferences } from '@/lib/email-notifications'
+import { EmailConfig } from '@/lib/email-service'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface AnomalyNotificationCenterProps {
   employees: Employee[]
@@ -26,8 +28,15 @@ export function AnomalyNotificationCenter({
   absences
 }: AnomalyNotificationCenterProps) {
   const [sentNotifications, setSentNotifications] = useKV<EmailNotification[]>('sent-anomaly-notifications', [])
+  const [emailConfig] = useKV<EmailConfig>('email-config', {
+    provider: 'none',
+    fromEmail: 'noreply@zeiterfassung.app',
+    fromName: 'Zeiterfassung'
+  })
   const [sending, setSending] = useState(false)
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null)
+
+  const isEmailConfigured = emailConfig?.provider !== 'none' && !!emailConfig?.apiKey
 
   const analyzeAndSendNotifications = async (employeeIds?: string[]) => {
     setSending(true)
@@ -109,15 +118,32 @@ export function AnomalyNotificationCenter({
 
   return (
     <div className="space-y-6">
+      {!isEmailConfigured && (
+        <Alert>
+          <Gear className="h-4 w-4" />
+          <AlertDescription>
+            <strong>E-Mail-Dienst nicht konfiguriert:</strong> E-Mails werden nur simuliert und in der Browser-Konsole angezeigt. 
+            Bitte konfigurieren Sie einen E-Mail-Dienst unter <strong>E-Mail-Konfiguration</strong>, um echte E-Mails zu versenden.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <EnvelopeSimple className="h-5 w-5" weight="duotone" />
-            Anomalie-Benachrichtigungen
-          </CardTitle>
-          <CardDescription>
-            Senden Sie E-Mail-Benachrichtigungen an Mitarbeiter mit erkannten Zeiterfassungs-Anomalien
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <EnvelopeSimple className="h-5 w-5" weight="duotone" />
+                Anomalie-Benachrichtigungen
+              </CardTitle>
+              <CardDescription>
+                Senden Sie E-Mail-Benachrichtigungen an Mitarbeiter mit erkannten Zeiterfassungs-Anomalien
+              </CardDescription>
+            </div>
+            <Badge variant={isEmailConfigured ? 'default' : 'secondary'}>
+              {isEmailConfigured ? '✓ Konfiguriert' : 'Simuliert'}
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-3 p-4 rounded-lg bg-muted">

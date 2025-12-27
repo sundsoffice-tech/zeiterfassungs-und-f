@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon, Lock, Sliders, Brain, Bell, User } from '@phosphor-icons/react'
+import { UserCircleGear, Plus, PencilSimple, Trash, ShieldCheck, ChartBar, Link as LinkIcon, Lock, Sliders, Brain, Bell, User, EnvelopeSimple } from '@phosphor-icons/react'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
@@ -18,6 +18,7 @@ import { ValidationRulesScreen } from '@/components/ValidationRulesScreen'
 import { AIDecisionTrendsScreen } from '@/components/AIDecisionTrendsScreen'
 import { AnomalyNotificationCenter } from '@/components/AnomalyNotificationCenter'
 import { EmployeeSettingsScreen } from '@/components/EmployeeSettingsScreen'
+import { EmailConfigScreen } from '@/components/EmailConfigScreen'
 import { useKV } from '@github/spark/hooks'
 import { AdminDecision } from '@/lib/explainable-ai'
 
@@ -188,6 +189,10 @@ export function AdminScreen({
             <LinkIcon className="h-4 w-4" weight="duotone" />
             Integrationen
           </TabsTrigger>
+          <TabsTrigger value="email-config" className="gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+            <EnvelopeSimple className="h-4 w-4" weight="duotone" />
+            E-Mail-Konfiguration
+          </TabsTrigger>
           <TabsTrigger value="privacy" className="gap-2">
             <Lock className="h-4 w-4" weight="duotone" />
             Datenschutz & Sicherheit
@@ -234,6 +239,10 @@ export function AdminScreen({
 
         <TabsContent value="integrations">
           <IntegrationsScreen />
+        </TabsContent>
+
+        <TabsContent value="email-config">
+          <EmailConfigScreen />
         </TabsContent>
 
         <TabsContent value="privacy">
