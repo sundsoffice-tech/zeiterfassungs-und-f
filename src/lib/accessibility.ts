@@ -55,6 +55,41 @@ export function announceToScreenReader(message: string, priority: 'polite' | 'as
   }, 1000)
 }
 
-export const focusRingClasses = 'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background'
+export const focusRingClasses = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-shadow duration-200'
 
-export const skipLinkClasses = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md'
+export const skipLinkClasses = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg'
+
+export const visuallyHiddenClasses = 'absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0'
+
+export function getLandmarkRole(section: 'header' | 'main' | 'nav' | 'footer' | 'aside' | 'region'): string {
+  const roles = {
+    header: 'banner',
+    main: 'main',
+    nav: 'navigation',
+    footer: 'contentinfo',
+    aside: 'complementary',
+    region: 'region'
+  }
+  return roles[section]
+}
+
+export function formatTimeForScreenReader(hours: number, minutes: number): string {
+  const hourText = hours === 1 ? '1 Stunde' : `${hours} Stunden`
+  const minuteText = minutes === 1 ? '1 Minute' : `${minutes} Minuten`
+  
+  if (hours === 0) return minuteText
+  if (minutes === 0) return hourText
+  return `${hourText} und ${minuteText}`
+}
+
+export function formatDateForScreenReader(date: Date): string {
+  const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
+  const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+  
+  const dayName = days[date.getDay()]
+  const day = date.getDate()
+  const month = months[date.getMonth()]
+  const year = date.getFullYear()
+  
+  return `${dayName}, ${day}. ${month} ${year}`
+}

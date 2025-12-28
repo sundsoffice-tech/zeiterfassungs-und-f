@@ -127,22 +127,22 @@ function App() {
         Zum Hauptinhalt springen
       </a>
       
-      <header className="border-b bg-background sticky top-0 z-20" role="banner">
+      <header className="border-b bg-card sticky top-0 z-20 shadow-sm" role="banner">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
-                <Clock className="h-5 w-5 text-primary-foreground" weight="bold" aria-hidden="true" />
+              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center" aria-hidden="true">
+                <Clock className="h-6 w-6 text-primary-foreground" weight="bold" />
               </div>
-              <span className="text-lg font-semibold">Zeiterfassung</span>
+              <h1 className="text-xl font-semibold text-foreground">Zeiterfassung</h1>
             </div>
           </div>
         </div>
       </header>
 
-      <main id="main-content" className="container mx-auto px-4 py-6 pb-20 md:pb-6" role="main">
+      <main id="main-content" className="container mx-auto px-4 py-8 pb-24 md:pb-8" role="main">
         {employees && employees.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6" role="region" aria-label="Benachrichtigungen">
             <ReminderNotificationDisplay
               employee={employees[0]}
               timeEntries={timeEntries || []}
@@ -152,8 +152,8 @@ function App() {
           </div>
         )}
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="hidden md:block">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <div className="hidden md:block" role="navigation" aria-label="Hauptnavigation">
             <NavigationMenu activeTab={activeTab} onNavigate={setActiveTab} />
           </div>
 

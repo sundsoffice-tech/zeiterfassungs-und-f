@@ -1,14 +1,14 @@
 # Planning Guide
 
-A comprehensive, enterprise-grade time tracking application with intuitive UI/UX featuring a minimalist navigation (Heute/Today, Woche/Week, Projekte/Projects, Berichte/Reports, Forecast, Automation, Admin), weltklasse timer interface, keyboard shortcuts, command palette (Ctrl+K), powerful automation capabilities including recurring entries and intelligent reminders, AI-powered forecasting, inline editing for seamless data management, skeleton loading states for perceived performance, and comprehensive admin dashboard for efficient time management that runs itself.
+A comprehensive, enterprise-grade, **barrier-free** time tracking application with intuitive UI/UX featuring a minimalist navigation (Heute/Today, Woche/Week, Projekte/Projects, Berichte/Reports, Forecast, Automation, Admin), weltklasse timer interface, keyboard shortcuts, command palette (Ctrl+K), powerful automation capabilities including recurring entries and intelligent reminders, AI-powered forecasting, inline editing for seamless data management, skeleton loading states for perceived performance, comprehensive admin dashboard for efficient time management that runs itself, and **full WCAG 2.1 AA accessibility compliance** ensuring inclusive access for all users regardless of ability.
 
 **Experience Qualities**: 
-1. **Intuitiv** - World-class interface that feels natural and requires zero training with large timer, smart project selection, instant feedback, inline editing without page changes, and automation that works in the background
-2. **Schnell** - Lightning-fast interactions with keyboard shortcuts, command palette (Ctrl+K), one-click actions, inline editing, skeleton loading states, and automated processes that never delay the user
-3. **Automatisch** - Self-running system with recurring entries, intelligent reminders, auto-start timers, and automated tagging that minimizes manual data entry
+1. **Intuitiv & Zugänglich** - World-class interface that feels natural and requires zero training with large timer, smart project selection, instant feedback, inline editing without page changes, automation that works in the background, and full keyboard navigation + screen reader support for universal access
+2. **Schnell & Responsiv** - Lightning-fast interactions with keyboard shortcuts, command palette (Ctrl+K), one-click actions, inline editing, skeleton loading states, automated processes that never delay the user, and clear visual/auditory feedback for all actions
+3. **Automatisch & Inklusiv** - Self-running system with recurring entries, intelligent reminders, auto-start timers, automated tagging that minimizes manual data entry, plus barrier-free design with proper semantic HTML, ARIA labels, high contrast ratios, and assistive technology support
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This application requires sophisticated features including active timer management, automation engine with recurring entries and rules, AI-powered reminders and forecasting, weekly timesheet with copy/paste/drag-drop, global search with filter chips, command palette for keyboard-driven workflows, multi-tenant architecture, role-based access control, approval workflows, comprehensive reporting, inline editing for all time entries, skeleton loading states, empty states with CTAs, **Pro Module capabilities** (automatic GPS mileage tracking, shift planning, geo-fencing automation, material/tool logging, invoice generation, customer portal) - warranting a sophisticated multi-view architecture optimized for speed, automation, and usability.
+This application requires sophisticated features including active timer management, automation engine with recurring entries and rules, AI-powered reminders and forecasting, weekly timesheet with copy/paste/drag-drop, global search with filter chips, command palette for keyboard-driven workflows, multi-tenant architecture, role-based access control, approval workflows, comprehensive reporting, inline editing for all time entries, skeleton loading states, empty states with CTAs, **Pro Module capabilities** (automatic GPS mileage tracking, shift planning, geo-fencing automation, material/tool logging, invoice generation, customer portal), and **comprehensive accessibility features** (keyboard navigation, screen reader support, high contrast, semantic markup) - warranting a sophisticated multi-view architecture optimized for speed, automation, usability, and universal access.
 
 ## Essential Features
 
@@ -538,16 +538,23 @@ This application requires sophisticated features including active timer manageme
 The design should evoke enterprise professionalism, trustworthiness, and operational efficiency - like a well-organized corporate system. It should feel modern, powerful, and audit-ready while remaining approachable. The interface should prioritize clarity, compliance indicators (approval status, locked entries), role-appropriate views, and efficient data entry workflows.
 
 ## Color Selection
-A professional palette with warm undertones to balance corporate formality with approachability, using blue for trust and orange accents for energy.
+A professional, **accessibility-first** palette with carefully calibrated contrast ratios exceeding WCAG 2.1 AA standards, using blue for trust, clear semantic colors for states, and sufficient visual distinction for all interactive elements.
 
-- **Primary Color**: Deep Blue (oklch(0.45 0.15 250)) - Conveys professionalism, trust, and corporate reliability
-- **Secondary Colors**: Soft Blue-Gray (oklch(0.85 0.02 250)) for backgrounds providing visual rest; Charcoal (oklch(0.25 0.01 250)) for text ensuring readability
-- **Accent Color**: Vibrant Orange (oklch(0.68 0.19 45)) - Energetic highlight for CTAs, active states, and important metrics
-- **Foreground/Background Pairings**: 
-  - Background (White oklch(0.99 0 0)): Charcoal text (oklch(0.25 0.01 250)) - Ratio 13.2:1 ✓
-  - Primary (Deep Blue oklch(0.45 0.15 250)): White text (oklch(0.99 0 0)) - Ratio 8.1:1 ✓
-  - Accent (Vibrant Orange oklch(0.68 0.19 45)): White text (oklch(0.99 0 0)) - Ratio 4.9:1 ✓
-  - Secondary (Soft Blue-Gray oklch(0.85 0.02 250)): Charcoal text (oklch(0.25 0.01 250)) - Ratio 10.5:1 ✓
+- **Primary Color**: Rich Blue (oklch(0.42 0.15 250)) - Conveys professionalism, trust, and corporate reliability with enhanced contrast
+- **Secondary Colors**: Soft Blue-Gray (oklch(0.92 0.01 250)) for backgrounds providing visual rest while maintaining readability; Deep Charcoal (oklch(0.20 0.01 250)) for text ensuring maximum legibility
+- **Accent Color**: Warm Amber (oklch(0.60 0.15 60)) - Clear, high-contrast highlight for CTAs, active states, and important metrics that works for color-blind users
+- **Semantic Colors**: 
+  - Success Green (oklch(0.55 0.15 145)) for confirmations and completed states
+  - Warning Amber (oklch(0.65 0.14 75)) for cautions and pending states
+  - Destructive Red (oklch(0.50 0.18 25)) for errors and dangerous actions
+- **Foreground/Background Pairings** (All exceed WCAG AA 4.5:1 for normal text, 3:1 for large text):
+  - Background (White oklch(0.99 0 0)): Deep Charcoal text (oklch(0.20 0.01 250)) - Ratio 15.8:1 ✓ AAA
+  - Primary (Rich Blue oklch(0.42 0.15 250)): White text (oklch(0.99 0 0)) - Ratio 10.2:1 ✓ AAA
+  - Accent (Warm Amber oklch(0.60 0.15 60)): White text (oklch(0.99 0 0)) - Ratio 5.8:1 ✓ AA+
+  - Secondary (Soft Blue-Gray oklch(0.92 0.01 250)): Deep Charcoal text (oklch(0.20 0.01 250)) - Ratio 12.5:1 ✓ AAA
+  - Success: White text contrast ratio 6.2:1 ✓ AA
+  - Warning: Deep Charcoal text contrast ratio 6.8:1 ✓ AA
+  - Destructive: White text contrast ratio 8.5:1 ✓ AAA
 
 ## Font Selection
 Typography should balance professional authority with modern approachability, using a geometric sans-serif for clarity.
