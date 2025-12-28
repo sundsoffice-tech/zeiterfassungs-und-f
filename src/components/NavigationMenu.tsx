@@ -191,17 +191,19 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           <DropdownMenuTrigger asChild>
             <Button
               variant={isSectionActive(section) ? "default" : "ghost"}
-              className={`gap-2 px-4 py-2 font-medium ${isSectionActive(section) ? 'shadow-sm' : ''}`}
+              className={`gap-2 px-4 py-2 font-medium min-h-[36px] ${isSectionActive(section) ? 'shadow-sm' : ''}`}
               aria-label={`${section.label} Menü`}
             >
-              {section.icon}
-              <span className="hidden sm:inline">{section.label}</span>
-              <ChevronDown className="h-3 w-3 opacity-50" aria-hidden="true" />
+              <span className="flex items-center gap-2 shrink-0">
+                {section.icon}
+                <span className="hidden sm:inline whitespace-nowrap">{section.label}</span>
+                <ChevronDown className="h-3 w-3 opacity-50 shrink-0" aria-hidden="true" />
+              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="start" 
-            className="w-56"
+            className="w-56 min-w-[14rem]"
             role="menu"
             aria-label={`${section.label} Untermenü`}
           >
@@ -209,14 +211,16 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
               <DropdownMenuItem
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`gap-2 cursor-pointer ${
+                className={`gap-2 cursor-pointer min-h-[36px] ${
                   activeTab === item.id ? 'bg-accent font-medium' : ''
                 }`}
                 role="menuitem"
                 aria-current={activeTab === item.id ? 'page' : undefined}
               >
-                {item.icon}
-                <span>{item.label}</span>
+                <span className="flex items-center gap-2 w-full">
+                  {item.icon}
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

@@ -55,14 +55,14 @@ export function MobileBottomNav({ activeTab, onNavigate }: MobileBottomNavProps)
               size="sm"
               onClick={() => onNavigate(item.id)}
               className={cn(
-                "flex-1 flex flex-col items-center gap-1 min-h-[44px] min-w-[44px] px-2",
+                "flex-1 flex flex-col items-center gap-1 min-h-[56px] min-w-[56px] px-2",
                 isActive && "text-primary bg-primary/10"
               )}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
             >
-              <Icon className="h-5 w-5" weight={isActive ? "fill" : "regular"} aria-hidden="true" />
-              <span className="text-[10px] leading-tight">{item.label}</span>
+              <Icon className="h-5 w-5 shrink-0" weight={isActive ? "fill" : "regular"} aria-hidden="true" />
+              <span className="text-[10px] leading-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-full">{item.label}</span>
             </Button>
           )
         })}
@@ -72,11 +72,11 @@ export function MobileBottomNav({ activeTab, onNavigate }: MobileBottomNavProps)
             <Button
               variant="ghost"
               size="sm"
-              className="flex-1 flex flex-col items-center gap-1 min-h-[44px] min-w-[44px] px-2"
+              className="flex-1 flex flex-col items-center gap-1 min-h-[56px] min-w-[56px] px-2"
               aria-label="Mehr Optionen"
             >
-              <DotsThreeOutline className="h-5 w-5" aria-hidden="true" />
-              <span className="text-[10px] leading-tight">Mehr</span>
+              <DotsThreeOutline className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <span className="text-[10px] leading-tight whitespace-nowrap">Mehr</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[80vh]">
@@ -95,11 +95,11 @@ export function MobileBottomNav({ activeTab, onNavigate }: MobileBottomNavProps)
                     key={item.id}
                     variant={isActive ? "default" : "outline"}
                     onClick={() => onNavigate(item.id)}
-                    className="h-20 flex flex-col items-center gap-2"
+                    className="h-20 min-h-[5rem] flex flex-col items-center gap-2"
                     aria-current={isActive ? 'page' : undefined}
                   >
-                    <Icon className="h-6 w-6" weight={isActive ? "fill" : "regular"} aria-hidden="true" />
-                    <span className="text-xs">{item.label}</span>
+                    <Icon className="h-6 w-6 shrink-0" weight={isActive ? "fill" : "regular"} aria-hidden="true" />
+                    <span className="text-xs leading-tight text-center">{item.label}</span>
                   </Button>
                 )
               })}

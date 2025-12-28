@@ -91,10 +91,10 @@ export function CommandPalette({
                     <CommandItem
                       key={item.id}
                       onSelect={() => handleSelect(item.action)}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 min-h-[36px]"
                     >
-                      <Icon className="h-4 w-4" weight="duotone" />
-                      <span>{item.label}</span>
+                      <Icon className="h-4 w-4 shrink-0" weight="duotone" />
+                      <span className="flex-1">{item.label}</span>
                     </CommandItem>
                   )
                 })}
@@ -113,10 +113,10 @@ export function CommandPalette({
                         onOpenChange(false)
                         setSearch('')
                       }}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 min-h-[36px]"
                     >
-                      <FolderOpen className="h-4 w-4" weight="duotone" />
-                      <span>{project.name}</span>
+                      <FolderOpen className="h-4 w-4 shrink-0" weight="duotone" />
+                      <span className="flex-1">{project.name}</span>
                     </CommandItem>
                   ))}
               </CommandGroup>

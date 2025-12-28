@@ -210,6 +210,23 @@
     outline-offset: 2px;
     transition: outline-offset 0.2s ease;
   }
+
+  button, 
+  [role="button"],
+  [role="menuitem"],
+  [role="tab"],
+  a {
+    font-feature-settings: 'tnum' on, 'lnum' on;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  nav,
+  [role="navigation"] {
+    contain: layout;
+  }
 }
 
 /* Status colors utility classes */

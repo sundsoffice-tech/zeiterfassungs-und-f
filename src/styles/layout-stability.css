@@ -1,0 +1,84 @@
+@layer base {
+  button,
+  [role="button"],
+  [role="menuitem"],
+  [role="tab"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"] {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1.5;
+    letter-spacing: normal;
+  }
+
+  [role="menu"],
+  [role="menubar"],
+  [role="navigation"] {
+    box-sizing: border-box;
+  }
+
+  [role="menuitem"] {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    box-sizing: border-box;
+  }
+
+  nav button,
+  nav [role="button"],
+  [role="navigation"] button,
+  [role="navigation"] [role="button"] {
+    contain: layout style paint;
+  }
+
+  .nav-item,
+  .menu-item,
+  .dropdown-item {
+    contain: layout;
+    will-change: auto;
+  }
+}
+
+@layer components {
+  .stable-text {
+    font-feature-settings: 'tnum' on, 'lnum' on;
+    font-variant-numeric: tabular-nums;
+    text-rendering: optimizeLegibility;
+  }
+
+  .stable-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stable-nav-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    min-width: fit-content;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  .stable-dropdown-content {
+    min-width: 10rem;
+    box-sizing: border-box;
+  }
+
+  .stable-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 2.25rem;
+    box-sizing: border-box;
+  }
+}
