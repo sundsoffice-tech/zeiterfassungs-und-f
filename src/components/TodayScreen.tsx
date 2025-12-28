@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { format, addMinutes } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { createAuditMetadata } from '@/lib/data-model-helpers'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { SmartCategorization } from '@/components/SmartCategorization'
 import { CategorizationSuggestion } from '@/lib/ai-categorization'
 import { ValidationDisplay } from '@/components/ValidationDisplay'
@@ -424,23 +425,7 @@ export function TodayScreen({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4 p-6 rounded-xl bg-gradient-to-r from-accent via-primary to-accent/80 shadow-xl" role="region" aria-label="Schnellzugriff Zeiterfassung">
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-white mb-1">Zeit erfassen</h2>
-          <p className="text-white/90 text-sm">Schnelleintrag in nur 2 Klicks</p>
-        </div>
-        <Button 
-          size="lg" 
-          onClick={() => setShowQuickEntry(true)}
-          className="bg-white text-primary hover:bg-white/90 shadow-lg gap-2 text-lg px-8 py-6"
-          aria-label="Neuen Zeiteintrag erstellen (Tastenkürzel: N)"
-        >
-          <Plus className="h-6 w-6" weight="bold" aria-hidden="true" />
-          Zeit erfassen
-        </Button>
-      </div>
-
+    <div className="space-y-8">
       <QuickTimeEntry
         open={showQuickEntry}
         onOpenChange={setShowQuickEntry}
@@ -453,327 +438,359 @@ export function TodayScreen({
         }}
       />
 
-      {gapOvertimeAnalysis && gapOvertimeAnalysis.issues.length > 0 && (
-        <AnomalyBanner
-          analysis={gapOvertimeAnalysis}
-          onFillGaps={() => {
-            setShowQuickEntry(true)
-            toast.info('Bitte ergänzen Sie die fehlenden Zeiteinträge')
-          }}
-        />
-      )}
-
-      <ContinueWorkTile
-        employees={employees}
-        projects={projects}
-        tasks={tasks}
-        phases={phases}
-        timeEntries={timeEntries}
-        activeTimer={activeTimer}
-        onResumeEntry={handleResumeEntry}
-        onStartFromFavorite={handleStartFromFavorite}
-      />
-
-      <Card className="border-2 shadow-lg">
+      {/* 1. HERO: Timer - The main function */}
+      <Card className="border-0 shadow-lg bg-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" weight="duotone" />
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Clock className="h-6 w-6" weight="duotone" />
             Timer
           </CardTitle>
-          <CardDescription>Starten Sie Ihre Zeiterfassung</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <div className="text-6xl font-mono font-bold tracking-tight mb-4 text-primary">
+        <CardContent className="space-y-8">
+          {/* Large Timer Display */}
+          <div className="text-center py-4">
+            <div className="text-7xl font-mono font-light tracking-tight text-foreground mb-4">
               {formatTime(elapsedTime)}
             </div>
             {activeTimer && (
-              <div className="flex items-center justify-center gap-2">
-                <Badge variant={activeTimer.isPaused ? 'secondary' : 'default'}>
-                  {activeTimer.isPaused ? 'Pausiert' : 'Läuft'}
-                </Badge>
-              </div>
+              <Badge variant={activeTimer.isPaused ? 'secondary' : 'default'} className="text-sm">
+                {activeTimer.isPaused ? 'Pausiert' : 'Läuft'}
+              </Badge>
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="employee-select" className="text-sm font-medium">Mitarbeiter</label>
-              <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                <SelectTrigger id="employee-select" aria-label="Mitarbeiter auswählen">
-                  <SelectValue placeholder="Mitarbeiter wählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map(emp => (
-                    <SelectItem key={emp.id} value={emp.id}>
-                      {emp.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="project-select" className="text-sm font-medium">Projekt <span className="text-destructive">*</span></label>
-              <Select 
-                value={selectedProject} 
-                onValueChange={(val) => {
-                  setSelectedProject(val)
-                  setSelectedPhase('')
-                  setSelectedTask('')
-                }}
-                disabled={!!activeTimer}
-              >
-                <SelectTrigger id="project-select" aria-label="Projekt auswählen" aria-required="true">
-                  <SelectValue placeholder="Projekt wählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects.filter(p => p.active).map(proj => (
-                    <SelectItem key={proj.id} value={proj.id}>
-                      {proj.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {availablePhases.length > 0 && (
+          {/* Project Selection - Minimalist */}
+          <div className="max-w-xl mx-auto space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label htmlFor="phase-select" className="text-sm font-medium">Phase (optional)</label>
+                <label htmlFor="employee-select" className="text-sm font-medium">Mitarbeiter</label>
+                <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                  <SelectTrigger id="employee-select">
+                    <SelectValue placeholder="Mitarbeiter wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map(emp => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="project-select" className="text-sm font-medium">Projekt <span className="text-destructive">*</span></label>
                 <Select 
-                  value={selectedPhase} 
+                  value={selectedProject} 
                   onValueChange={(val) => {
-                    setSelectedPhase(val)
+                    setSelectedProject(val)
+                    setSelectedPhase('')
                     setSelectedTask('')
                   }}
                   disabled={!!activeTimer}
                 >
-                  <SelectTrigger id="phase-select" aria-label="Phase auswählen">
-                    <SelectValue placeholder="Phase wählen" />
+                  <SelectTrigger id="project-select">
+                    <SelectValue placeholder="Projekt wählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Keine Phase</SelectItem>
-                    {availablePhases.map(phase => (
-                      <SelectItem key={phase.id} value={phase.id}>
-                        {phase.name}
+                    {projects.filter(p => p.active).map(proj => (
+                      <SelectItem key={proj.id} value={proj.id}>
+                        {proj.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            </div>
 
-            {availableTasks.length > 0 && (
+            {/* Activity Mode as Dropdown */}
+            {!activeTimer && (
               <div className="space-y-2">
-                <label htmlFor="task-select" className="text-sm font-medium">Task (optional)</label>
-                <Select 
-                  value={selectedTask} 
-                  onValueChange={setSelectedTask}
-                  disabled={!!activeTimer}
-                >
-                  <SelectTrigger id="task-select" aria-label="Task auswählen">
-                    <SelectValue placeholder="Task wählen" />
+                <label htmlFor="mode-select" className="text-sm font-medium">Aktivitätsmodus</label>
+                <Select value={selectedMode} onValueChange={(value) => setSelectedMode(value as ActivityMode)}>
+                  <SelectTrigger id="mode-select">
+                    <SelectValue placeholder="Aktivität wählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Kein Task</SelectItem>
-                    {availableTasks.map(task => (
-                      <SelectItem key={task.id} value={task.id}>
-                        {task.name}
+                    {Object.values(ActivityMode).map(mode => (
+                      <SelectItem key={mode} value={mode}>
+                        <div className="flex items-center gap-2">
+                          {mode === ActivityMode.FAHRT && <CarSimple className="h-4 w-4" weight="duotone" />}
+                          {mode === ActivityMode.MONTAGE && <Wrench className="h-4 w-4" weight="duotone" />}
+                          {mode === ActivityMode.DEMONTAGE && <Hammer className="h-4 w-4" weight="duotone" />}
+                          {mode === ActivityMode.PLANUNG && <ClipboardText className="h-4 w-4" weight="duotone" />}
+                          {mode === ActivityMode.BERATUNG && <ChatsCircle className="h-4 w-4" weight="duotone" />}
+                          {mode === ActivityMode.WARTUNG && <Gear className="h-4 w-4" weight="duotone" />}
+                          {mode === ActivityMode.DOKUMENTATION && <FileText className="h-4 w-4" weight="duotone" />}
+                          {mode === ActivityMode.MEETING && <Users className="h-4 w-4" weight="duotone" />}
+                          {mode === ActivityMode.SONSTIGES && <PushPin className="h-4 w-4" weight="duotone" />}
+                          {formatMode(mode)}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             )}
-          </div>
 
-          {!activeTimer && (
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Aktivitätsmodus</label>
-              <div className="grid grid-cols-3 md:grid-cols-5 gap-2" role="group" aria-label="Aktivitätsmodus auswählen">
-                <Button
-                  variant={selectedMode === ActivityMode.FAHRT ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMode(ActivityMode.FAHRT)}
-                  className="gap-2 min-h-[44px]"
-                  aria-label="Fahrt Modus"
-                  aria-pressed={selectedMode === ActivityMode.FAHRT}
+            {/* Start/Stop Button - Large and Central */}
+            <div className="flex items-center gap-3 justify-center pt-2">
+              {!activeTimer ? (
+                <Button 
+                  onClick={handleStart} 
+                  size="lg" 
+                  className="w-full h-14 text-lg gap-2"
+                  disabled={!selectedProject}
                 >
-                  <CarSimple className="h-4 w-4" weight="duotone" aria-hidden="true" />
-                  Fahrt
+                  <Play className="h-5 w-5" weight="fill" />
+                  Starten
                 </Button>
-                <Button
-                  variant={selectedMode === ActivityMode.MONTAGE ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMode(ActivityMode.MONTAGE)}
-                  className="gap-2 min-h-[44px]"
-                  aria-label="Montage Modus"
-                  aria-pressed={selectedMode === ActivityMode.MONTAGE}
-                >
-                  <Wrench className="h-4 w-4" weight="duotone" aria-hidden="true" />
-                  Montage
-                </Button>
-                <Button
-                  variant={selectedMode === ActivityMode.DEMONTAGE ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMode(ActivityMode.DEMONTAGE)}
-                  className="gap-2 min-h-[44px]"
-                  aria-label="Demontage Modus"
-                  aria-pressed={selectedMode === ActivityMode.DEMONTAGE}
-                >
-                  <Hammer className="h-4 w-4" weight="duotone" aria-hidden="true" />
-                  Demontage
-                </Button>
-                <Button
-                  variant={selectedMode === ActivityMode.PLANUNG ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMode(ActivityMode.PLANUNG)}
-                  className="gap-2 min-h-[44px]"
-                  aria-label="Planung Modus"
-                  aria-pressed={selectedMode === ActivityMode.PLANUNG}
-                >
-                  <ClipboardText className="h-4 w-4" weight="duotone" aria-hidden="true" />
-                  Planung
-                </Button>
-                <Button
-                  variant={selectedMode === ActivityMode.BERATUNG ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMode(ActivityMode.BERATUNG)}
-                  className="gap-2 min-h-[44px]"
-                  aria-label="Beratung Modus"
-                  aria-pressed={selectedMode === ActivityMode.BERATUNG}
-                >
-                  <ChatsCircle className="h-4 w-4" weight="duotone" aria-hidden="true" />
-                  Beratung
-                </Button>
-                <Button
-                  variant={selectedMode === ActivityMode.WARTUNG ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMode(ActivityMode.WARTUNG)}
-                  className="gap-2 min-h-[44px]"
-                  aria-label="Wartung Modus"
-                  aria-pressed={selectedMode === ActivityMode.WARTUNG}
-                >
-                  <Gear className="h-4 w-4" weight="duotone" aria-hidden="true" />
-                  Wartung
-                </Button>
-                <Button
-                  variant={selectedMode === ActivityMode.DOKUMENTATION ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMode(ActivityMode.DOKUMENTATION)}
-                  className="gap-2 min-h-[44px]"
-                  aria-label="Dokumentation Modus"
-                  aria-pressed={selectedMode === ActivityMode.DOKUMENTATION}
-                >
-                  <FileText className="h-4 w-4" weight="duotone" aria-hidden="true" />
-                  Doku
-                </Button>
-                <Button
-                  variant={selectedMode === ActivityMode.MEETING ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMode(ActivityMode.MEETING)}
-                  className="gap-2 min-h-[44px]"
-                  aria-label="Meeting Modus"
-                  aria-pressed={selectedMode === ActivityMode.MEETING}
-                >
-                  <Users className="h-4 w-4" weight="duotone" aria-hidden="true" />
-                  Meeting
-                </Button>
-                <Button
-                  variant={selectedMode === ActivityMode.SONSTIGES ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMode(ActivityMode.SONSTIGES)}
-                  className="gap-2 min-h-[44px]"
-                  aria-label="Sonstiges Modus"
-                  aria-pressed={selectedMode === ActivityMode.SONSTIGES}
-                >
-                  <PushPin className="h-4 w-4" weight="duotone" aria-hidden="true" />
-                  Sonstiges
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {activeTimer && activeTimer.mode && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Modus wechseln</label>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowEventHistory(true)}
-                  className="gap-2"
-                >
-                  <Clock className="h-4 w-4" />
-                  {activeTimer.events.length} Ereignisse
-                </Button>
-              </div>
-              <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-                {Object.values(ActivityMode).map((mode) => (
-                  <Button
-                    key={mode}
-                    variant={activeTimer.mode === mode ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleModeSwitch(mode)}
-                    disabled={activeTimer.isPaused}
-                    className="gap-2 min-h-[44px]"
+              ) : (
+                <>
+                  <Button 
+                    onClick={handlePause} 
+                    size="lg" 
+                    variant="secondary" 
+                    className="flex-1 h-14 text-lg gap-2"
                   >
-                    {mode === ActivityMode.FAHRT && <CarSimple className="h-4 w-4" weight="duotone" />}
-                    {mode === ActivityMode.MONTAGE && <Wrench className="h-4 w-4" weight="duotone" />}
-                    {mode === ActivityMode.DEMONTAGE && <Hammer className="h-4 w-4" weight="duotone" />}
-                    {mode === ActivityMode.PLANUNG && <ClipboardText className="h-4 w-4" weight="duotone" />}
-                    {mode === ActivityMode.BERATUNG && <ChatsCircle className="h-4 w-4" weight="duotone" />}
-                    {mode === ActivityMode.WARTUNG && <Gear className="h-4 w-4" weight="duotone" />}
-                    {mode === ActivityMode.DOKUMENTATION && <FileText className="h-4 w-4" weight="duotone" />}
-                    {mode === ActivityMode.MEETING && <Users className="h-4 w-4" weight="duotone" />}
-                    {mode === ActivityMode.SONSTIGES && <PushPin className="h-4 w-4" weight="duotone" />}
-                    <span className="hidden sm:inline">{formatMode(mode)}</span>
+                    <Pause className="h-5 w-5" weight="fill" />
+                    {activeTimer.isPaused ? 'Fortsetzen' : 'Pause'}
                   </Button>
-                ))}
-              </div>
+                  <Button 
+                    onClick={handleStop} 
+                    size="lg" 
+                    variant="destructive" 
+                    className="flex-1 h-14 text-lg gap-2"
+                  >
+                    <Stop className="h-5 w-5" weight="fill" />
+                    Stoppen
+                  </Button>
+                </>
+              )}
             </div>
-          )}
-
-          <div className="flex items-center gap-3 justify-center" role="group" aria-label="Timer Steuerung">
-            {!activeTimer ? (
-              <Button 
-                onClick={handleStart} 
-                size="lg" 
-                className="gap-2"
-                disabled={!selectedProject}
-                aria-label="Timer starten"
-                aria-disabled={!selectedProject}
-              >
-                <Play className="h-5 w-5" weight="fill" aria-hidden="true" />
-                Starten
-              </Button>
-            ) : (
-              <>
-                <Button 
-                  onClick={handlePause} 
-                  size="lg" 
-                  variant="secondary" 
-                  className="gap-2"
-                  aria-label={activeTimer.isPaused ? 'Timer fortsetzen' : 'Timer pausieren'}
-                >
-                  <Pause className="h-5 w-5" weight="fill" aria-hidden="true" />
-                  {activeTimer.isPaused ? 'Fortsetzen' : 'Pause'}
-                </Button>
-                <Button 
-                  onClick={handleStop} 
-                  size="lg" 
-                  variant="destructive" 
-                  className="gap-2"
-                  aria-label="Timer stoppen und speichern"
-                >
-                  <Stop className="h-5 w-5" weight="fill" aria-hidden="true" />
-                  Stoppen
-                </Button>
-              </>
-            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* 2. Today's Entries - Secondary */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Heute</CardTitle>
+              <CardDescription>{format(new Date(), 'EEEE, dd. MMMM yyyy')}</CardDescription>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-mono font-light">{totalHoursToday.toFixed(2)}h</div>
+              <div className="text-xs text-muted-foreground">Gesamt</div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {todayEntries.length === 0 ? (
+            <EmptyDayView onAddTime={() => setShowQuickEntry(true)} />
+          ) : (
+            <div className="space-y-3">
+              {todayEntries.map((entry) => (
+                <InlineEditableTimeEntry
+                  key={entry.id}
+                  entry={entry}
+                  projects={projects}
+                  tasks={tasks}
+                  phases={phases}
+                  onSave={(updatedEntry) => {
+                    setTimeEntries((current = []) =>
+                      current.map(e => e.id === updatedEntry.id ? updatedEntry : e)
+                    )
+                    toast.success('Eintrag aktualisiert')
+                  }}
+                  onDelete={(entryId) => {
+                    setTimeEntries((current = []) =>
+                      current.filter(e => e.id !== entryId)
+                    )
+                    toast.success('Eintrag gelöscht')
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 3. Advanced Options - Hidden in Accordion */}
+      <Accordion type="single" collapsible className="border rounded-lg">
+        <AccordionItem value="advanced" className="border-0">
+          <AccordionTrigger className="px-6 text-muted-foreground hover:text-foreground">
+            Erweiterte Optionen
+          </AccordionTrigger>
+          <AccordionContent className="px-6 space-y-6">
+            {/* Phase and Task Selection */}
+            {selectedProject && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {availablePhases.length > 0 && (
+                  <div className="space-y-2">
+                    <label htmlFor="phase-select" className="text-sm font-medium">Phase (optional)</label>
+                    <Select 
+                      value={selectedPhase} 
+                      onValueChange={(val) => {
+                        setSelectedPhase(val)
+                        setSelectedTask('')
+                      }}
+                      disabled={!!activeTimer}
+                    >
+                      <SelectTrigger id="phase-select">
+                        <SelectValue placeholder="Phase wählen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Keine Phase</SelectItem>
+                        {availablePhases.map(phase => (
+                          <SelectItem key={phase.id} value={phase.id}>
+                            {phase.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {availableTasks.length > 0 && (
+                  <div className="space-y-2">
+                    <label htmlFor="task-select" className="text-sm font-medium">Task (optional)</label>
+                    <Select 
+                      value={selectedTask} 
+                      onValueChange={setSelectedTask}
+                      disabled={!!activeTimer}
+                    >
+                      <SelectTrigger id="task-select">
+                        <SelectValue placeholder="Task wählen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Kein Task</SelectItem>
+                        {availableTasks.map(task => (
+                          <SelectItem key={task.id} value={task.id}>
+                            {task.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Recent Projects and Favorites */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4" weight="duotone" />
+                  Zuletzt verwendet
+                </h4>
+                <div className="space-y-2">
+                  {recentProjects.length === 0 && (
+                    <p className="text-sm text-muted-foreground">Keine kürzlichen Projekte</p>
+                  )}
+                  {recentProjects.map(projectId => {
+                    const project = projects.find(p => p.id === projectId)
+                    if (!project) return null
+                    return (
+                      <Button
+                        key={projectId}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setSelectedProject(projectId)
+                          if (!activeTimer) {
+                            handleStart()
+                          }
+                        }}
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className="h-2 w-2 rounded-full bg-primary" />
+                          <span className="text-sm">{project.name}</span>
+                        </div>
+                      </Button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium flex items-center gap-2">
+                  <Star className="h-4 w-4" weight="duotone" />
+                  Favoriten
+                </h4>
+                <div className="space-y-2">
+                  {favoriteEntries.length === 0 && (
+                    <p className="text-sm text-muted-foreground">Keine Favoriten</p>
+                  )}
+                  {favoriteEntries.map(entry => {
+                    const project = projects.find(p => p.id === entry.projectId)
+                    if (!project) return null
+                    return (
+                      <Button
+                        key={entry.id}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={() => handleStartFromFavorite(entry.projectId, entry.phaseId, entry.taskId)}
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <Star className="h-3 w-3" weight="fill" />
+                          <span className="text-sm">{project.name}</span>
+                        </div>
+                      </Button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* AI Features */}
+            {currentEmployee && (
+              <div className="space-y-4">
+                <Separator />
+                <NaturalLanguageInput
+                  employee={currentEmployee}
+                  projects={projects}
+                  date={format(new Date(), 'yyyy-MM-dd')}
+                  onEntriesCreated={(entries) => {
+                    setTimeEntries((current = []) => [...current, ...entries])
+                  }}
+                />
+              </div>
+            )}
+
+            <SmartCategorization
+              employeeId={selectedEmployee}
+              projects={projects}
+              tasks={tasks}
+              timeEntries={timeEntries}
+              onApplySuggestion={(suggestion: CategorizationSuggestion) => {
+                if (suggestion.projectId) {
+                  setSelectedProject(suggestion.projectId)
+                }
+                if (suggestion.taskId) {
+                  setSelectedTask(suggestion.taskId)
+                }
+                toast.success('Vorschlag angewendet')
+              }}
+            />
+
+            {/* Validation Display - only if there are issues */}
+            {validationResults.length > 0 && (
+              <>
+                <Separator />
+                <ValidationDisplay
+                  results={validationResults}
+                  showSoftWarnings={true}
+                  onApplyFix={handleApplyFix}
+                />
+              </>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       <Dialog open={showEventHistory} onOpenChange={setShowEventHistory}>
         <DialogContent className="max-w-2xl">
@@ -815,200 +832,6 @@ export function TodayScreen({
           </ScrollArea>
         </DialogContent>
       </Dialog>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Clock className="h-4 w-4" weight="duotone" />
-              Zuletzt verwendet
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {recentProjects.length === 0 && (
-              <p className="text-sm text-muted-foreground">Keine kürzlichen Projekte</p>
-            )}
-            {recentProjects.map(projectId => {
-              const project = projects.find(p => p.id === projectId)
-              if (!project) return null
-              return (
-                <Button
-                  key={projectId}
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSelectedProject(projectId)
-                    if (!activeTimer) {
-                      handleStart()
-                    }
-                  }}
-                >
-                  <div className="flex items-center gap-2 flex-1">
-                    <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span className="text-sm">{project.name}</span>
-                  </div>
-                </Button>
-              )
-            })}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Star className="h-4 w-4" weight="duotone" />
-              Favoriten
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {favoriteEntries.length === 0 && (
-              <p className="text-sm text-muted-foreground">Keine Favoriten</p>
-            )}
-            {favoriteEntries.map(entry => {
-              const project = projects.find(p => p.id === entry.projectId)
-              if (!project) return null
-              return (
-                <Button
-                  key={entry.id}
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSelectedProject(entry.projectId)
-                    if (entry.phaseId) setSelectedPhase(entry.phaseId)
-                    if (entry.taskId) setSelectedTask(entry.taskId)
-                  }}
-                >
-                  <div className="flex items-center gap-2 flex-1">
-                    <Star className="h-3 w-3" weight="fill" />
-                    <span className="text-sm">{project.name}</span>
-                  </div>
-                </Button>
-              )
-            })}
-          </CardContent>
-        </Card>
-      </div>
-
-      {currentEmployee && (
-        <NaturalLanguageInput
-          employee={currentEmployee}
-          projects={projects}
-          date={format(new Date(), 'yyyy-MM-dd')}
-          onEntriesCreated={(entries) => {
-            setTimeEntries((current = []) => [...current, ...entries])
-          }}
-        />
-      )}
-
-      <SmartCategorization
-        employeeId={selectedEmployee}
-        projects={projects}
-        tasks={tasks}
-        timeEntries={timeEntries}
-        onApplySuggestion={(suggestion: CategorizationSuggestion) => {
-          if (suggestion.projectId) {
-            setSelectedProject(suggestion.projectId)
-          }
-          if (suggestion.taskId) {
-            setSelectedTask(suggestion.taskId)
-          }
-          toast.success('Vorschlag angewendet')
-        }}
-      />
-
-      {validationResults.length > 0 && (
-        <ValidationDisplay
-          results={validationResults}
-          showSoftWarnings={true}
-          onApplyFix={handleApplyFix}
-        />
-      )}
-
-      {todayEntries.some(e => e.tags?.some(tag => Object.values(ActivityMode).includes(tag as ActivityMode))) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <ArrowsClockwise className="h-5 w-5" weight="duotone" />
-              Aktivitäten nach Modus
-            </CardTitle>
-            <CardDescription>Zeitverteilung der verschiedenen Aktivitätsmodi heute</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              {Object.values(ActivityMode).map(mode => {
-                const modeEntries = todayEntries.filter(e => 
-                  e.tags?.includes(mode)
-                )
-                const totalHours = modeEntries.reduce((sum, e) => sum + e.duration, 0)
-                
-                if (totalHours === 0) return null
-                
-                return (
-                  <div
-                    key={mode}
-                    className="p-3 rounded-lg border bg-card space-y-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="text-2xl">{getModeIcon(mode)}</div>
-                      <div className="text-sm font-medium">{formatMode(mode)}</div>
-                    </div>
-                    <div className="font-mono text-xl font-bold text-primary">
-                      {totalHours.toFixed(2)}h
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {modeEntries.length} {modeEntries.length === 1 ? 'Eintrag' : 'Einträge'}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Heute</CardTitle>
-              <CardDescription>{format(new Date(), 'EEEE, dd. MMMM yyyy')}</CardDescription>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold font-mono">{totalHoursToday.toFixed(2)}h</div>
-              <div className="text-xs text-muted-foreground">Gesamt heute</div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {todayEntries.length === 0 ? (
-            <EmptyDayView onAddTime={() => setShowQuickEntry(true)} />
-          ) : (
-            <div className="space-y-3">
-              {todayEntries.map((entry) => (
-                <InlineEditableTimeEntry
-                  key={entry.id}
-                  entry={entry}
-                  projects={projects}
-                  tasks={tasks}
-                  phases={phases}
-                  onSave={(updatedEntry) => {
-                    setTimeEntries((current = []) =>
-                      current.map(e => e.id === updatedEntry.id ? updatedEntry : e)
-                    )
-                    toast.success('Eintrag aktualisiert')
-                  }}
-                  onDelete={(entryId) => {
-                    setTimeEntries((current = []) =>
-                      current.filter(e => e.id !== entryId)
-                    )
-                    toast.success('Eintrag gelöscht')
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }

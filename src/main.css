@@ -32,52 +32,52 @@
   ---break---
 */
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   
-  /* Background - Warmes Off-White */
-  --background: oklch(0.985 0.002 250);
-  --foreground: oklch(0.20 0.02 250);
+  /* Background - Clean Off-White */
+  --background: oklch(0.99 0.001 250);
+  --foreground: oklch(0.20 0.015 250);
   
-  /* Cards - Reines Weiß mit Tiefe */
+  /* Cards - Pure White with subtle depth */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.02 250);
+  --card-foreground: oklch(0.20 0.015 250);
   
   /* Popover */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.02 250);
+  --popover-foreground: oklch(0.20 0.015 250);
   
-  /* Primary - Sattes Business Blue */
-  --primary: oklch(0.50 0.18 250);
+  /* Primary - Subtle Business Blue */
+  --primary: oklch(0.45 0.12 250);
   --primary-foreground: oklch(0.99 0 0);
   
-  /* Secondary - Subtiles Blaugrau */
-  --secondary: oklch(0.94 0.01 250);
-  --secondary-foreground: oklch(0.30 0.02 250);
+  /* Secondary - Very Subtle Gray */
+  --secondary: oklch(0.96 0.005 250);
+  --secondary-foreground: oklch(0.30 0.015 250);
   
-  /* Muted - Sanftes Grau mit Blau-Unterton */
-  --muted: oklch(0.96 0.005 250);
-  --muted-foreground: oklch(0.50 0.02 250);
+  /* Muted - Soft Gray */
+  --muted: oklch(0.97 0.003 250);
+  --muted-foreground: oklch(0.50 0.015 250);
   
-  /* Accent - Lebendiges Teal/Cyan */
-  --accent: oklch(0.65 0.15 195);
+  /* Accent - Subtle Teal */
+  --accent: oklch(0.55 0.10 200);
   --accent-foreground: oklch(0.99 0 0);
   
-  /* Success - Frisches Grün */
-  --success: oklch(0.60 0.17 155);
+  /* Success - Subtle Green */
+  --success: oklch(0.60 0.14 155);
   --success-foreground: oklch(0.99 0 0);
   
-  /* Warning - Warmes Amber */
-  --warning: oklch(0.75 0.15 75);
-  --warning-foreground: oklch(0.20 0.02 60);
+  /* Warning - Subtle Amber */
+  --warning: oklch(0.75 0.12 75);
+  --warning-foreground: oklch(0.20 0.015 60);
   
-  /* Destructive - Gedämpftes Rot */
-  --destructive: oklch(0.55 0.20 25);
+  /* Destructive - Subtle Red */
+  --destructive: oklch(0.55 0.16 25);
   --destructive-foreground: oklch(0.99 0 0);
   
-  /* Borders - Subtil aber sichtbar */
-  --border: oklch(0.90 0.01 250);
-  --input: oklch(0.92 0.01 250);
-  --ring: oklch(0.50 0.18 250);
+  /* Borders - Very Subtle */
+  --border: oklch(0.92 0.005 250);
+  --input: oklch(0.94 0.005 250);
+  --ring: oklch(0.45 0.12 250);
   
   /* Charts - Harmonische Palette */
   --chart-1: oklch(0.55 0.18 250);  /* Primary Blue */

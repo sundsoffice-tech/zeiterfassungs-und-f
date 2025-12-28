@@ -53,7 +53,6 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
       id: 'zeiterfassung',
       label: 'Zeiterfassung',
       icon: <Clock className="h-4 w-4" weight="duotone" />,
-      gradient: 'from-primary/10 to-accent/10',
       items: [
         {
           id: 'today',
@@ -81,7 +80,6 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           id: 'calendar',
           label: 'Kalender',
           icon: <CalendarCheck className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-primary/10 to-accent/10',
         },
         {
           id: 'admin',
@@ -116,7 +114,6 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
       id: 'automatisierung',
       label: 'Automatisierung',
       icon: <Lightning className="h-4 w-4" weight="duotone" />,
-      gradient: 'from-accent/10 to-primary/10',
       items: [
         {
           id: 'automation',
@@ -132,13 +129,11 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           id: 'pro',
           label: 'Pro Module',
           icon: <Rocket className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-accent/10 to-primary/10',
         },
         {
           id: 'explainable',
           label: 'Erklärbare KI',
           icon: <Brain className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-accent/10 to-primary/10',
         },
       ],
     },
@@ -150,7 +145,6 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
       id: 'dev-tools',
       label: 'Dev Tools',
       icon: <Wrench className="h-4 w-4" weight="duotone" />,
-      gradient: 'from-orange-500/10 to-red-500/10',
       items: [
         {
           id: 'timepicker',
@@ -171,13 +165,11 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           id: 'performance',
           label: 'Performance',
           icon: <Gauge className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-green-500/10 to-emerald-500/10',
         },
         {
           id: 'lighthouse',
           label: 'Lighthouse',
           icon: <Lighthouse className="h-4 w-4" weight="duotone" />,
-          gradient: 'from-orange-500/10 to-yellow-500/10',
         },
       ],
     })
@@ -199,7 +191,7 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
           <DropdownMenuTrigger asChild>
             <Button
               variant={isSectionActive(section) ? "default" : "ghost"}
-              className={`gap-2 px-4 py-2 font-medium ${section.gradient ? `bg-gradient-to-r ${section.gradient}` : ''} ${isSectionActive(section) ? 'shadow-sm' : ''}`}
+              className={`gap-2 px-4 py-2 font-medium ${isSectionActive(section) ? 'shadow-sm' : ''}`}
               aria-label={`${section.label} Menü`}
             >
               {section.icon}
@@ -217,7 +209,7 @@ export function NavigationMenu({ activeTab, onNavigate }: NavigationMenuProps) {
               <DropdownMenuItem
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`gap-2 cursor-pointer ${item.gradient ? `bg-gradient-to-r ${item.gradient}` : ''} ${
+                className={`gap-2 cursor-pointer ${
                   activeTab === item.id ? 'bg-accent font-medium' : ''
                 }`}
                 role="menuitem"
