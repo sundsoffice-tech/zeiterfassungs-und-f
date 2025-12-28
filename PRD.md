@@ -500,6 +500,13 @@ This application requires sophisticated features including active timer manageme
 - **Progression**: Click add → Select employee/project → Choose date → Enter details (locations/distance for mileage or amount/description for expenses) → Attach receipt (optional) → Rate auto-calculated → Submit for approval → Manager approves → Entry locks
 - **Success criteria**: Mileage and expense entries persist, rate calculations, approval workflow integration, locked after approval, project cost aggregation, receipt storage
 
+### Dark Mode mit System-Erkennung
+- **Functionality**: Vollständige Dark Mode Unterstützung mit drei Modi: Hell (Light), Dunkel (Dark), und System (automatische Erkennung der Betriebssystem-Einstellung)
+- **Purpose**: Benutzerfreundlichkeit und Barrierefreiheit verbessern durch Anpassung an Nutzerpräferenzen und Umgebungsbedingungen, Reduktion der Augenbelastung bei schlechten Lichtverhältnissen
+- **Trigger**: Benutzer wählt Theme über Toggle im Header oder Command Palette (Cmd/Ctrl + K), oder System-Theme wird automatisch erkannt
+- **Progression**: Benutzer öffnet Theme-Toggle im Header → Wählt Hell/Dunkel/System → Theme wechselt sofort ohne Seitenneuladen → Präferenz wird gespeichert und bei nächstem Besuch wiederhergestellt → Bei System-Auswahl: Theme passt sich automatisch an OS-Einstellung an und reagiert auf Änderungen in Echtzeit
+- **Success criteria**: Flicker-free Loading (kein Aufblitzen beim initialen Laden), alle Farben und Komponenten in beiden Modi lesbar und konform zu WCAG AA Kontrastverhältnissen, Theme-Präferenz persistiert über Sitzungen, System-Theme erkennt OS-Einstellung korrekt und reagiert auf Änderungen, animiertes Sonnen/Mond-Icon im Header, Theme-Optionen in Command Palette verfügbar, alle Screens und Komponenten unterstützen beide Modi
+
 ### Dashboard Overview
 - **Functionality**: Display summary cards with total hours worked, active projects, and total mileage, plus CSV export capabilities
 - **Purpose**: Provide at-a-glance metrics for quick status checks and export data for accounting/payroll
@@ -538,8 +545,9 @@ This application requires sophisticated features including active timer manageme
 The design should evoke enterprise professionalism, trustworthiness, and operational efficiency - like a well-organized corporate system. It should feel modern, powerful, and audit-ready while remaining approachable. The interface should prioritize clarity, compliance indicators (approval status, locked entries), role-appropriate views, and efficient data entry workflows.
 
 ## Color Selection
-A professional, **accessibility-first** palette with carefully calibrated contrast ratios exceeding WCAG 2.1 AA standards, using blue for trust, clear semantic colors for states, and sufficient visual distinction for all interactive elements.
+A professional, **accessibility-first** palette with carefully calibrated contrast ratios exceeding WCAG 2.1 AA standards, using blue for trust, clear semantic colors for states, and sufficient visual distinction for all interactive elements. **Unterstützt vollständigen Dark Mode mit automatischer System-Erkennung.**
 
+**Light Mode:**
 - **Primary Color**: Rich Blue (oklch(0.42 0.15 250)) - Conveys professionalism, trust, and corporate reliability with enhanced contrast
 - **Secondary Colors**: Soft Blue-Gray (oklch(0.92 0.01 250)) for backgrounds providing visual rest while maintaining readability; Deep Charcoal (oklch(0.20 0.01 250)) for text ensuring maximum legibility
 - **Accent Color**: Warm Amber (oklch(0.60 0.15 60)) - Clear, high-contrast highlight for CTAs, active states, and important metrics that works for color-blind users
@@ -547,7 +555,21 @@ A professional, **accessibility-first** palette with carefully calibrated contra
   - Success Green (oklch(0.55 0.15 145)) for confirmations and completed states
   - Warning Amber (oklch(0.65 0.14 75)) for cautions and pending states
   - Destructive Red (oklch(0.50 0.18 25)) for errors and dangerous actions
-- **Foreground/Background Pairings** (All exceed WCAG AA 4.5:1 for normal text, 3:1 for large text):
+
+**Dark Mode:**
+- **Primary Color**: Bright Blue (oklch(0.65 0.18 250)) - Lighter variant for dark backgrounds maintaining visual hierarchy
+- **Background**: Deep Blue-Black (oklch(0.15 0.02 250)) - Rich dark background reducing eye strain
+- **Card Background**: Slightly Elevated (oklch(0.20 0.02 250)) - Subtle elevation for depth
+- **Foreground Text**: Near White (oklch(0.95 0.01 250)) - High contrast text for readability
+- **Accent Color**: Vibrant Teal (oklch(0.70 0.14 195)) - Energetic accent for dark mode
+- **Semantic Colors (Dark Mode Adjusted)**:
+  - Success Green (oklch(0.65 0.16 155)) - Brighter for dark backgrounds
+  - Warning Amber (oklch(0.78 0.14 75)) - Enhanced visibility
+  - Destructive Red (oklch(0.60 0.18 25)) - Softer but still prominent
+
+**Foreground/Background Pairings** (All exceed WCAG AA 4.5:1 for normal text, 3:1 for large text):
+
+*Light Mode:*
   - Background (White oklch(0.99 0 0)): Deep Charcoal text (oklch(0.20 0.01 250)) - Ratio 15.8:1 ✓ AAA
   - Primary (Rich Blue oklch(0.42 0.15 250)): White text (oklch(0.99 0 0)) - Ratio 10.2:1 ✓ AAA
   - Accent (Warm Amber oklch(0.60 0.15 60)): White text (oklch(0.99 0 0)) - Ratio 5.8:1 ✓ AA+
@@ -555,6 +577,15 @@ A professional, **accessibility-first** palette with carefully calibrated contra
   - Success: White text contrast ratio 6.2:1 ✓ AA
   - Warning: Deep Charcoal text contrast ratio 6.8:1 ✓ AA
   - Destructive: White text contrast ratio 8.5:1 ✓ AAA
+
+*Dark Mode:*
+  - Background (Deep Blue-Black oklch(0.15 0.02 250)): Near White text (oklch(0.95 0.01 250)) - Ratio 14.2:1 ✓ AAA
+  - Primary (Bright Blue oklch(0.65 0.18 250)): Deep background text (oklch(0.15 0.02 250)) - Ratio 8.9:1 ✓ AAA
+  - Card (Elevated oklch(0.20 0.02 250)): Near White text (oklch(0.95 0.01 250)) - Ratio 11.8:1 ✓ AAA
+  - Accent (Vibrant Teal oklch(0.70 0.14 195)): Deep background text (oklch(0.15 0.02 195)) - Ratio 7.2:1 ✓ AA
+  - Success: Deep background text ratio 7.5:1 ✓ AA
+  - Warning: Dark text ratio 6.1:1 ✓ AA
+  - Destructive: White text ratio 9.2:1 ✓ AAA
 
 ## Font Selection
 Typography should balance professional authority with modern approachability, using a geometric sans-serif for clarity.

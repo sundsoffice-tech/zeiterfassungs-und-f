@@ -3,7 +3,8 @@ import { Employee, Project, ActiveTimer } from '@/lib/types'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, Play, Stop } from '@phosphor-icons/react'
+import { Clock, FolderOpen, ChartBar, UserCircleGear, CalendarBlank, Play, Stop, Sun, Moon, Monitor } from '@phosphor-icons/react'
+import { useTheme } from '@/hooks/use-theme'
 
 interface CommandPaletteProps {
   open: boolean
@@ -25,6 +26,7 @@ export function CommandPalette({
   setActiveTimer
 }: CommandPaletteProps) {
   const [search, setSearch] = useState('')
+  const { setTheme } = useTheme()
 
   const commands = [
     {
@@ -35,6 +37,14 @@ export function CommandPalette({
         { id: 'nav-projects', label: 'Projekte öffnen', icon: FolderOpen, action: () => onNavigate('projects') },
         { id: 'nav-reports', label: 'Berichte öffnen', icon: ChartBar, action: () => onNavigate('reports') },
         { id: 'nav-admin', label: 'Admin öffnen', icon: UserCircleGear, action: () => onNavigate('admin') }
+      ]
+    },
+    {
+      group: 'Design',
+      items: [
+        { id: 'theme-light', label: 'Helles Theme', icon: Sun, action: () => setTheme('light') },
+        { id: 'theme-dark', label: 'Dunkles Theme', icon: Moon, action: () => setTheme('dark') },
+        { id: 'theme-system', label: 'System Theme', icon: Monitor, action: () => setTheme('system') }
       ]
     },
     {

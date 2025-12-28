@@ -9,6 +9,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+    <script>
+        (function() {
+            try {
+                const stored = localStorage.getItem('spark-kv:theme-preference');
+                const theme = stored ? JSON.parse(stored) : 'system';
+                
+                if (theme === 'system') {
+                    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    document.documentElement.classList.add(systemTheme);
+                } else {
+                    document.documentElement.classList.add(theme);
+                }
+            } catch (e) {}
+        })();
+    </script>
     <link href="/src/main.css" rel="stylesheet" />
 </head>
 

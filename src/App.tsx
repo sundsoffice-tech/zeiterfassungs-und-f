@@ -36,6 +36,8 @@ import { usePerformanceMonitor } from '@/hooks/use-performance-monitor'
 import { skipLinkClasses } from '@/lib/accessibility'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { useTheme } from '@/hooks/use-theme'
 
 const ReportsScreen = lazy(() => import('@/components/ReportsScreen').then(m => ({ default: m.ReportsScreen })))
 
@@ -65,6 +67,7 @@ function ReportsLoadingSkeleton() {
 
 function App() {
   usePerformanceMonitor('App')
+  useTheme()
   
   const [activeTab, setActiveTab] = useState('today')
   const [employees, setEmployees] = useKV<Employee[]>('employees_v2', [])
@@ -136,6 +139,7 @@ function App() {
               </div>
               <h1 className="text-xl font-semibold text-foreground">Zeiterfassung</h1>
             </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
