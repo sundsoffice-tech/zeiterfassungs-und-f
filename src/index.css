@@ -83,23 +83,22 @@
 }
 
 @layer components {
-  /* Better Card Styles */
+  /* Minimal Card Styles */
   .card {
     background: var(--card);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+    transition: box-shadow 0.2s ease;
   }
   
   .card:hover {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.04);
   }
   
   /* Interactive cards (clickable) */
   .card-interactive:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    box-shadow: 0 4px 8px -2px rgb(0 0 0 / 0.05);
   }
 }
 
@@ -170,12 +169,3 @@
 .bg-success { background-color: var(--success); }
 .text-warning { color: var(--warning); }
 .bg-warning { background-color: var(--warning); }
-
-/* Gradient backgrounds for headers/features */
-.gradient-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.55 0.16 220) 100%);
-}
-
-.gradient-accent {
-  background: linear-gradient(135deg, var(--accent) 0%, oklch(0.60 0.14 180) 100%);
-}

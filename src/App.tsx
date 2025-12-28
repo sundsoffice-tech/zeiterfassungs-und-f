@@ -127,28 +127,14 @@ function App() {
         Zum Hauptinhalt springen
       </a>
       
-      <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-20 shadow-sm" role="banner">
-        <div className="container mx-auto px-4 py-4">
+      <header className="border-b bg-background sticky top-0 z-20" role="banner">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md" role="img" aria-label="Zeiterfassung Logo">
-                <Clock className="h-6 w-6 text-primary-foreground" weight="bold" aria-hidden="true" />
+              <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
+                <Clock className="h-5 w-5 text-primary-foreground" weight="bold" aria-hidden="true" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight">Zeiterfassung</h1>
-                <p className="text-xs text-muted-foreground">Professionelles Time Tracking</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 text-xs bg-muted rounded border" aria-label="Tastenkombination: Befehl K oder Strg K">
-                <span className="text-muted-foreground">⌘K</span>
-              </kbd>
-              <div className="hidden lg:flex items-center gap-2 text-xs text-muted-foreground" role="complementary" aria-label="Tastenkürzel">
-                <span className="px-2 py-1 bg-muted rounded border">N</span>
-                <span>Neuer Eintrag</span>
-                <span className="ml-2 px-2 py-1 bg-muted rounded border">⌘S</span>
-                <span>Speichern</span>
-              </div>
+              <span className="text-lg font-semibold">Zeiterfassung</span>
             </div>
           </div>
         </div>
