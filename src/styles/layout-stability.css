@@ -43,6 +43,18 @@
     contain: layout;
     will-change: auto;
   }
+
+  img,
+  video,
+  iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  img[width],
+  img[height] {
+    height: auto;
+  }
 }
 
 @layer components {
@@ -80,5 +92,58 @@
     justify-content: flex-start;
     min-height: 2.25rem;
     box-sizing: border-box;
+  }
+
+  .async-content-wrapper {
+    min-height: 200px;
+    position: relative;
+  }
+
+  .chart-container {
+    min-height: 300px;
+    position: relative;
+    contain: layout style;
+  }
+
+  .card-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  }
+
+  .skeleton-preserve-height {
+    min-height: inherit;
+  }
+
+  [data-loading="true"] {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .content-container {
+    contain: layout style;
+  }
+
+  .list-item {
+    contain: layout;
+  }
+}
+
+@layer utilities {
+  .min-h-screen-stable {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .preserve-aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+
+  .preserve-aspect-video {
+    aspect-ratio: 16 / 9;
+  }
+
+  .preserve-aspect-card {
+    aspect-ratio: 4 / 3;
   }
 }

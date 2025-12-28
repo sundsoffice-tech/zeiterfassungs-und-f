@@ -14,6 +14,7 @@ import { Employee, Project, Task, IntegrationProvider, ActivityMode } from '@/li
 import { CalendarEvent, CalendarTitlePattern, matchCalendarEventToProject, createTimeEntryFromCalendarEvent, getDefaultCalendarSyncSettings, CalendarSyncSettings } from '@/lib/calendar-sync'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
+import { CalendarSkeleton, ListSkeleton } from '@/components/SkeletonLoaders'
 
 interface CalendarIntegrationScreenProps {
   employees: Employee[]
@@ -50,12 +51,17 @@ export function CalendarIntegrationScreen({
     priority: 50
   })
 
+  const [isSyncing, setIsSyncing] = useState(false)
+
   const handleSync = async () => {
+    setIsSyncing(true)
     try {
       const suggestions = await calendar.syncCalendar(selectedProvider)
       toast.success(`Synchronisiert: ${suggestions.length} Ereignisse gefunden`)
     } catch (error) {
       toast.error('Synchronisierung fehlgeschlagen')
+    } finally {
+      setIsSyncing(false)
     }
   }
 
@@ -171,7 +177,11 @@ export function CalendarIntegrationScreen({
                 </div>
               </div>
 
-              {calendar.pendingEvents.length > 0 && (
+              {isSyncing && (
+                <ListSkeleton items={3} />
+              )}
+
+              {!isSyncing && calendar.pendingEvents.length > 0 && (
                 <div className="space-y-3 pt-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold">Ausstehende Ereignisse ({calendar.pendingEvents.length})</h3>

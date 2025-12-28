@@ -31,6 +31,7 @@ import {
 import { format, subDays } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { AIInsightSkeleton } from '@/components/SkeletonLoaders'
 
 interface ExplainableAIScreenProps {
   employees: Employee[]
@@ -60,6 +61,7 @@ export function ExplainableAIScreen({
 
   const [selectedEntry, setSelectedEntry] = useState<TimeEntry | null>(null)
   const [selectedTab, setSelectedTab] = useState<'demo' | 'dashboard' | 'learning'>('demo')
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false)
 
   const problematicEntries = useMemo(() => {
     return timeEntries
@@ -104,13 +106,18 @@ export function ExplainableAIScreen({
   const allInsights = useMemo(() => {
     if (!selectedEntry) return []
 
-    const validationInsights = generateInsightsFromValidations(
-      selectedEntry,
-      validation.results,
-      { allEntries: timeEntries, projects, employees, tasks }
-    )
+    setIsGeneratingInsights(true)
+    try {
+      const validationInsights = generateInsightsFromValidations(
+        selectedEntry,
+        validation.results,
+        { allEntries: timeEntries, projects, employees, tasks }
+      )
 
-    return validationInsights
+      return validationInsights
+    } finally {
+      setTimeout(() => setIsGeneratingInsights(false), 300)
+    }
   }, [selectedEntry, validation.results, timeEntries, projects, employees, tasks, generateInsightsFromValidations])
 
   const handleActionTaken = async (insight: ExplainableInsight, action: DecisionAction) => {
@@ -364,13 +371,17 @@ export function ExplainableAIScreen({
                     </CardContent>
                   </Card>
 
-                  <ExplainableInsightDisplay
-                    insights={allInsights}
-                    onTakeAction={handleActionTaken}
-                    showLearningNotes={true}
-                    strictnessMode={strictnessMode}
-                    onStrictnessModeChange={setStrictnessMode}
-                  />
+                  {isGeneratingInsights ? (
+                    <AIInsightSkeleton />
+                  ) : (
+                    <ExplainableInsightDisplay
+                      insights={allInsights}
+                      onTakeAction={handleActionTaken}
+                      showLearningNotes={true}
+                      strictnessMode={strictnessMode}
+                      onStrictnessModeChange={setStrictnessMode}
+                    />
+                  )}
                 </div>
               )}
             </div>

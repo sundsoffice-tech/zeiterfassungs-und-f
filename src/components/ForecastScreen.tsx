@@ -28,6 +28,7 @@ import {
   TimeEstimate 
 } from '@/lib/forecasting'
 import { toast } from 'sonner'
+import { ForecastSkeleton } from '@/components/SkeletonLoaders'
 
 interface ForecastScreenProps {
   employees: Employee[]
@@ -123,6 +124,10 @@ export function ForecastScreen({
     }
   }
 
+  if (loading) {
+    return <ForecastSkeleton />
+  }
+
   if (!forecast) {
     return (
       <div className="space-y-6">
@@ -145,7 +150,7 @@ export function ForecastScreen({
           <CardContent className="space-y-4">
             <Button onClick={generateBasicForecast} disabled={loading} className="w-full">
               <ChartBar className="h-4 w-4 mr-2" />
-              {loading ? 'Wird generiert...' : 'Prognose erstellen'}
+              Prognose erstellen
             </Button>
             <Button 
               onClick={generateAIForecast} 
@@ -154,7 +159,7 @@ export function ForecastScreen({
               className="w-full"
             >
               <SparkleIcon className="h-4 w-4 mr-2" />
-              {loading ? 'Wird generiert...' : 'KI-Prognose erstellen'}
+              KI-Prognose erstellen
             </Button>
           </CardContent>
         </Card>
